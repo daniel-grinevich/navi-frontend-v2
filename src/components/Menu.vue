@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import { useMenu } from '@/composables/useMenu'
 
-const { state, isLoading } = useMenu()
+const { isPending, data, isError } = useMenu()
 </script>
 
 <template>
-  <div v-if="isLoading">Loading...</div>
-  <div v-else>{{ state }}</div>
+  <div v-if="isPending">Loading...</div>
+  <div v-else-if="isError">Error...</div>
+  <div v-else>
+    {{ data }}
+  </div>
 </template>

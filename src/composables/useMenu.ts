@@ -1,21 +1,17 @@
 import { apiClient } from '@/lib/apiClient'
-import { useAsyncState } from '@vueuse/core'
+import { useQuery } from '@tanstack/vue-query'
 
 export const useMenu = () => {
-  const { state, isLoading, isReady, error, execute, executeImmediate } =
-    useAsyncState(async () => {
-      const data = await apiClient('api/menu-items/', {
-        method: 'GET',
-      })
-      return data || []
-    }, [])
+  const { isPending, isFetching, isError, data, error } = useQuery({
+    queryKey: ['menu'],
+    queryFn: () => apiClient('api/menu-items/', { method: 'GET' }),
+  })
 
   return {
-    state,
-    isReady,
-    isLoading,
+    isPending,
+    isFetching,
+    isError,
+    data,
     error,
-    execute,
-    executeImmediate,
   }
 }
