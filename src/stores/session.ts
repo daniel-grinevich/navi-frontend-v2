@@ -25,7 +25,7 @@ export const useSessionStore = defineStore('user', () => {
     })
   }
 
-  // token access, refresh, (?user token?)
+  // token access, refresh, (?user obj?)
   return {
     session,
     user,

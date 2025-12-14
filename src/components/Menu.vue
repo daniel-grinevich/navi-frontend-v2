@@ -8,8 +8,6 @@ const { isPending, data, isError } = useMenu()
   <div v-if="isPending">Loading...</div>
   <div v-else-if="isError">Error...</div>
   <div v-else>
-    <div v-for="menuItem in data">
-      <MenuItem :menuItem="menuItem" />
-    </div>
+    {{ data }}
   </div>
 </template>
