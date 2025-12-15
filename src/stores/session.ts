@@ -1,35 +1,66 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
-import type { User, Session } from '@supabase/supabase-js'
-import { supabase } from '@/lib/supabaseClient'
+import { useStorage } from '@vueuse/core'
+import { apiClient } from '@/lib/apiClient'
 
-export const useSessionStore = defineStore('user', () => {
-  const session = ref<Session | null>(null)
-  const user = ref<User | null>(null)
+export const useSessionStore = defineStore('session', () => {
+  const user = ref({})
+  const session = useStorage(
+    'my-access-token',
+    { accessToken: '', refreshToken: '' },
+    sessionStorage,
+  )
 
-  const isAuthenticated = computed(() => !!user.value && !!session.value)
+  const isAuthenticated = computed(() => {
+    return Object.keys(user.value).length > 0 && !!session.value.accessToken
+  })
 
   const initAuth = async () => {
-    const {
-      data: { session: savedSession },
-    } = await supabase.auth.getSession()
-
-    if (savedSession) {
-      session.value = savedSession
-      user.value = savedSession.user
+    if (!session.value.accessToken || !session.value.refreshToken) {
+      return
     }
 
-    supabase.auth.onAuthStateChange((_event, newSession) => {
-      session.value = newSession
-      user.value = newSession?.user ?? null
-    })
+    try {
+      const fullToken = 'Bearer ' + session.value.accessToken
+      const data = await apiClient('/api/users/me', {
+        method: 'GET',
+        headers: { Authorization: fullToken }
+      })
+
+      user.value = data
+    } catch (err) {
+      session.value = { accessToken: '', refreshToken: '' }
+      user.value = {}
+    }
   }
 
-  // token access, refresh, (?user obj?)
+  const getUser = async () => {
+    if (!session.value.accessToken || !session.value.refreshToken) {
+      return
+    }
+    try {
+      const fullToken = 'Bearer ' + session.value.accessToken
+      const data = await apiClient('/api/users/me', {
+        method: 'GET',
+        headers: { Authorization: fullToken }
+      })
+
+      user.value = data
+    } catch (err) {
+      session.value = { accessToken: '', refreshToken: '' }
+      user.value = {}
+    }
+  }
+
+  const logout = () => {
+    return true
+  }
   return {
-    session,
     user,
-    isAuthenticated,
+    session,
     initAuth,
+    getUser,
+    isAuthenticated,
+    logout,
   }
 })
