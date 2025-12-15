@@ -1,8 +1,7 @@
 <script setup lang="ts" generic="T extends { id?: string | number }">
 /*** libraries ****/
-import { onMounted, ref } from 'vue'
 /*** components ****/
-import LoadingSpinnerTwo from './LoadingSpinnerTwo.vue'
+import LoadingSpinnerTwo from '@/components/shared/LoadingSpinnerTwo.vue'
 /*** stores ***/
 /*** composables ****/
 /*** types ****/

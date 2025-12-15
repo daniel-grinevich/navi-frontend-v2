@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
-import { supabase } from '@/lib/supabaseClient'
-import { LoginSchema } from '@/schemas/LoginSchema'
+import { useApiWrite } from '@/composables/useApi'
 import { useSessionStore } from '@/stores/session'
-import LoadingSpinner from '@/components/shared/LoadingSpinner.vue'
+import LoadingSpinnerTwo from '@/components/shared/LoadingSpinnerTwo.vue'
+import { apiClient } from '@/lib/apiClient'
+import { LoginSchema } from '@/schemas/LoginSchema'
 
 const sessionStore = useSessionStore()
 const router = useRouter()
@@ -15,6 +16,26 @@ const loading = ref(false)
 const loginErrorMessage = ref('')
 const fieldErrors = ref({})
 
+const { mutateAsync, isPending } = useApiWrite<
+  { access: string; refresh: string },
+  Error,
+  { email: string; password: string }
+>((userData) => apiClient('api/token/', { method: 'POST', body: JSON.stringify(userData) }), {
+  onSuccess: (responseData: { access: string; refresh: string }) => {
+    sessionStore.session = {
+      accessToken: responseData.access,
+      refreshToken: responseData.refresh,
+    }
+    sessionStore.getUser()
+    loading.value = false
+    router.push('/')
+  },
+  onError: (err: Error) => {
+    loginErrorMessage.value = err.message
+    loading.value = false
+  },
+})
+
 const handleLoginSubmit = async (e: Event) => {
   loading.value = true
   loginErrorMessage.value = ''
@@ -23,22 +44,9 @@ const handleLoginSubmit = async (e: Event) => {
 
   if (!result.success) {
     loginErrorMessage.value = result.error.message
+    loading.value = false
   } else {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: result.data.email,
-      password: result.data.password,
-    })
-
-    if (error) {
-      loginErrorMessage.value = error.message
-      loading.value = false
-    } else {
-      sessionStore.session = data.session
-      sessionStore.user = data.user
-
-      loading.value = false
-      router.push('/')
-    }
+    await mutateAsync(formData)
   }
 }
 </script>
@@ -46,8 +54,8 @@ const handleLoginSubmit = async (e: Event) => {
 <template>
   <div class="flex p-6 flex-row">
     <div class="flex-1 h-full">
-      <div v-if="loading">
-        <LoadingSpinner />
+      <div v-if="loading || isPending">
+        <LoadingSpinnerTwo />
       </div>
     </div>
     <div class="flex-1 border h-full">

@@ -1,4 +1,9 @@
-import { useQuery, type UseQueryOptions } from '@tanstack/vue-query'
+import {
+  useQuery,
+  useMutation,
+  type UseQueryOptions,
+  type UseMutationOptions,
+} from '@tanstack/vue-query'
 import type { ComputedRef } from 'vue'
 
 export const useApi = <TData = unknown, TError = Error>(
@@ -20,5 +25,26 @@ export const useApi = <TData = unknown, TError = Error>(
     data: data as ComputedRef<TData | undefined>,
     error: error as ComputedRef<TError | null>,
     refetch,
+  }
+}
+
+export const useApiWrite = <TData = unknown, TError = Error, TVariables = void, TContext = unknown>(
+  mutationFn: (variables: TVariables) => Promise<TData>,
+  options?: Omit<UseMutationOptions<TData, TError, TVariables, TContext>, 'mutationFn'>,
+) => {
+  const { isPending, isError, isSuccess, data, error, mutate, mutateAsync, reset } = useMutation({
+    mutationFn,
+    ...options,
+  })
+
+  return {
+    isPending: isPending as ComputedRef<boolean>,
+    isError: isError as ComputedRef<boolean>,
+    isSuccess: isSuccess as ComputedRef<boolean>,
+    data: data as ComputedRef<TData | undefined>,
+    error: error as ComputedRef<TError | null>,
+    mutate,
+    mutateAsync,
+    reset,
   }
 }
