@@ -1,17 +1,17 @@
 import { apiClient } from '@/lib/apiClient'
-import { useQuery } from '@tanstack/vue-query'
+import { useApi } from './useApi'
+
+export type MenuItem = {
+  id?: string | number
+  slug: string
+  name: string
+  status: string
+  category_name: string
+  body: string
+  description: string
+  price: number
+}
 
 export const useMenu = () => {
-  const { isPending, isFetching, isError, data, error } = useQuery({
-    queryKey: ['menu'],
-    queryFn: () => apiClient('api/menu-items/', { method: 'GET' }),
-  })
-
-  return {
-    isPending,
-    isFetching,
-    isError,
-    data,
-    error,
-  }
+  return useApi<MenuItem[]>(['menu'], () => apiClient('api/menu-items/', { method: 'GET' }))
 }
