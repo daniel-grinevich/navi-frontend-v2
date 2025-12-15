@@ -17,7 +17,11 @@ const props = withDefaults(
     price: number
   }>(),
   {
+    slug: '',
     name: '',
+    status: '',
+    category_name: '',
+    body: '',
     description: '',
     price: 0,
   },
@@ -41,9 +45,7 @@ const onMenuItemClick = () => {
           v-if="props.status"
           class="inline-block mt-2 px-2 py-1 text-xs rounded-full"
           :class="
-            props.status === 'available'
-              ? 'bg-green-100 text-green-800'
-              : 'bg-red-100 text-red-800'
+            props.status === 'available' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
           "
         >
           {{ props.status }}
