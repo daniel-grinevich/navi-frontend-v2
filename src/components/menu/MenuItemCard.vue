@@ -14,7 +14,7 @@ const props = withDefaults(
     category_name: string
     body: string
     description: string
-    price: number
+    price: string
   }>(),
   {
     slug: '',
@@ -23,7 +23,7 @@ const props = withDefaults(
     category_name: '',
     body: '',
     description: '',
-    price: 0,
+    price: '',
   },
 )
 
@@ -52,7 +52,7 @@ const onMenuItemClick = () => {
         </span>
       </div>
       <div class="ml-4 text-right">
-        <p class="text-lg font-bold text-gray-900">${{ props.price.toFixed(2) }}</p>
+        <p class="text-lg font-bold text-gray-900">${{ props.price }}</p>
       </div>
     </div>
   </div>
