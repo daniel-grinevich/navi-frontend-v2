@@ -1,9 +1,11 @@
+
 <script setup lang="ts">
 /*** libraries ****/
 /*** components ****/
 /*** stores ***/
 /*** composables ****/
 /*** types ****/
+import { useRouter } from 'vue-router'
 
 const props = withDefaults(
   defineProps<{
@@ -27,15 +29,20 @@ const props = withDefaults(
   },
 )
 
-const onMenuItemClick = () => {
-  console.log('Clicked menu item:', props.slug)
+const router = useRouter()
+
+const onMenuItemClick = (id) => {
+  router.push({
+    name: 'menuItemDetail', // Use the name defined in your router config
+    params: { id: id } // Pass the dynamic data as params
+  })
 }
 </script>
 
 <template>
   <div
     class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
-    @click="onMenuItemClick"
+    @click="onMenuItemClick(props.id)"
   >
     <div class="flex justify-between items-start">
       <div class="flex-1">
