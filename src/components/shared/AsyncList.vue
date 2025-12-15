@@ -11,7 +11,7 @@ const props = withDefaults(
     items?: T[]
     ready?: boolean
     loading?: boolean
-    error?: T
+    error?: boolean
     flexDirection?: string
     flexGap?: string
     noDataMsg?: string
@@ -21,7 +21,7 @@ const props = withDefaults(
     items: () => [],
     ready: false,
     loading: false,
-    error: undefined,
+    error: false,
     flexDirection: 'col',
     flexGap: 'gap-3',
     noDataMsg: 'No data to display.',
