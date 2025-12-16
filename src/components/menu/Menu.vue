@@ -37,7 +37,7 @@ const groupedMenuItems = computed(() => {
   <div v-else>
     <div v-for="(items, category) in groupedMenuItems" :key="category" class="mb-8">
       <h2 class="text-2xl font-bold mb-4">{{ category }}</h2>
-      <AsyncList :items="items" :loading="false" :error="false">
+      <AsyncList :items="items" :loading="false" :error="false" :flex-direction="'row'">
         <template #item="item">
           <MenuItemCard v-bind="item" />
         </template>

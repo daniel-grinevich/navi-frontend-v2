@@ -3,7 +3,6 @@
     </script>
     
     <template>
-      MenuItemDetail
       <MenuItemDetail />
     </template>
     

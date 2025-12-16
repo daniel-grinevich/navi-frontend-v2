@@ -1,4 +1,3 @@
-
 <script setup lang="ts">
 /*** libraries ****/
 /*** components ****/
@@ -19,6 +18,7 @@ const props = withDefaults(
     price: string
   }>(),
   {
+    id: '',
     slug: '',
     name: '',
     status: '',
@@ -31,19 +31,13 @@ const props = withDefaults(
 
 const router = useRouter()
 
-const onMenuItemClick = (id) => {
-  router.push({
-    name: 'menuItemDetail', // Use the name defined in your router config
-    params: { id: id } // Pass the dynamic data as params
-  })
+const onMenuItemClick = () => {
+  router.push({ name: 'menuItemDetail', params: { id: props.id } })
 }
 </script>
 
 <template>
-  <div
-    class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
-    @click="onMenuItemClick(props.id)"
-  >
+  <div class="border rounded-lg p-4 w-48 cursor-pointer" @click="onMenuItemClick()">
     <div class="flex justify-between items-start">
       <div class="flex-1">
         <h3 class="text-lg font-semibold text-gray-900">{{ props.name }}</h3>
