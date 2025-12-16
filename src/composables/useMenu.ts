@@ -9,7 +9,7 @@ export type MenuItem = {
   category_name: string
   body: string
   description: string
-  price: number
+  price: string
 }
 
 export const useMenu = () => {

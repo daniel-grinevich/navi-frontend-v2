@@ -24,6 +24,18 @@ const router = createRouter({
       name: 'signup',
       component: () => import('../views/SignupView.vue'),
     },
+    {
+      path: '/menu',
+      name: 'menu',
+      component: () => import('../views/MenuView.vue'),
+      props: true,
+    },
+    {
+      path: '/menuItemDetail/:id',
+      name: 'menuItemDetail',
+      component: () => import('../views/MenuItemDetailView.vue'),
+      props: true,
+    },
   ],
 })
 

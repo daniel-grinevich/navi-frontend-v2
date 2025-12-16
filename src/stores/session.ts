@@ -3,8 +3,13 @@ import { defineStore } from 'pinia'
 import { useStorage } from '@vueuse/core'
 import { apiClient } from '@/lib/apiClient'
 
+interface User {
+  email?: string
+  [key: string]: any
+}
+
 export const useSessionStore = defineStore('session', () => {
-  const user = ref({})
+  const user = ref<User>({})
   const session = useStorage(
     'my-access-token',
     { accessToken: '', refreshToken: '' },
@@ -53,7 +58,8 @@ export const useSessionStore = defineStore('session', () => {
   }
 
   const logout = () => {
-    return true
+    session.value = { accessToken: '', refreshToken: '' }
+    user.value = {}
   }
   return {
     user,
