@@ -32,7 +32,7 @@ const props = withDefaults(
 const router = useRouter()
 
 const onMenuItemClick = () => {
-  router.push({ name: 'menuItemDetail', params: { id: props.id } })
+  router.push({ name: 'menuItemDetail', params: { id: props.slug } })
 }
 </script>
 
