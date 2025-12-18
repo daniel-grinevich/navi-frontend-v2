@@ -18,9 +18,8 @@ const preComputedLocations = ref<any[]>([])
 
 const { data: naviLocations } = useNaviLocations()
 
-/* Calculate distance between two coordinates using Haversine formula */
 const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
-  const R = 3959 // Earth's radius in miles (use 6371 for km)
+  const R = 3959
   const dLat = (lat2 - lat1) * (Math.PI / 180)
   const dLon = (lon2 - lon1) * (Math.PI / 180)
   const a =
@@ -32,8 +31,6 @@ const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: numbe
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
   return R * c
 }
-
-/* lol this is some ugly code */
 
 onMounted(() => {
   locationStore.resume()
