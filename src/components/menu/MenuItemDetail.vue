@@ -9,8 +9,8 @@ import { useRouter, useRoute } from 'vue-router'
 import { ref, computed } from 'vue'
 import { useMenuItem } from '@/composables/useMenuItem'
 import { type MenuItem } from '@/composables/useMenu'
-import { CustomizationGroup } from '@/components/menu/customization/CustomizationGroup.vue'
-import AsyncList from '@/components/shared/AsyncList.vue' 
+import CustomizationGroup from '@/components/menu/customization/CustomizationGroup.vue'
+import AsyncList from '@/components/shared/AsyncList.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -85,10 +85,10 @@ const onAddToCartClick = () => {
           :items="customizationGroups"
           :loading="false"
           :error="false"
-          :flex-direction="'row'"
+          :flex-direction="col"
         >
           <template #item="item">
-            {{ item.name }}
+            <CustomizationGroup :customizationGroup="item" />
           </template>
         </AsyncList>
       </div>
