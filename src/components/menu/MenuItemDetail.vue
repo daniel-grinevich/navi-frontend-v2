@@ -6,15 +6,23 @@ import { useSessionStore } from '@/stores/shoppingCart'
 /*** composables ****/
 /*** types ****/
 import { useRouter, useRoute } from 'vue-router'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useMenuItem } from '@/composables/useMenuItem'
 import { type MenuItem } from '@/composables/useMenu'
+import { CustomizationGroup } from '@/components/menu/customization/CustomizationGroup.vue'
+import AsyncList from '@/components/shared/AsyncList.vue' 
 
 const router = useRouter()
 const route = useRoute()
 const id = route.params.id as string
 
 const { isLoading, data: menuItem, isError } = useMenuItem(id)
+console.log(menuItem)
+const customizationGroups = computed(() => {
+  if (!menuItem.value) return {}
+  return menuItem.value.category.customization_groups
+})
+
 const sessionStore = useSessionStore()
 const quantity = ref(1)
 
@@ -71,6 +79,18 @@ const onAddToCartClick = () => {
           min="1"
           class="w-20 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
+      </div>
+      <div>
+        <AsyncList
+          :items="customizationGroups"
+          :loading="false"
+          :error="false"
+          :flex-direction="'row'"
+        >
+          <template #item="item">
+            {{ item.name }}
+          </template>
+        </AsyncList>
       </div>
       <button
         @click="onAddToCartClick"

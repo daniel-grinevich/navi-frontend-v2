@@ -36,6 +36,12 @@ const router = createRouter({
       component: () => import('../views/MenuItemDetailView.vue'),
       props: true,
     },
+    {
+      path: '/find-navi',
+      name: 'findNavi',
+      component: () => import('../views/FindNaviView.vue'),
+      props: true,
+    },
   ],
 })
 
