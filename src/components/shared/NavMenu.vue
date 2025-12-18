@@ -22,8 +22,8 @@ const userDisplayName = computed(() => {
 </script>
 
 <template>
-  <nav class="w-fullfont-mono p-4">
-    <div class="max-w-7xl mx-auto">
+  <nav class="w-full font-mono p-4">
+    <div class="mx-auto">
       <!-- Top border -->
       <div class="text-xs mb-2">
         ┌────────────────────────────────────────────────────────────────────────────────┐
