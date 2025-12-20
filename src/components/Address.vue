@@ -23,7 +23,7 @@ const props = withDefaults(
       road: '',
       city: '',
       state: '',
-      country: '',
+      country: 'USA',
       postcode: '',
     }),
   },
