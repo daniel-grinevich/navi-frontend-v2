@@ -8,7 +8,7 @@ export type cartItem = {
   quantity: number
 }
 
-export const useSessionStore = defineStore('session', () => {
+export const useShoppingCart = defineStore('shopping-cart', () => {
   const localCart = useStorage<cartItem[]>('shopping-cart', [], localStorage)
   const totalPrice = computed(() => {
     const total = localCart.value.reduce((acc, val) => {
@@ -17,6 +17,7 @@ export const useSessionStore = defineStore('session', () => {
     }, 0)
     return total
   })
+  const selectedNaviPort = ref(0)
 
   const addCartItem = (item: cartItem) => {
     localCart.value = [...localCart.value, item]
@@ -42,5 +43,6 @@ export const useSessionStore = defineStore('session', () => {
     addCartItem,
     removeCartItem,
     updateCartItem,
+    selectedNaviPort,
   }
 })

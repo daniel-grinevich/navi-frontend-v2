@@ -1,23 +1,26 @@
 <script setup lang="ts">
 /*** libraries ****/
 import { ref, onMounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
 /*** components ****/
 import LoadingSpinnerTwo from '@/components/shared/LoadingSpinnerTwo.vue'
-import Address, { type Address as AddressType } from '@/components/Address.vue'
+import AsyncList from '@/components/shared/AsyncList.vue'
+import Card from '@/components/shared/Card.vue'
+import Address from '@/components/shared/Address.vue'
 /*** stores ***/
 import { useLocationStore } from '@/stores/location'
+import { useShoppingCart } from '@/stores/shoppingCart'
 /*** composables ****/
-import { useNaviLocations } from '@/composables/useNaviLocations'
+import { useNaviPorts } from '@/composables/useNaviPorts'
 /*** helpers ***/
 import { calculateDistance } from '@/helpers/locationHelper'
 /*** types ****/
 import type { NaviPort } from '@/types/NaviPort'
 
+const router = useRouter()
 const locationStore = useLocationStore()
-const address = ref<AddressType | null>(null)
-const loadingAddress = ref(false)
-
-const { data: naviPortLocations } = useNaviLocations()
+const shoppingCartStore = useShoppingCart()
+const { data: naviPortLocations, isLoading } = useNaviPorts()
 
 const normalizedNaviPorts = computed(() => {
   if (!naviPortLocations.value || !locationStore.coords.latitude) return []
@@ -39,6 +42,11 @@ const normalizedNaviPorts = computed(() => {
   }))
 })
 
+const handleNaviPortClick = (id: number) => {
+  shoppingCartStore.selectedNaviPort = id
+  router.push({ name: 'menu' })
+}
+
 onMounted(() => {
   locationStore.resume()
 })
@@ -46,6 +54,10 @@ onMounted(() => {
 <template>
   <div class="max-w-4xl mx-auto p-6">
     <h1 class="text-2xl font-bold mb-4">Find Navi Location</h1>
+    <div class="h-8">
+      <p v-if="shoppingCartStore.selectedNaviPort == 0">No NaviPort selectd (T_T)</p>
+      <p v-else>NaviPort Selected {{ shoppingCartStore.selectedNaviPort }}</p>
+    </div>
 
     <div v-if="locationStore.error" class="bg-red-100 text-red-700 p-4 rounded-md mb-4">
       Error getting location: {{ locationStore.error.message }}
@@ -56,19 +68,26 @@ onMounted(() => {
       <p>Can we have your location?</p>
     </div>
 
-    <div
-      v-else
-      v-for="naviPort in normalizedNaviPorts"
-      :key="naviPort.id"
-      class="p-4 bg-white border border-gray-300 rounded-lg shadow-sm mb-4"
-    >
-      <Address :address="naviPort.address" />
-      <div
-        v-if="locationStore.coords.latitude && locationStore.coords.longitude"
-        class="mt-2 text-sm font-semibold text-blue-600"
-      >
-        {{ naviPort.distance }} miles away
-      </div>
+    <div v-else>
+      <AsyncList :items="normalizedNaviPorts" :loading="isLoading">
+        <template #item="naviPort">
+          <Card>
+            <template #body>
+              <div class="flex flex-row justify-between">
+                <Address :address="naviPort.address" />
+                <button
+                  class="p-1 border cursor-pointer w-24"
+                  @click="handleNaviPortClick(naviPort.id)"
+                  type="button"
+                >
+                  Select
+                </button>
+              </div>
+            </template>
+            <template #footer> {{ naviPort.distance }} miles away </template>
+          </Card>
+        </template>
+      </AsyncList>
     </div>
   </div>
 </template>
