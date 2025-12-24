@@ -1,5 +1,6 @@
 <script setup lang="ts">
 /*** libraries ****/
+import { computed } from 'vue'
 /*** components ****/
 /*** stores ***/
 /*** composables ****/
@@ -34,27 +35,26 @@ const router = useRouter()
 const onMenuItemClick = () => {
   router.push({ name: 'menuItemDetail', params: { id: props.slug } })
 }
+
+const isOffline = computed(() => props.status !== 'available')
 </script>
 
 <template>
-  <div class="border rounded-lg p-4 w-48 cursor-pointer" @click="onMenuItemClick()">
-    <div class="flex justify-between items-start">
-      <div class="flex-1">
-        <h3 class="text-lg font-semibold text-gray-900">{{ props.name }}</h3>
-        <p v-if="props.description" class="text-sm text-gray-600 mt-1">{{ props.description }}</p>
-        <span
-          v-if="props.status"
-          class="inline-block mt-2 px-2 py-1 text-xs rounded-full"
-          :class="
-            props.status === 'available' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-          "
-        >
-          {{ props.status }}
-        </span>
+  <div class="card h-72 w-64 flex flex-col" @click="onMenuItemClick()">
+    <!-- Action Button -->
+    <div class="w-full border h-36 mx-auto flex items-center justify-center">Placeholder</div>
+    <div id="info">
+      <div class="flex flex-row">
+        <h2 class="text-2xl font-primary grow">{{ props.name }}</h2>
+        <div class="flex justify-end align-bottom">
+          <div class="bg-dark-bg text-bone p-1 items-center align-middle">${{ props.price }}</div>
+        </div>
       </div>
-      <div class="ml-4 text-right">
-        <p class="text-lg font-bold text-gray-900">${{ props.price }}</p>
+      <div class="font-secondary">
+        <p>---------------------</p>
       </div>
+
+      <button class="bg-opposite" @click.stop="onMenuItemClick()">Start Order</button>
     </div>
   </div>
 </template>

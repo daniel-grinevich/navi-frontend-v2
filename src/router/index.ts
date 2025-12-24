@@ -42,6 +42,22 @@ const router = createRouter({
       component: () => import('../views/FindNaviView.vue'),
       props: true,
     },
+    {
+      path: '/cart',
+      name: 'cart',
+      component: () => import('../views/CartView.vue'),
+    },
+    {
+      path: '/checkout',
+      name: 'checkout',
+      component: () => import('../views/CheckoutView.vue'),
+    },
+    {
+      path: '/order-confirmation/:orderId',
+      name: 'orderConfirmation',
+      component: () => import('../views/OrderConfirmationView.vue'),
+      props: true,
+    },
   ],
 })
 

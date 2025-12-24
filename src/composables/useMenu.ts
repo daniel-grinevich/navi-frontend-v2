@@ -1,5 +1,6 @@
 import { apiClient } from '@/lib/apiClient'
 import { useApi } from './useApi'
+import { type CustomizationGroup } from '@/types/customization'
 
 export type MenuItem = {
   id?: string | number
@@ -10,6 +11,11 @@ export type MenuItem = {
   body: string
   description: string
   price: string
+  category?: {
+    id: string | number
+    name: string
+    customization_groups: CustomizationGroup[]
+  }
 }
 
 export const useMenu = () => {
