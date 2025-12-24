@@ -25,23 +25,26 @@ const customizationGroups = computed(() => {
   return menuItem.value?.category?.customization_groups || []
 })
 
-const customizations = computed(() => {
-  return menuItem.value?.category?.customization_groups.flatMap((group) => {
-    return group.customizations.map((customization) => ({
-      id: customization.id,
-      price: customization.price || 0,
-    }))
+const customizationPriceMap = computed(() => {
+  const customizationMap = new Map()
+
+  menuItem.value?.category?.customization_groups.forEach((group) => {
+    group.customizations.forEach((customization) =>
+      customizationMap.set(customization.id, customization.price),
+    )
   })
+
+  return customizationMap
 })
 
 const updateCustomization = (groupId: number, customizationId: number, action: string) => {
   if (action === null || groupId === null) return
 
-  const customizations = selectedCustomizations.value.get(groupId) || []
+  const customizationsList = selectedCustomizations.value.get(groupId) || []
   if (action === 'add') {
-    selectedCustomizations.value.set(groupId, [...customizations, customizationId])
+    selectedCustomizations.value.set(groupId, [...customizationsList, customizationId])
   } else if (action === 'remove') {
-    const filteredCustomizations = customizations.filter((x) => x !== customizationId)
+    const filteredCustomizations = customizationsList.filter((x) => x !== customizationId)
     selectedCustomizations.value.set(groupId, filteredCustomizations)
   } else {
     Error(`The action: ${action}, is not supported.`)
@@ -58,19 +61,25 @@ const hasAllRequiredCustomizations = computed(() => {
 })
 
 const totalCustomizationModifiers = computed(() => {
+  /*
+  TODO apparently parseFloat is not percise enough for currency multiplication / addition
+  We need to use a JS library like decimal.js to handle this.
+  */
   let total = 0
-  selectedCustomizations.value.forEach((custom) => {
-    custom.options.forEach((opt) => {
-      total += opt.priceModifier
+  selectedCustomizations.value.forEach((group) => {
+    group.forEach((customizationId) => {
+      const price = customizationPriceMap.value.get(customizationId) || 0
+      total += Number(price)
     })
   })
   return total
 })
 
 const displayPrice = computed(() => {
+  debugger
   if (!menuItem.value) return 0
   const basePrice = parseFloat(menuItem.value.price)
-  return (basePrice + totalCustomizationModifiers.value) * quantity.value
+  return basePrice + totalCustomizationModifiers.value * quantity.value
 })
 
 const canAddToCart = computed(() => {
