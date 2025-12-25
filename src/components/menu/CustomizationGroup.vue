@@ -7,12 +7,12 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  'update-customization': [groupId: number, customizationId: number, action: string]
+  'update-customization': [groupId: string, customizationId: string, action: string]
 }>()
 
-const selectedCustomizations = reactive(new Set<number>())
+const selectedCustomizations = reactive(new Set<string>())
 
-const handleCustomizationClick = (customizationId: number) => {
+const handleCustomizationClick = (customizationId: string) => {
   if (selectedCustomizations.has(customizationId)) {
     selectedCustomizations.delete(customizationId)
     emit('update-customization', props.group.id, customizationId, 'remove')
@@ -22,7 +22,7 @@ const handleCustomizationClick = (customizationId: number) => {
   }
 }
 
-const isSelected = (optionId: number) => selectedCustomizations.has(optionId)
+const isSelected = (optionId: string) => selectedCustomizations.has(optionId)
 </script>
 
 <template>
@@ -38,8 +38,8 @@ const isSelected = (optionId: number) => selectedCustomizations.has(optionId)
           <span v-if="group.is_required" class="text-sm">*</span>
           {{ group.is_required ? 'Required' : 'Optional' }}
         </span>
-        <span v-if="group.max_selections > 1" class="text-xs">
-          Choose {{ group.min_selections }}-{{ group.max_selections }}
+        <span v-if="group.min_allowed" class="text-xs">
+          Choose {{ group.min_allowed }}-{{ group.max_allowed }}
         </span>
       </div>
     </div>

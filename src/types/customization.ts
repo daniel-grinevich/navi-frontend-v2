@@ -52,7 +52,7 @@
 //                 ]
 //             },
 export type CustomizationOption = {
-  id: number
+  id: string
   name: string
   price: number
   is_available: boolean
@@ -60,19 +60,19 @@ export type CustomizationOption = {
 }
 
 export type CustomizationGroup = {
-  id: number
+  id: string
   slug: string
   name: string
   description?: string
   display_order: number
   is_required: boolean
-  min_selections: number
-  max_selections: number
+  min_allowed: number
+  max_allowed: number
   customizations: CustomizationOption[]
 }
 
 export type SelectedCustomization = {
-  groupId: string | number
+  groupId: string
   groupName: string
   options: {
     optionId: string | number

@@ -18,7 +18,7 @@ const shoppingCart = useShoppingCart()
 const id = route.params.id as string
 const { isLoading, data: menuItem, isError } = useMenuItem(id)
 
-const selectedCustomizations = ref<Map<number, number[]>>(new Map())
+const selectedCustomizations = ref<Map<string, string[]>>(new Map())
 const quantity = ref<number>(1)
 
 const customizationGroups = computed(() => {
@@ -37,7 +37,7 @@ const customizationPriceMap = computed(() => {
   return customizationMap
 })
 
-const updateCustomization = (groupId: number, customizationId: number, action: string) => {
+const updateCustomization = (groupId: string, customizationId: string, action: string) => {
   if (action === null || groupId === null) return
 
   const customizationsList = selectedCustomizations.value.get(groupId) || []
@@ -52,6 +52,7 @@ const updateCustomization = (groupId: number, customizationId: number, action: s
 }
 
 const hasAllRequiredCustomizations = computed(() => {
+  debugger
   return customizationGroups.value
     .filter((group) => group.is_required)
     .every((group) => {
@@ -83,11 +84,7 @@ const displayPrice = computed(() => {
 })
 
 const canAddToCart = computed(() => {
-  return (
-    menuItem.value?.status === 'available' &&
-    hasAllRequiredCustomizations.value &&
-    quantity.value > 0
-  )
+  return menuItem.value?.status === 'A' && hasAllRequiredCustomizations.value && quantity.value > 0
 })
 
 const onAddToCartClick = () => {
@@ -170,10 +167,7 @@ const onAddToCartClick = () => {
         </button>
       </div>
 
-      <div
-        v-if="!hasAllRequiredCustomizations && menuItem.status === 'available'"
-        class="mt-3 text-smflex items-center"
-      >
+      <div v-if="!hasAllRequiredCustomizations" class="mt-3 text-smflex items-center">
         <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
           <path
             fill-rule="evenodd"

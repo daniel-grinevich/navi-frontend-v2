@@ -19,5 +19,7 @@ export type MenuItem = {
 }
 
 export const useMenu = () => {
-  return useApi<MenuItem[]>(['menu'], () => apiClient('api/menu-items/', { method: 'GET' }))
+  return useApi<MenuItem[]>(['menu'], () =>
+    apiClient('api/menu-items/?status=A', { method: 'GET' }),
+  )
 }
