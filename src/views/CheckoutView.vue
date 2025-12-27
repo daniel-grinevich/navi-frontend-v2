@@ -4,22 +4,27 @@ import { useRouter } from 'vue-router'
 import { useShoppingCart } from '@/stores/shoppingCart'
 import { useSessionStore } from '@/stores/session'
 import Card from '@/components/shared/Card.vue'
-import { type Order, type OrderSubmissionResponse } from '@/types/order'
+import { type Order } from '@/types/order'
+import { useCreateOrder } from '@/composables/useOrder'
 
 const router = useRouter()
 const cart = useShoppingCart()
 const session = useSessionStore()
 
-const isSubmitting = ref(false)
+const { data, isPending, mutateAsync } = useCreateOrder()
+
 const orderNotes = ref('')
 
-// Check if NaviPort is selected
 const hasNaviPort = computed(() => cart.selectedNaviPort !== null)
 
-// Redirect if cart is empty
 onMounted(() => {
   if (cart.itemCount === 0) {
     router.push({ name: 'menu' })
+  }
+
+  debugger
+  if (session.user.guestEmail !== null) {
+    session.createGuest()
   }
 })
 
@@ -27,7 +32,6 @@ const selectNaviPort = () => {
   router.push({ name: 'findNavi' })
 }
 
-// Mock order submission
 const submitOrder = async () => {
   if (!hasNaviPort.value) {
     alert('Please select a NaviPort location first')
@@ -39,46 +43,31 @@ const submitOrder = async () => {
     return
   }
 
-  isSubmitting.value = true
-
-  // Construct order object
-  const order: Order = {
-    userId: session.user.id,
+  const orderData = {
+    user: session.user,
     naviPortId: cart.selectedNaviPort!,
     items: cart.localCart,
     subtotal: cart.subtotal,
     tax: cart.tax,
     total: cart.totalPrice,
-    status: 'pending',
     specialInstructions: orderNotes.value || undefined,
-    createdAt: new Date(),
   }
 
-  // MOCK SUBMISSION - Simulate API call
   try {
-    await new Promise((resolve) => setTimeout(resolve, 1500)) // Simulate network delay
+    const response = await mutateAsync(orderData)
 
-    // Mock successful response
-    const mockResponse: OrderSubmissionResponse = {
-      success: true,
-      orderId: crypto.randomUUID(),
-      message: 'Order placed successfully!',
-      estimatedReadyTime: new Date(Date.now() + 20 * 60 * 1000), // 20 minutes from now
-    }
-
-    // Clear cart on success
     cart.clearCart()
 
-    // Navigate to confirmation page
+    debugger
+
     router.push({
       name: 'orderConfirmation',
-      params: { orderId: mockResponse.orderId },
-      state: { orderData: mockResponse },
+      params: { orderId: response.orderId },
+      state: { orderData: response },
     })
   } catch (error) {
+    console.error('Order submission failed:', error)
     alert('Failed to submit order. Please try again.')
-  } finally {
-    isSubmitting.value = false
   }
 }
 </script>
@@ -142,7 +131,7 @@ const submitOrder = async () => {
                     class="text-xs text-gray-500 mt-2 space-y-1"
                   >
                     <li v-for="(custom, idx) in item.customizations" :key="idx">
-                      {{ custom.groupName }}: {{ custom.options.map((o) => o.optionName).join(', ') }}
+                      {{ custom.groupName }}: {{ custom.optionName }}
                     </li>
                   </ul>
                   <p v-if="item.specialInstructions" class="text-xs text-gray-500 italic mt-2">
@@ -155,7 +144,6 @@ const submitOrder = async () => {
           </template>
         </Card>
 
-        <!-- Order Notes -->
         <Card>
           <template #header>
             <h2 class="text-lg font-semibold">Additional Notes (Optional)</h2>
@@ -173,7 +161,6 @@ const submitOrder = async () => {
         </Card>
       </div>
 
-      <!-- Right Column: Order Summary & Submit -->
       <div>
         <Card class="sticky top-6">
           <template #header>
@@ -198,13 +185,24 @@ const submitOrder = async () => {
             <div class="space-y-3">
               <button
                 @click="submitOrder"
-                :disabled="!hasNaviPort || isSubmitting || cart.itemCount === 0"
+                :disabled="!hasNaviPort || isPending || cart.itemCount === 0"
                 class="w-full px-6 py-4 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
               >
-                <span v-if="isSubmitting" class="flex items-center justify-center">
+                <span v-if="isPending" class="flex items-center justify-center">
                   <svg class="animate-spin h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    <circle
+                      class="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      stroke-width="4"
+                    ></circle>
+                    <path
+                      class="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
                   </svg>
                   Placing Order...
                 </span>
@@ -217,10 +215,6 @@ const submitOrder = async () => {
                 Back to Cart
               </button>
             </div>
-
-            <p class="text-xs text-gray-500 text-center mt-4 italic">
-              Note: This is a mock submission. No actual payment will be processed.
-            </p>
           </template>
         </Card>
       </div>

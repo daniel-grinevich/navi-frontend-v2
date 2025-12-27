@@ -10,7 +10,7 @@ export type OrderStatus =
 
 export type Order = {
   id?: string
-  userId?: string
+  user: {}
   naviPortId: string | number
   items: CartItem[]
   subtotal: number
@@ -27,4 +27,5 @@ export type OrderSubmissionResponse = {
   orderId: string
   message: string
   estimatedReadyTime?: Date
+  status: string
 }

@@ -5,6 +5,7 @@ import { apiClient } from '@/lib/apiClient'
 
 interface User {
   email?: string
+  guestEmail?: string
   [key: string]: any
 }
 
@@ -29,7 +30,7 @@ export const useSessionStore = defineStore('session', () => {
       const fullToken = 'Bearer ' + session.value.accessToken
       const data = await apiClient('/api/users/me', {
         method: 'GET',
-        headers: { Authorization: fullToken }
+        headers: { Authorization: fullToken },
       })
 
       user.value = data
@@ -47,7 +48,7 @@ export const useSessionStore = defineStore('session', () => {
       const fullToken = 'Bearer ' + session.value.accessToken
       const data = await apiClient('/api/users/me', {
         method: 'GET',
-        headers: { Authorization: fullToken }
+        headers: { Authorization: fullToken },
       })
 
       user.value = data
@@ -61,12 +62,40 @@ export const useSessionStore = defineStore('session', () => {
     session.value = { accessToken: '', refreshToken: '' }
     user.value = {}
   }
+
+  const setGuestEmail = (guestEmail: string) => {
+    user.value = { guestEmail }
+  }
+
+  const createGuest = async () => {
+    debugger
+    if (!user.value.guestEmail) return
+
+    try {
+      const response = await apiClient('api/create-guest/', {
+        method: 'POST',
+        body: JSON.stringify({
+          guestUser: user.value.guestEmail,
+        }),
+      })
+
+      const data = await response.json()
+
+      const { accessToken, refreshToken } = data
+      session.value = { accessToken: accessToken, refreshToken: refreshToken }
+    } catch (error) {
+      console.error(`Error when creating guest user ${error}`)
+    }
+  }
+
   return {
     user,
     session,
     initAuth,
     getUser,
+    createGuest,
     isAuthenticated,
     logout,
+    setGuestEmail,
   }
 })

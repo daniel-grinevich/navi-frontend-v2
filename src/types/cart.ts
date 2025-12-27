@@ -5,7 +5,7 @@ export type CartItem = {
   cartItemId: string
 
   // Menu item details
-  menuItemId: string | number
+  menuItemId: string
   menuItemName: string
   menuItemSlug: string
   basePrice: number

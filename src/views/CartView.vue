@@ -1,14 +1,56 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useShoppingCart } from '@/stores/shoppingCart'
 import CartItemCard from '@/components/cart/CartItemCard.vue'
 import Card from '@/components/shared/Card.vue'
+import { useSessionStore } from '@/stores/session'
 
 const router = useRouter()
 const cart = useShoppingCart()
+const session = useSessionStore()
+
+const guestEmail = ref('')
+const emailError = ref('')
+
+const validateEmail = (email: string): boolean => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  return emailRegex.test(email)
+}
+
+const handleEmailBlur = () => {
+  if (!guestEmail.value) {
+    emailError.value = 'Email is required'
+  } else if (!validateEmail(guestEmail.value)) {
+    emailError.value = 'Please enter a valid email address'
+  } else {
+    emailError.value = ''
+    session.setGuestEmail(guestEmail.value)
+  }
+}
+
+const handleEmailInput = () => {
+  if (emailError.value) {
+    emailError.value = ''
+  }
+}
 
 const goToCheckout = () => {
   if (cart.itemCount === 0) return
+
+  if (!session.isAuthenticated) {
+    if (!guestEmail.value) {
+      emailError.value = 'Email is required'
+      return
+    }
+    if (!validateEmail(guestEmail.value)) {
+      emailError.value = 'Please enter a valid email address'
+      return
+    }
+    debugger
+    session.setGuestEmail(guestEmail.value)
+  }
+
   router.push({ name: 'checkout' })
 }
 
@@ -47,11 +89,31 @@ const continueShopping = () => {
 
     <!-- Cart Items -->
     <div v-else>
+      <div v-if="!session.isAuthenticated" class="mb-6">
+        <span class="text-alt text-sm"
+          >Your email goes here just so we can send you your reciept ☺︎</span
+        >
+        <input
+          id="user-email"
+          v-model="guestEmail"
+          type="email"
+          placeholder="Enter email or log in"
+          @blur="handleEmailBlur"
+          @input="handleEmailInput"
+          :class="[
+            'px-3 py-2 border rounded-md w-full mt-1',
+            emailError
+              ? 'border-red-500 focus:ring-red-500'
+              : 'border-gray-300 focus:ring-blue-500',
+          ]"
+        />
+        <p v-if="emailError" class="text-red-500 text-sm mt-1">{{ emailError }}</p>
+      </div>
+
       <div class="space-y-4 mb-6">
         <CartItemCard v-for="item in cart.localCart" :key="item.cartItemId" :item="item" />
       </div>
 
-      <!-- Order Summary -->
       <Card class="mb-6">
         <template #header>
           <h2 class="text-xl font-semibold">Order Summary</h2>

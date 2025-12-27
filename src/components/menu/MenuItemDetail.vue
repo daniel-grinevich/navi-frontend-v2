@@ -9,7 +9,8 @@ import { useShoppingCart } from '@/stores/shoppingCart'
 /*** composables ****/
 import { useMenuItem } from '@/composables/useMenuItem'
 /*** types ****/
-import { type SelectedCustomization } from '@/types/customization'
+import type { SelectedCustomization } from '@/types/customization'
+import type { CartItem } from '@/types/cart'
 
 const router = useRouter()
 const route = useRoute()
@@ -18,19 +19,22 @@ const shoppingCart = useShoppingCart()
 const id = route.params.id as string
 const { isLoading, data: menuItem, isError } = useMenuItem(id)
 
-const selectedCustomizations = ref<Map<string, string[]>>(new Map())
+const selectedCustomizations = ref<Map<string, SelectedCustomization[]>>(new Map())
 const quantity = ref<number>(1)
 
 const customizationGroups = computed(() => {
   return menuItem.value?.category?.customization_groups || []
 })
 
-const customizationPriceMap = computed(() => {
+const customizationMap = computed(() => {
   const customizationMap = new Map()
 
   menuItem.value?.category?.customization_groups.forEach((group) => {
     group.customizations.forEach((customization) =>
-      customizationMap.set(customization.id, customization.price),
+      customizationMap.set(customization.id, {
+        name: customization.name,
+        price: customization.price,
+      }),
     )
   })
 
@@ -41,10 +45,23 @@ const updateCustomization = (groupId: string, customizationId: string, action: s
   if (action === null || groupId === null) return
 
   const customizationsList = selectedCustomizations.value.get(groupId) || []
+
   if (action === 'add') {
-    selectedCustomizations.value.set(groupId, [...customizationsList, customizationId])
+    const groupName = customizationGroups.value.find((group) => group.id === groupId)?.name
+
+    if (!groupName) return
+
+    const newCustomization: SelectedCustomization = {
+      groupId: groupId,
+      groupName: groupName,
+      optionId: customizationId,
+      optionName: customizationMap.value.get(customizationId).name,
+      priceModifier: parseFloat(customizationMap.value.get(customizationId).price),
+    }
+
+    selectedCustomizations.value.set(groupId, [...customizationsList, newCustomization])
   } else if (action === 'remove') {
-    const filteredCustomizations = customizationsList.filter((x) => x !== customizationId)
+    const filteredCustomizations = customizationsList.filter((x) => x.optionId !== customizationId)
     selectedCustomizations.value.set(groupId, filteredCustomizations)
   } else {
     Error(`The action: ${action}, is not supported.`)
@@ -68,8 +85,8 @@ const totalCustomizationModifiers = computed(() => {
   */
   let total = 0
   selectedCustomizations.value.forEach((group) => {
-    group.forEach((customizationId) => {
-      const price = customizationPriceMap.value.get(customizationId) || 0
+    group.forEach((option) => {
+      const price = option.priceModifier || 0
       total += Number(price)
     })
   })
@@ -77,7 +94,6 @@ const totalCustomizationModifiers = computed(() => {
 })
 
 const displayPrice = computed(() => {
-  debugger
   if (!menuItem.value) return 0
   const basePrice = parseFloat(menuItem.value.price)
   return basePrice + totalCustomizationModifiers.value * quantity.value
@@ -88,18 +104,19 @@ const canAddToCart = computed(() => {
 })
 
 const onAddToCartClick = () => {
+  debugger
   if (!menuItem.value || !canAddToCart.value) return
 
-  shoppingCart.addCartItem({
-    menuItemId: menuItem.value.id!,
+  const cartItem: Omit<CartItem, 'cartItemId' | 'totalPrice'> = {
+    menuItemId: menuItem.value.id,
     menuItemName: menuItem.value.name,
     menuItemSlug: menuItem.value.slug,
     basePrice: parseFloat(menuItem.value.price),
-    customizations: Array.from(selectedCustomizations.value.values()),
+    customizations: Array.from(selectedCustomizations.value.values()).flat(),
     quantity: quantity.value,
-  })
+  }
 
-  router.push({ name: 'cart' })
+  shoppingCart.addCartItem(cartItem)
 }
 </script>
 
@@ -161,7 +178,7 @@ const onAddToCartClick = () => {
         <button
           @click="onAddToCartClick"
           :disabled="!canAddToCart"
-          class="px-8 py-3 font-semibold rounded-md disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+          class="px-8 py-3 bg-alt text-primary cursor-pointer font-semibold rounded-md disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
         >
           Add to Cart
         </button>

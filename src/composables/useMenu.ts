@@ -3,7 +3,7 @@ import { useApi } from './useApi'
 import { type CustomizationGroup } from '@/types/customization'
 
 export type MenuItem = {
-  id?: string | number
+  id: string
   slug: string
   name: string
   status: string
@@ -12,7 +12,7 @@ export type MenuItem = {
   description: string
   price: string
   category?: {
-    id: string | number
+    id: string
     name: string
     customization_groups: CustomizationGroup[]
   }

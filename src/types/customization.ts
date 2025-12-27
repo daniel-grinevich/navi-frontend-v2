@@ -74,9 +74,7 @@ export type CustomizationGroup = {
 export type SelectedCustomization = {
   groupId: string
   groupName: string
-  options: {
-    optionId: string | number
-    optionName: string
-    priceModifier: number
-  }[]
+  optionId: string
+  optionName: string
+  priceModifier: number
 }

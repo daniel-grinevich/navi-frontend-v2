@@ -27,9 +27,8 @@ const removeItem = () => {
 
 // Format customizations for display
 const customizationSummary = computed(() => {
-  return props.item.customizations.map((group) => {
-    const options = group.options.map((opt) => opt.optionName).join(', ')
-    return `${group.groupName}: ${options}`
+  return props.item.customizations.map((customization) => {
+    return `${customization.groupName}: ${customization.optionName}`
   })
 })
 </script>
@@ -66,7 +65,10 @@ const customizationSummary = computed(() => {
       </div>
 
       <!-- Special Instructions -->
-      <div v-if="item.specialInstructions" class="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+      <div
+        v-if="item.specialInstructions"
+        class="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md"
+      >
         <p class="text-sm font-medium text-gray-700 mb-1">Special Instructions:</p>
         <p class="text-sm text-gray-600 italic">{{ item.specialInstructions }}</p>
       </div>
@@ -82,7 +84,12 @@ const customizationSummary = computed(() => {
               class="px-3 py-2 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M20 12H4"
+                />
               </svg>
             </button>
             <input
@@ -99,7 +106,12 @@ const customizationSummary = computed(() => {
               class="px-3 py-2 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 4v16m8-8H4"
+                />
               </svg>
             </button>
           </div>
