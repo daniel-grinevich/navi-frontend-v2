@@ -4,29 +4,43 @@
 /*** stores ***/
 /*** composables ****/
 /*** types ****/
+import { ref } from 'vue';
 import AsyncList from '@/components/shared/AsyncList.vue'
+import type { CustomizationGroup, Category } from '@/composables/useMenuItem';
+
 const props = withDefaults(
   defineProps<{
-    customizationGroup: {}
+    customizationGroup: CustomizationGroup
   }>(),
   {
-    customizationGroup: {},
-  },
+    customizationGroup:() => ({
+    name: '',
+    category: {id:'',name:'',customization_groups:[]},
+    description: '',
+    display_order: '',
+    is_required: '',
+    created_at: '',
+    created_by: '',
+    updated_at: '',
+    updated_by: '',
+    slug: '',
+    customizations: [],}
+  )}
 )
 const customizations=props.customizationGroup.customizations
-console.log(customizations)
+const customization = ref({customizationGroup:props.customizationGroup.slug,customizations:[]})
 
-const onCustomizationClick = () => {
-  pass
+const handleCustomizationClick = (id:string) => {
+  console.log(id)
 }
 console.log(customizations)
 </script>
 
 <template>
     {{props.customizationGroup.name}}
-  <AsyncList :items="customizations" :loading="false" :error="false" :flex-direction="row">
+  <AsyncList :items="customizations" :loading="false" :error="false" :flex-direction="'row'">
     <template #item="item">
-      {{ item.name }}
+      <button @click="handleCustomizationClick(item.slug)"> {{item.name}}</button>
     </template>
   </AsyncList>
 </template>

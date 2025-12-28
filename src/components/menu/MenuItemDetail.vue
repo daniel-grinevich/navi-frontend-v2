@@ -19,7 +19,7 @@ const id = route.params.id as string
 const { isLoading, data: menuItem, isError } = useMenuItem(id)
 console.log(menuItem)
 const customizationGroups = computed(() => {
-  if (!menuItem.value) return {}
+  if (!menuItem.value) return []
   return menuItem.value.category.customization_groups
 })
 
@@ -85,7 +85,7 @@ const onAddToCartClick = () => {
           :items="customizationGroups"
           :loading="false"
           :error="false"
-          :flex-direction="col"
+          :flex-direction="'col'"
         >
           <template #item="item">
             <CustomizationGroup :customizationGroup="item" />
