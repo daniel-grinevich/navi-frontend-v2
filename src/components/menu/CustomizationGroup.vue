@@ -48,7 +48,11 @@ const isSelected = (optionId: string) => selectedCustomizations.has(optionId)
       <div v-for="option in group.customizations" :key="option.id">
         <button
           class="p-3 border cursor-pointer"
-          :class="isSelected(option.id) && 'text-primary bg-alt'"
+          :class="[
+            isSelected(option.id)
+              ? 'bg-gray-200 text-gray-900 dark:bg-gray-700 dark:text-white'
+              : 'bg-transparent',
+          ]"
           type="button"
           @click="handleCustomizationClick(option.id)"
         >
