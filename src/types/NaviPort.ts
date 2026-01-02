@@ -1,5 +1,5 @@
 export type NaviPort = {
-  id: string
+  id: number
   name: string
   slug: string
   created_at?: Date
@@ -16,4 +16,14 @@ export type NaviPort = {
   city: string
   state_or_region: string
   postal_code: string
+}
+
+export type NormalizedNaviPort = NaviPort & {
+  address: {
+    road: string
+    city: string
+    state: string
+    postcode: string
+  }
+  distance: string
 }

@@ -37,7 +37,7 @@ const customizationSummary = computed(() => {
   <Card>
     <template #header>
       <div class="flex justify-between items-start">
-        <h3 class="text-lg font-semibold text-gray-900">{{ item.menuItemName }}</h3>
+        <h3 class="text-lg font-semibold">{{ item.menuItemName }}</h3>
         <button
           @click="removeItem"
           class="text-red-600 hover:text-red-800 text-sm font-medium transition-colors"
@@ -49,14 +49,14 @@ const customizationSummary = computed(() => {
 
     <template #body>
       <!-- Base Price -->
-      <div class="text-sm text-gray-600 mb-3">
+      <div class="text-sm mb-3">
         <span class="font-medium">Base Price:</span> ${{ item.basePrice.toFixed(2) }}
       </div>
 
       <!-- Customizations -->
       <div v-if="customizationSummary.length > 0" class="mb-4">
-        <p class="text-sm font-medium text-gray-700 mb-2">Customizations:</p>
-        <ul class="text-sm text-gray-600 space-y-1 pl-4">
+        <p class="text-sm font-medium mb-2">Customizations:</p>
+        <ul class="text-sm space-y-1 pl-4">
           <li v-for="(summary, idx) in customizationSummary" :key="idx" class="flex items-start">
             <span class="text-gray-400 mr-2">•</span>
             <span>{{ summary }}</span>
@@ -69,14 +69,14 @@ const customizationSummary = computed(() => {
         v-if="item.specialInstructions"
         class="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md"
       >
-        <p class="text-sm font-medium text-gray-700 mb-1">Special Instructions:</p>
-        <p class="text-sm text-gray-600 italic">{{ item.specialInstructions }}</p>
+        <p class="text-sm font-medium mb-1">Special Instructions:</p>
+        <p class="text-sm italic">{{ item.specialInstructions }}</p>
       </div>
 
       <!-- Quantity Controls and Price -->
       <div class="flex items-center justify-between pt-3 border-t">
         <div class="flex items-center gap-3">
-          <label class="text-sm font-medium text-gray-700">Quantity:</label>
+          <label class="text-sm font-medium">Quantity:</label>
           <div class="flex items-center border border-gray-300 rounded-md">
             <button
               @click="updateQuantity(item.quantity - 1)"
@@ -118,8 +118,8 @@ const customizationSummary = computed(() => {
         </div>
 
         <div class="text-right">
-          <p class="text-sm text-gray-500">Item Total</p>
-          <p class="text-xl font-bold text-gray-900">${{ itemSubtotal.toFixed(2) }}</p>
+          <p class="text-sm">Item Total</p>
+          <p class="text-xl font-bold">${{ itemSubtotal.toFixed(2) }}</p>
         </div>
       </div>
     </template>

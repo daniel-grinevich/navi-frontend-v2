@@ -7,6 +7,19 @@ export const useShoppingCart = defineStore('shopping-cart', () => {
   const localCart = useStorage<CartItem[]>('shopping-cart', [], localStorage)
   const selectedNaviPort = ref<number | null>(null)
 
+  const serverCart = computed(() => {
+    return localCart.value.map((item) => ({
+      menu_item: item.menuItemId,
+      quantity: item.quantity,
+      unit_price: item.basePrice.toFixed(2),
+      customizations: item.customizations.map((c) => ({
+        customization: c.optionId,
+        quantity: 1,
+        unit_price: c.priceModifier.toFixed(2),
+      })),
+    }))
+  })
+
   const itemCount = computed(() => {
     return localCart.value.reduce((acc, item) => acc + item.quantity, 0)
   })
@@ -67,6 +80,7 @@ export const useShoppingCart = defineStore('shopping-cart', () => {
 
   return {
     localCart,
+    serverCart,
     selectedNaviPort,
     itemCount,
     subtotal,

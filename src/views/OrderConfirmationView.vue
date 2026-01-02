@@ -2,6 +2,7 @@
 import { useRouter, useRoute } from 'vue-router'
 import { computed } from 'vue'
 import Card from '@/components/shared/Card.vue'
+import Qrcode from '@/components/shared/Qrcode.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -78,11 +79,7 @@ const estimatedTime = computed(() => {
           />
         </svg>
         <div>
-          <p class="text-sm font-medium text-blue-900">What's Next?</p>
-          <p class="text-sm text-blue-700 mt-1">
-            You will receive a notification when your order is ready for pickup at your selected
-            NaviPort location.
-          </p>
+          <Qrcode :value="orderId" :size="500"/>
         </div>
       </div>
     </div>

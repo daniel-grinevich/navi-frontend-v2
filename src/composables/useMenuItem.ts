@@ -1,51 +1,6 @@
 import { apiClient } from '@/lib/apiClient'
 import { useApi } from './useApi'
-
-export type Customizations = {
-  id?: string | number,
-  name: string
-  group: string
-  description: string
-  display_order: string
-  price: string
-  created_at?: string
-  created_by?: string
-  updated_at?: string
-  updated_by?: string
-  slug: string
-}
-
-export type CustomizationGroup = {
-  id: string
-  name: string
-  category: Category
-  description: string
-  display_order: string
-  is_required: string
-  created_at: string
-  created_by: string
-  updated_at: string
-  updated_by: string
-  slug: string
-  customizations: Customizations[]
-}
-
-export type Category = {
-  id: string 
-  name: string
-  customization_groups: CustomizationGroup[]
-}
-
-export type MenuItemCategory = {
-  id: string
-  slug: string
-  name: string
-  status: string
-  category: Category
-  body: string
-  description: string
-  price: string
-}
+import type { MenuItemCategory } from '@/types/customization'
 
 export const useMenuItem = (id: string) => {
   return useApi<MenuItemCategory>(['menu', id], () =>

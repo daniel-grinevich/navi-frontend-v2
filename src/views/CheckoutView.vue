@@ -44,13 +44,8 @@ const submitOrder = async () => {
   }
 
   const orderData = {
-    user: session.user,
-    naviPortId: cart.selectedNaviPort!,
-    items: cart.localCart,
-    subtotal: cart.subtotal,
-    tax: cart.tax,
-    total: cart.totalPrice,
-    specialInstructions: orderNotes.value || undefined,
+    navi_port: cart.selectedNaviPort,
+    items: cart.serverCart,
   }
 
   try {
@@ -58,11 +53,11 @@ const submitOrder = async () => {
 
     cart.clearCart()
 
-    debugger
+    console.log(response)
 
     router.push({
       name: 'orderConfirmation',
-      params: { orderId: response.orderId },
+      params: { orderId: response.order.id },
       state: { orderData: response },
     })
   } catch (error) {

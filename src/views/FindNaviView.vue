@@ -15,14 +15,14 @@ import { useNaviPorts } from '@/composables/useNaviPorts'
 /*** helpers ***/
 import { calculateDistance } from '@/helpers/locationHelper'
 /*** types ****/
-import type { NaviPort } from '@/types/NaviPort'
+import type { NaviPort,NormalizedNaviPort } from '@/types/NaviPort'
 
 const router = useRouter()
 const locationStore = useLocationStore()
 const shoppingCartStore = useShoppingCart()
 const { data: naviPortLocations, isLoading } = useNaviPorts()
 
-const normalizedNaviPorts = computed(() => {
+const normalizedNaviPorts = computed<NormalizedNaviPort[]>(() => {
   if (!naviPortLocations.value || !locationStore.coords.latitude) return []
 
   return naviPortLocations.value.map((naviPort: NaviPort) => ({

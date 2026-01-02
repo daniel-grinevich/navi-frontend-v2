@@ -120,11 +120,11 @@ const continueShopping = () => {
         </template>
         <template #body>
           <div class="space-y-3">
-            <div class="flex justify-between text-gray-700">
+            <div class="flex justify-between">
               <span>Subtotal ({{ cart.itemCount }} item{{ cart.itemCount > 1 ? 's' : '' }})</span>
               <span class="font-medium">${{ cart.subtotal.toFixed(2) }}</span>
             </div>
-            <div class="flex justify-between text-gray-700">
+            <div class="flex justify-between">
               <span>Tax (8%)</span>
               <span class="font-medium">${{ cart.tax.toFixed(2) }}</span>
             </div>
@@ -140,7 +140,7 @@ const continueShopping = () => {
       <div class="flex gap-4 flex-col sm:flex-row">
         <button
           @click="continueShopping"
-          class="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 font-medium transition-colors"
+          class="flex-1 px-6 py-3 border-2 border-gray-300 rounded-md hover:bg-gray-50 font-medium transition-colors"
         >
           Continue Shopping
         </button>

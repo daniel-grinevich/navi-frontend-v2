@@ -69,7 +69,6 @@ const updateCustomization = (groupId: string, customizationId: string, action: s
 }
 
 const hasAllRequiredCustomizations = computed(() => {
-  debugger
   return customizationGroups.value
     .filter((group) => group.is_required)
     .every((group) => {
@@ -104,7 +103,6 @@ const canAddToCart = computed(() => {
 })
 
 const onAddToCartClick = () => {
-  debugger
   if (!menuItem.value || !canAddToCart.value) return
 
   const cartItem: Omit<CartItem, 'cartItemId' | 'totalPrice'> = {
@@ -117,6 +115,7 @@ const onAddToCartClick = () => {
   }
 
   shoppingCart.addCartItem(cartItem)
+  router.push({ name: 'menu' })
 }
 </script>
 
@@ -149,7 +148,7 @@ const onAddToCartClick = () => {
       </div>
     </div>
 
-    <div class="border-t pt-6 sticky bottom-0 bg-primary">
+    <div class="border-t pt-6 sticky bottom-0 bg-primary text-gray-900 dark:bg-alt dark:text-white">
       <div class="flex items-center justify-between gap-4 flex-wrap">
         <div class="flex items-center gap-4">
           <label for="quantity" class="text-sm font-medium"> Quantity: </label>
