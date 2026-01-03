@@ -33,7 +33,7 @@ const selectNaviPort = () => {
 }
 
 const submitOrder = async () => {
-  if (!hasNaviPort.value) {
+  if (!cart.selectedNaviPort) {
     alert('Please select a NaviPort location first')
     return
   }
@@ -53,12 +53,9 @@ const submitOrder = async () => {
 
     cart.clearCart()
 
-    console.log(response)
-
     router.push({
       name: 'orderConfirmation',
       params: { orderId: response.order.id },
-      state: { orderData: response },
     })
   } catch (error) {
     console.error('Order submission failed:', error)

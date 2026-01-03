@@ -1,19 +1,14 @@
 import { apiClient } from '@/lib/apiClient'
-import { useApi, useApiWrite } from './useApi'
-import type { Order, OrderSubmissionResponse } from '@/types/order'
+import { getHeader, useApi, useApiWrite } from './useApi'
+import type { ServerOrder,Order, OrderSubmissionResponse } from '@/types/order'
 import { useSessionStore } from '@/stores/session'
 
 export const useCreateOrder = () => {
   const session = useSessionStore()
 
-  return useApiWrite<OrderSubmissionResponse, Error, Omit<Order, 'status'>>(async (orderData) => {
-    const accessToken = session.session.accessToken
+  return useApiWrite<OrderSubmissionResponse, Error, ServerOrder>(async (orderData) => {
 
-    const headers: Record<string, string> = {}
-
-    if (accessToken) {
-      headers['Authorization'] = `Bearer ${accessToken}`
-    }
+    const headers = getHeader(session.session)
 
     return await apiClient('api/orders/', {
       method: 'POST',
@@ -25,12 +20,18 @@ export const useCreateOrder = () => {
 
 // Fetch a single order by ID
 export const useOrder = (orderId: string) => {
-  return useApi<Order>(['order', orderId], () =>
-    apiClient(`api/order/${orderId}/`, { method: 'GET' }),
-  )
+  const session = useSessionStore()
+
+  return useApi<Order>(['order', orderId], async () => {
+    const headers= getHeader(session.session)
+    return await apiClient(`api/orders/${orderId}/`, { method: 'GET', headers })
+  })
 }
 
 // Fetch all orders for the current user
 export const useOrders = () => {
-  return useApi<Order[]>(['orders'], () => apiClient('api/orders/', { method: 'GET' }))
+  const session = useSessionStore()
+  return useApi<Order[]>(['orders'], async () => {
+    const headers= getHeader(session.session)
+    return await apiClient('api/orders/', { method: 'GET' })})
 }

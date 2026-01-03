@@ -1,4 +1,5 @@
 import { type CartItem } from './cart'
+import { type User } from './user'
 
 export type OrderStatus =
   | 'pending'
@@ -19,6 +20,21 @@ export type Order = {
   specialInstructions?: string
   createdAt?: Date
   estimatedReadyTime?: Date
+  user: User
+}
+
+export type ServerOrder = {
+  navi_port: string | number
+  items: {
+    menu_item: string
+    quantity: number
+    unit_price: string
+    customizations: {
+      customization: string
+      quantity: number
+      unit_price: string
+    }[]
+  }[]
 }
 
 export type OrderSubmissionResponse = {
@@ -27,4 +43,5 @@ export type OrderSubmissionResponse = {
   message: string
   estimatedReadyTime?: string
   status: string
+  order: Order
 }

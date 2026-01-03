@@ -58,6 +58,9 @@ const userDisplayName = computed(() => {
               {{ cart.itemCount > 9 ? '9+' : cart.itemCount }}
             </span>
           </router-link>
+          <router-link to="/find-navi" class="relative text-xs">
+            <span class="hover:text-green-300 transition-colors">[ NaviPort ]</span>
+          </router-link>
 
           <div v-if="session.isAuthenticated" class="flex flex-row gap-4 items-center">
             <span class="text-xs"> &gt;&gt; USER: {{ userDisplayName }} &lt;&lt; </span>

@@ -3,16 +3,17 @@ import { useRouter, useRoute } from 'vue-router'
 import { computed } from 'vue'
 import Card from '@/components/shared/Card.vue'
 import Qrcode from '@/components/shared/Qrcode.vue'
+import { useOrder } from '@/composables/useOrder'
 
 const router = useRouter()
 const route = useRoute()
 
 const orderId = computed(() => route.params.orderId as string)
-const orderData = computed(() => (route as any).state?.orderData || null)
+const { isLoading, data: order, isError }  = useOrder(orderId.value)
 
 const estimatedTime = computed(() => {
-  if (!orderData.value?.estimatedReadyTime) return null
-  return new Date(orderData.value.estimatedReadyTime).toLocaleTimeString([], {
+  if (!order.value?.estimatedReadyTime) return null
+  return new Date(order.value.estimatedReadyTime).toLocaleTimeString([], {
     hour: '2-digit',
     minute: '2-digit',
   })
@@ -78,8 +79,8 @@ const estimatedTime = computed(() => {
             clip-rule="evenodd"
           />
         </svg>
-        <div>
-          <Qrcode :value="orderId" :size="500"/>
+        <div v-if="order?.id">
+          <Qrcode :value="order.id" :size="500"/>
         </div>
       </div>
     </div>
