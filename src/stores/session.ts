@@ -26,21 +26,11 @@ export const useSessionStore = defineStore('session', () => {
       return
     }
 
-    try {
-      const fullToken = 'Bearer ' + session.value.accessToken
-      const data = await apiClient('/api/users/me', {
-        method: 'GET',
-        headers: { Authorization: fullToken },
-      })
-
-      user.value = data
-    } catch (err) {
-      session.value = { accessToken: '', refreshToken: '' }
-      user.value = {}
-    }
+    await getUser()
   }
 
   const getUser = async () => {
+    debugger
     if (!session.value.accessToken || !session.value.refreshToken) {
       return
     }
@@ -52,9 +42,15 @@ export const useSessionStore = defineStore('session', () => {
       })
 
       user.value = data
-    } catch (err) {
-      session.value = { accessToken: '', refreshToken: '' }
-      user.value = {}
+    } catch (err: any) {
+      if (err.status === 401) {
+        const refreshed = await refreshAccessToken()
+        if (refreshed) {
+          return getUser() // retry
+        }
+      } else {
+        logout()
+      }
     }
   }
 
@@ -85,6 +81,25 @@ export const useSessionStore = defineStore('session', () => {
       session.value = { accessToken: accessToken, refreshToken: refreshToken }
     } catch (error) {
       console.error(`Error when creating guest user ${error}`)
+    }
+  }
+
+  const refreshAccessToken = async () => {
+    if (!session.value.refreshToken) return false
+
+    try {
+      const data = await apiClient('/api/token/refresh/', {
+        method: 'POST',
+        body: JSON.stringify({
+          refresh: session.value.refreshToken,
+        }),
+      })
+
+      session.value.accessToken = data.access
+      return true
+    } catch {
+      logout()
+      return false
     }
   }
 

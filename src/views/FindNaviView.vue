@@ -15,7 +15,7 @@ import { useNaviPorts } from '@/composables/useNaviPorts'
 /*** helpers ***/
 import { calculateDistance } from '@/helpers/locationHelper'
 /*** types ****/
-import type { NaviPort,NormalizedNaviPort } from '@/types/NaviPort'
+import type { NaviPort, NormalizedNaviPort } from '@/types/NaviPort'
 
 const router = useRouter()
 const locationStore = useLocationStore()
@@ -44,7 +44,12 @@ const normalizedNaviPorts = computed<NormalizedNaviPort[]>(() => {
 
 const handleNaviPortClick = (id: number) => {
   shoppingCartStore.selectedNaviPort = id
-  router.push({ name: 'menu' })
+  const from = router.options.history.state.back?.toString()
+
+  if (from != '/') {
+    router.go(-1)
+  }
+  router.push({ name: 'cart' })
 }
 
 onMounted(() => {
