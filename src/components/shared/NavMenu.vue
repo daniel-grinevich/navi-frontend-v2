@@ -63,6 +63,7 @@ const userDisplayName = computed(() => {
           </router-link>
 
           <div v-if="session.isAuthenticated" class="flex flex-row gap-4 items-center">
+            <router-link to="/orders" class="px-3 py-1 text-xs"> [ Orders ] </router-link>
             <span class="text-xs"> &gt;&gt; USER: {{ userDisplayName }} &lt;&lt; </span>
             <button type="button" @click="handleLogout" class="px-3 py-1 text-xs cursor-pointer">
               [ LOGOUT ]

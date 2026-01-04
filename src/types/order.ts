@@ -2,12 +2,10 @@ import { type CartItem } from './cart'
 import { type User } from './user'
 
 export type OrderStatus =
-  | 'pending'
-  | 'confirmed'
-  | 'preparing'
-  | 'ready'
-  | 'delivered'
-  | 'cancelled'
+  | 'O'
+  | 'S'
+  | 'D'
+  | 'C'
 
 export type Order = {
   id?: string
@@ -18,7 +16,7 @@ export type Order = {
   total: number
   status: OrderStatus
   specialInstructions?: string
-  createdAt?: Date
+  created_at: Date
   estimatedReadyTime?: Date
   user: User
 }

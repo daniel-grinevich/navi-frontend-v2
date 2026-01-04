@@ -78,3 +78,20 @@ export type SelectedCustomization = {
   optionName: string
   priceModifier: number
 }
+
+export type Category = {
+  id: string 
+  name: string
+  customization_groups: CustomizationGroup[]
+}
+
+export type MenuItemCategory = {
+  id: string
+  slug: string
+  name: string
+  status: string
+  category: Category
+  body: string
+  description: string
+  price: string
+}

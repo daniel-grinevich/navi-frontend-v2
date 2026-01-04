@@ -79,8 +79,9 @@ const estimatedTime = computed(() => {
             clip-rule="evenodd"
           />
         </svg>
-        <div v-if="order?.id">
-          <Qrcode :value="order.id" :size="500"/>
+        {{ console.log(order) }}
+        <div v-if="order?.id&&order.status=='O'">
+          <Qrcode :value="'{{order.id}}'" :size="500"/>
         </div>
       </div>
     </div>

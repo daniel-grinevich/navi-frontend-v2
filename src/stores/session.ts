@@ -30,7 +30,6 @@ export const useSessionStore = defineStore('session', () => {
   }
 
   const getUser = async () => {
-    debugger
     if (!session.value.accessToken || !session.value.refreshToken) {
       return
     }
@@ -64,7 +63,6 @@ export const useSessionStore = defineStore('session', () => {
   }
 
   const createGuest = async () => {
-    debugger
     if (!user.value.guestEmail) return
 
     try {
