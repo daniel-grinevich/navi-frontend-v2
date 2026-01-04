@@ -33,5 +33,5 @@ export const useOrders = () => {
   const session = useSessionStore()
   return useApi<Order[]>(['orders'], async () => {
     const headers= getHeader(session.session)
-    return await apiClient('api/orders/', { method: 'GET' })})
+    return await apiClient('api/orders/', { method: 'GET', headers })})
 }

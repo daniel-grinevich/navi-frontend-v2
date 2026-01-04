@@ -8,7 +8,7 @@ export async function apiClient(endpoint: string, options: RequestInit = {}) {
       ...options.headers,
     },
   })
-  debugger
+
   if (!response.ok) {
     let errorBody = null
     try {
