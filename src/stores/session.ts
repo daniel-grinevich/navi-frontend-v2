@@ -39,8 +39,12 @@ export const useSessionStore = defineStore('session', () => {
         method: 'GET',
         headers: { Authorization: fullToken },
       })
-
-      user.value = data
+      if (data.is_guest){
+        user.value.guestEmail=data.email
+      }
+      else {
+        user.value = data
+      }
     } catch (err: any) {
       if (err.status === 401) {
         const refreshed = await refreshAccessToken()
@@ -73,9 +77,9 @@ export const useSessionStore = defineStore('session', () => {
         }),
       })
 
-      const data = await response.json()
+      const { accessToken, refreshToken, user: userData} = response
+      console.log(accessToken)
 
-      const { accessToken, refreshToken } = data
       session.value = { accessToken: accessToken, refreshToken: refreshToken }
     } catch (error) {
       console.error(`Error when creating guest user ${error}`)
