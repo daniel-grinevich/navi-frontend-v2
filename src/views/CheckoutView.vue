@@ -80,8 +80,8 @@ const submitOrder = async () => {
             <div v-if="hasNaviPort">
               <div class="flex items-center justify-between">
                 <div>
-                  <p class="font-medium text-gray-900">NaviPort #{{ cart.selectedNaviPort }}</p>
-                  <p class="text-sm text-gray-600 mt-1">Selected pickup location</p>
+                  <p class="font-medium">NaviPort #{{ cart.selectedNaviPort }}</p>
+                  <p class="text-sm mt-1">Selected pickup location</p>
                 </div>
                 <button
                   @click="selectNaviPort"
@@ -92,7 +92,7 @@ const submitOrder = async () => {
               </div>
             </div>
             <div v-else class="text-center py-4">
-              <p class="text-gray-600 mb-3">No location selected</p>
+              <p class="mb-3">No location selected</p>
               <button
                 @click="selectNaviPort"
                 class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium"
@@ -116,21 +116,21 @@ const submitOrder = async () => {
                 class="flex justify-between text-sm pb-4 border-b last:border-b-0"
               >
                 <div class="flex-1 pr-4">
-                  <p class="font-medium text-gray-900">{{ item.menuItemName }}</p>
-                  <p class="text-gray-600 text-xs mt-1">Qty: {{ item.quantity }}</p>
+                  <p class="font-medium">{{ item.menuItemName }}</p>
+                  <p class="text-xs mt-1">Qty: {{ item.quantity }}</p>
                   <ul
                     v-if="item.customizations.length > 0"
-                    class="text-xs text-gray-500 mt-2 space-y-1"
+                    class="text-xs mt-2 space-y-1"
                   >
                     <li v-for="(custom, idx) in item.customizations" :key="idx">
                       {{ custom.groupName }}: {{ custom.optionName }}
                     </li>
                   </ul>
-                  <p v-if="item.specialInstructions" class="text-xs text-gray-500 italic mt-2">
+                  <p v-if="item.specialInstructions" class="text-xs italic mt-2">
                     Note: {{ item.specialInstructions }}
                   </p>
                 </div>
-                <p class="font-medium text-gray-900">${{ item.totalPrice.toFixed(2) }}</p>
+                <p class="font-medium">${{ item.totalPrice.toFixed(2) }}</p>
               </div>
             </div>
           </template>
@@ -148,7 +148,7 @@ const submitOrder = async () => {
               placeholder="Any special requests for your order..."
               class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
             />
-            <p class="text-xs text-gray-500 mt-2">{{ orderNotes.length }} / 500 characters</p>
+            <p class="text-xs mt-2">{{ orderNotes.length }} / 500 characters</p>
           </template>
         </Card>
       </div>
@@ -160,11 +160,11 @@ const submitOrder = async () => {
           </template>
           <template #body>
             <div class="space-y-3 mb-6">
-              <div class="flex justify-between text-gray-700">
+              <div class="flex justify-between">
                 <span>Subtotal</span>
                 <span class="font-medium">${{ cart.subtotal.toFixed(2) }}</span>
               </div>
-              <div class="flex justify-between text-gray-700">
+              <div class="flex justify-between">
                 <span>Tax (8%)</span>
                 <span class="font-medium">${{ cart.tax.toFixed(2) }}</span>
               </div>

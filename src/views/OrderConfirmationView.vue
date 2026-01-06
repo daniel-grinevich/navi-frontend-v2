@@ -9,7 +9,7 @@ const router = useRouter()
 const route = useRoute()
 
 const orderId = computed(() => route.params.orderId as string)
-const { isLoading, data: order, isError }  = useOrder(orderId.value)
+const { isLoading, data: order, isError } = useOrder(orderId.value)
 
 const estimatedTime = computed(() => {
   if (!order.value?.estimatedReadyTime) return null
@@ -36,8 +36,8 @@ const estimatedTime = computed(() => {
           ></path>
         </svg>
       </div>
-      <h1 class="text-3xl font-bold text-gray-900 mb-2">Order Confirmed!</h1>
-      <p class="text-gray-600">Thank you for your order</p>
+      <h1 class="text-3xl font-bold mb-2">Order Confirmed!</h1>
+      <p>Thank you for your order</p>
     </div>
 
     <!-- Order Details Card -->
@@ -48,17 +48,18 @@ const estimatedTime = computed(() => {
       <template #body>
         <div class="space-y-3">
           <div class="flex justify-between items-center">
-            <span class="text-gray-600">Order ID:</span>
-            <span class="font-mono font-medium text-sm bg-gray-100 px-3 py-1 rounded">{{
-              orderId
-            }}</span>
+            <span>Order ID:</span>
+            <span
+              class="font-mono font-medium text-sm bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200 px-3 py-1 rounded"
+              >{{ orderId }}</span
+            >
           </div>
           <div v-if="estimatedTime" class="flex justify-between items-center">
-            <span class="text-gray-600">Estimated Ready Time:</span>
+            <span>Estimated Ready Time:</span>
             <span class="font-semibold text-lg text-green-600">{{ estimatedTime }}</span>
           </div>
           <div class="flex justify-between items-center">
-            <span class="text-gray-600">Status:</span>
+            <span>Status:</span>
             <span
               class="inline-block px-3 py-1 text-xs bg-yellow-100 text-yellow-800 rounded-full font-medium"
             >
@@ -80,8 +81,8 @@ const estimatedTime = computed(() => {
           />
         </svg>
         {{ console.log(order) }}
-        <div v-if="order?.id&&order.status=='O'">
-          <Qrcode :value="'{{order.id}}'" :size="500"/>
+        <div v-if="order?.id && order.status == 'O'">
+          <Qrcode :value="'{{order.id}}'" :size="500" />
         </div>
       </div>
     </div>
@@ -96,7 +97,7 @@ const estimatedTime = computed(() => {
       </button>
       <button
         @click="router.push({ name: 'home' })"
-        class="w-full px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 font-medium transition-colors"
+        class="w-full px-6 py-3 border-2 border-gray-300 rounded-md hover:bg-gray-50 font-medium transition-colors"
       >
         Back to Home
       </button>
