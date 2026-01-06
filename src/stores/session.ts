@@ -1,7 +1,7 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import { useStorage } from '@vueuse/core'
-import { apiClient } from '@/lib/apiClient'
+import { apiClientSession } from '@/lib/apiClientSession'
 
 interface User {
   email?: string
@@ -35,7 +35,7 @@ export const useSessionStore = defineStore('session', () => {
     }
     try {
       const fullToken = 'Bearer ' + session.value.accessToken
-      const data = await apiClient('/api/users/me', {
+      const data = await apiClientSession('/api/users/me', {
         method: 'GET',
         headers: { Authorization: fullToken },
       })
@@ -70,7 +70,7 @@ export const useSessionStore = defineStore('session', () => {
     if (!user.value.guestEmail) return
 
     try {
-      const response = await apiClient('api/create-guest/', {
+      const response = await apiClientSession('api/create-guest/', {
         method: 'POST',
         body: JSON.stringify({
           guestUser: user.value.guestEmail,
@@ -90,7 +90,7 @@ export const useSessionStore = defineStore('session', () => {
     if (!session.value.refreshToken) return false
 
     try {
-      const data = await apiClient('/api/token/refresh/', {
+      const data = await apiClientSession('/api/token/refresh/', {
         method: 'POST',
         body: JSON.stringify({
           refresh: session.value.refreshToken,
@@ -114,5 +114,6 @@ export const useSessionStore = defineStore('session', () => {
     isAuthenticated,
     logout,
     setGuestEmail,
+    refreshAccessToken,
   }
 })
