@@ -7,7 +7,7 @@ export const useCreateOrder = () => {
   const session = useSessionStore()
 
   return useApiWrite<OrderSubmissionResponse, Error, ServerOrder>(async (orderData) => {
-
+    debugger
     const headers = getHeader(session.session)
 
     return await apiClient('api/orders/', {
