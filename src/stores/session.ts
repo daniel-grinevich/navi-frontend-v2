@@ -39,10 +39,9 @@ export const useSessionStore = defineStore('session', () => {
         method: 'GET',
         headers: { Authorization: fullToken },
       })
-      if (data.is_guest){
-        user.value.guestEmail=data.email
-      }
-      else {
+      if (data.is_guest) {
+        user.value.guestEmail = data.email
+      } else {
         user.value = data
       }
     } catch (err: any) {
@@ -77,7 +76,7 @@ export const useSessionStore = defineStore('session', () => {
         }),
       })
 
-      const { accessToken, refreshToken, user: userData} = response
+      const { accessToken, refreshToken, user: userData } = response
       console.log(accessToken)
 
       session.value = { accessToken: accessToken, refreshToken: refreshToken }
