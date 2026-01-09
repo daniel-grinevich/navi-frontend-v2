@@ -1,38 +1,23 @@
 <script setup lang="ts">
+/*** libraries ****/
 import { computed, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import { apiClient } from '@/lib/apiClient'
-import { useDebounce } from '@/composables/useDebounce'
-import { useEmails } from '@/composables/useEmails'
-import type { Email } from '@/types/Email'
+import { refDebounced } from '@vueuse/core'
+/*** components ****/
+/*** stores ***/
+/*** composables ****/
+/*** types ****/
 
 const email = ref<string>('')
+const debouncedEmail = refDebounced(email, 500)
 const password = ref('')
 const confirmPassword = ref('')
 const loading = ref(false)
-const errorMessage = ref('')
+const errorMessages = ref([])
 const successMessage = ref('')
-const { getEmails } = useEmails()
 
-const BASE_URL = import.meta.env.VITE_BASE_URL
-
-const { debounceValue: debouncedEmail, asyncResults: allEmails } = useDebounce<string, Email[]>(
-  email,
-  500,
-  getEmails,
-)
-const { debounceValue: debouncedPassword } = useDebounce(password, 500)
-
-const emailErrors = computed(() => {
-  if (debouncedEmail.value?.length < 3) return true
-  if (allEmails.value?.some((x) => x.email === debouncedEmail.value)) return true
-  return false
-})
-
-const passwordErrors = computed(() => {
-  if (debouncedPassword.value?.length < 3) return true
-  return false
-})
+const handleEmailInput = computed(() => {})
 
 const handleSignupSubmit = async (e: Event) => {
   e.preventDefault()
@@ -79,7 +64,10 @@ const signUpNewUser = async () => {
           <p class="text-primary/70 font-body text-sm">join to start collecting ideas</p>
         </div>
 
-        <div v-if="successMessage" class="mb-4 p-3 bg-shock-green/20 border border-shock-green rounded-lg">
+        <div
+          v-if="successMessage"
+          class="mb-4 p-3 bg-shock-green/20 border border-shock-green rounded-lg"
+        >
           <p class="text-shock-green font-body text-sm">{{ successMessage }}</p>
         </div>
         <div v-if="errorMessage" class="mb-4 p-3 bg-pink/20 border border-pink rounded-lg">
