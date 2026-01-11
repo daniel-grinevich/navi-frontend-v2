@@ -5,7 +5,7 @@ import { useApiWrite } from '@/composables/useApi'
 import { useSessionStore } from '@/stores/session'
 import LoadingSpinnerTwo from '@/components/shared/LoadingSpinnerTwo.vue'
 import { apiClient } from '@/lib/apiClient'
-import { LoginSchema } from '@/schemas/LoginSchema'
+import { LoginSchema } from '@/schemas/user/LoginSchema'
 
 const sessionStore = useSessionStore()
 const router = useRouter()
