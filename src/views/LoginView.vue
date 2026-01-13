@@ -28,7 +28,7 @@ const { mutateAsync, isPending } = useApiWrite<
     }
     sessionStore.getUser()
     loading.value = false
-    router.push('/')
+    router.go(-1)
   },
   onError: (err: Error) => {
     loginErrorMessage.value = err.message
