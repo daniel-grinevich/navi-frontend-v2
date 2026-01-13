@@ -46,7 +46,7 @@ const handleNaviPortClick = (id: number) => {
   shoppingCartStore.selectedNaviPort = id
   const from = router.options.history.state.back?.toString()
 
-  if (from != '/') {
+  if (from != '/' && from !== undefined) {
     router.go(-1)
   }
   router.push({ name: 'cart' })
