@@ -21,8 +21,6 @@ onMounted(() => {
   if (cart.itemCount === 0) {
     router.push({ name: 'menu' })
   }
-
-  debugger
   if (session.user.guestEmail !== null) {
     session.createGuest()
   }
@@ -118,10 +116,7 @@ const submitOrder = async () => {
                 <div class="flex-1 pr-4">
                   <p class="font-medium">{{ item.menuItemName }}</p>
                   <p class="text-xs mt-1">Qty: {{ item.quantity }}</p>
-                  <ul
-                    v-if="item.customizations.length > 0"
-                    class="text-xs mt-2 space-y-1"
-                  >
+                  <ul v-if="item.customizations.length > 0" class="text-xs mt-2 space-y-1">
                     <li v-for="(custom, idx) in item.customizations" :key="idx">
                       {{ custom.groupName }}: {{ custom.optionName }}
                     </li>

@@ -50,7 +50,7 @@ export const useApiWrite = <TData = unknown, TError = Error, TVariables = void, 
   }
 }
 
-export const getHeader = (session:Session) =>{
+export const getTokenFromSession = (session: Session) => {
   const accessToken = session.accessToken
 
   const headers: Record<string, string> = {}

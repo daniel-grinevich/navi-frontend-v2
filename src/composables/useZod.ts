@@ -9,12 +9,11 @@ import z, { ZodObject } from 'zod'
 export const useZod = (ref: MaybeRefOrGetter<object>, schema: ZodObject) => {
   const schemaKeys = computed(() => Object.keys(schema.shape))
 
-  const unsupportedTypeMessage = (unsupportedType: string) => {
-    return `${unsupportedType} is an unsupported type.`
+  const unsupportedTypeMessage = (unsupportedType: string): Record<string, string[]> => {
+    return { form: [`${unsupportedType} is an unsupported type.`] }
   }
 
   const zodValueorError = computed(() => {
-    debugger
     console.log('computed is running')
     const input = toValue(ref)
 
@@ -28,13 +27,13 @@ export const useZod = (ref: MaybeRefOrGetter<object>, schema: ZodObject) => {
           const result = schema.safeParse(input)
           return result.success
             ? { success: true, data: result.data }
-            : { success: false, error: result.error.issues }
+            : { success: false, error: handleZodErrors(result.error.issues) }
         }
       case 'string':
         const stringResult = schema.safeParse(input)
         return stringResult.success
           ? { success: true, data: stringResult.data }
-          : { success: false, error: stringResult.error.issues }
+          : { success: false, error: handleZodErrors(stringResult.error.issues) }
 
       case 'number':
         const numberResult = schema.safeParse(input)
