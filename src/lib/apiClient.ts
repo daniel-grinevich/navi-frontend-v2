@@ -5,7 +5,7 @@ export async function apiClient<T = any>(
   endpoint: string,
   options: RequestInit = {},
   retry: boolean = false,
-): Promise<T | null> {
+): Promise<T> {
   const { isAuthenticated, refreshAccessToken, session } = useSessionStore()
 
   const auth = (options?.headers as Record<string, string> | undefined)?.Authorization
