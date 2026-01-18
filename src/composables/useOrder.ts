@@ -1,14 +1,13 @@
 import { apiClient } from '@/lib/apiClient'
-import { getHeader, useApi, useApiWrite } from './useApi'
-import type { ServerOrder,Order, OrderSubmissionResponse } from '@/types/order'
+import { getTokenFromSession, useApi, useApiWrite } from './useApi'
+import type { ServerOrder, Order, OrderSubmissionResponse } from '@/types/order'
 import { useSessionStore } from '@/stores/session'
 
 export const useCreateOrder = () => {
   const session = useSessionStore()
 
   return useApiWrite<OrderSubmissionResponse, Error, ServerOrder>(async (orderData) => {
-    debugger
-    const headers = getHeader(session.session)
+    const headers = getTokenFromSession(session.session)
 
     return await apiClient('api/orders/', {
       method: 'POST',
@@ -23,7 +22,7 @@ export const useOrder = (orderId: string) => {
   const session = useSessionStore()
 
   return useApi<Order>(['order', orderId], async () => {
-    const headers= getHeader(session.session)
+    const headers = getTokenFromSession(session.session)
     return await apiClient(`api/orders/${orderId}/`, { method: 'GET', headers })
   })
 }
@@ -32,6 +31,7 @@ export const useOrder = (orderId: string) => {
 export const useOrders = () => {
   const session = useSessionStore()
   return useApi<Order[]>(['orders'], async () => {
-    const headers= getHeader(session.session)
-    return await apiClient('api/orders/', { method: 'GET', headers })})
+    const headers = getTokenFromSession(session.session)
+    return await apiClient('api/orders/', { method: 'GET', headers })
+  })
 }

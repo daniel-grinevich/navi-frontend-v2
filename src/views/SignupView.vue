@@ -1,69 +1,117 @@
 <script setup lang="ts">
+/*** libraries ****/
 import { computed, ref } from 'vue'
-import { RouterLink } from 'vue-router'
-import { apiClient } from '@/lib/apiClient'
-import { useDebounce } from '@/composables/useDebounce'
-import { useEmails } from '@/composables/useEmails'
-import type { Email } from '@/types/Email'
+import { RouterLink, useRouter } from 'vue-router'
+import { refDebounced, useDebounceFn } from '@vueuse/core'
+/*** components ****/
+/*** stores ***/
+/*** composables ****/
+import { useUserByEmail, useUserSignup } from '@/composables/useUser'
+import { useZod } from '@/composables/useZod'
+/*** types ****/
+/*** schemas ****/
+import { SignupSchema } from '@/schemas/user/SignupSchema'
+import LoadingSpinnerTwo from '@/components/shared/LoadingSpinnerTwo.vue'
+
+const router = useRouter()
 
 const email = ref<string>('')
+const emailDebounced = refDebounced(email, 500)
 const password = ref('')
 const confirmPassword = ref('')
 const loading = ref(false)
-const errorMessage = ref('')
-const successMessage = ref('')
-const { getEmails } = useEmails()
+const enableQueryImmediate = ref(false)
+const enableQuery = refDebounced(enableQueryImmediate, 500)
+const errorMessages = ref<{ email: string[]; password: string[]; submit: string[] }>({
+  email: [],
+  password: [],
+  submit: [],
+})
+const touched = ref({ email: false, password: false, confirmPassword: false })
 
-const BASE_URL = import.meta.env.VITE_BASE_URL
-
-const { debounceValue: debouncedEmail, asyncResults: allEmails } = useDebounce<string, Email[]>(
-  email,
-  500,
-  getEmails,
-)
-const { debounceValue: debouncedPassword } = useDebounce(password, 500)
-
-const emailErrors = computed(() => {
-  if (debouncedEmail.value?.length < 3) return true
-  if (allEmails.value?.some((x) => x.email === debouncedEmail.value)) return true
-  return false
+const signupFields = computed(() => {
+  return { email: email.value, password: password.value }
 })
 
-const passwordErrors = computed(() => {
-  if (debouncedPassword.value?.length < 3) return true
-  return false
+const allEmailErrors = computed(() => {
+  if (!touched.value.email) return []
+
+  let zodEmailErrors: string[] = []
+
+  if (!zodValueorError.value.success && zodValueorError.value.error) {
+    zodEmailErrors = zodValueorError.value.error.email?.map((error: string) => error) ?? []
+  }
+
+  const duplicateError = duplicateEmails.value?.id ? ['This email is already in use.'] : []
+
+  return [...zodEmailErrors, ...errorMessages.value.email, ...duplicateError]
 })
+
+const allPasswordErrors = computed(() => {
+  if (!touched.value.password) return []
+
+  let zodPasswordErrors: string[] = []
+
+  if (!zodValueorError.value.success && zodValueorError.value.error) {
+    zodPasswordErrors = zodValueorError.value.error.password?.map((error: string) => error) ?? []
+  }
+
+  return [...zodPasswordErrors, ...errorMessages.value.password]
+})
+
+const confirmPasswordError = computed(() => {
+  if (!touched.value.confirmPassword) return ''
+  if (confirmPassword.value === '') return ''
+  if (confirmPassword.value !== password.value) return 'Passwords do not match'
+  return ''
+})
+
+const { zodValueorError } = useZod(signupFields, SignupSchema)
+
+const {
+  isLoading,
+  isPending,
+  isError,
+  data: duplicateEmails,
+} = useUserByEmail(emailDebounced, enableQuery)
+
+const { data: signupData, isError: signupError, mutateAsync } = useUserSignup()
+
+const markEmailTouched = useDebounceFn(() => {
+  touched.value.email = true
+}, 1000)
+
+const markPasswordTouched = useDebounceFn(() => {
+  touched.value.password = true
+}, 1000)
+
+const markConfirmPasswordTouched = useDebounceFn(() => {
+  touched.value.confirmPassword = true
+}, 1000)
+
+const handleEmailInput = () => {
+  markEmailTouched()
+  if (!zodValueorError.value.error?.email && email.value.length > 0) {
+    enableQueryImmediate.value = true
+  } else {
+    enableQueryImmediate.value = false
+  }
+}
 
 const handleSignupSubmit = async (e: Event) => {
   e.preventDefault()
-  // TODO: Add password confirmation validation
-  // TODO: Add password strength validation
-  // TODO: Add email format validation
-  // TODO: Redirect to home or dashboard after successful signup
-  // TODO: Handle email verification flow
-  await signUpNewUser()
-}
+  errorMessages.value.submit = []
 
-const signUpNewUser = async () => {
+  if (allEmailErrors.value.length || allPasswordErrors.value.length || confirmPasswordError.value)
+    return
+
   loading.value = true
-  errorMessage.value = ''
-  successMessage.value = ''
 
   try {
-    const response = await apiClient('signup', {
-      method: 'POST',
-      body: JSON.stringify({ user: { email: email.value, password: password.value } }),
-    })
-
-    const data = await response.json()
-
-    if (!response.ok) {
-      errorMessage.value = data.error || 'Signup failed'
-    } else {
-      successMessage.value = 'Account created! Check your email to verify.'
-    }
-  } catch (err) {
-    errorMessage.value = 'An unexpected error occurred'
+    await mutateAsync(signupFields.value)
+    router.push('/login')
+  } catch (error) {
+    errorMessages.value.submit.push('Failed to create account. Please try again.')
   } finally {
     loading.value = false
   }
@@ -71,50 +119,49 @@ const signUpNewUser = async () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-secondary flex items-center justify-center px-6 py-12">
-    <div class="w-full max-w-sm">
-      <div class="bg-primary/10 border-2 border-primary rounded-lg p-8">
+  <div class="min-h-screen flex justify-center py-3">
+    <div class="w-full max-w-md">
+      <div class="p-8 border">
         <div class="mb-8">
-          <h1 class="font-title text-3xl text-primary mb-2">Create Account</h1>
-          <p class="text-primary/70 font-body text-sm">join to start collecting ideas</p>
-        </div>
-
-        <div v-if="successMessage" class="mb-4 p-3 bg-shock-green/20 border border-shock-green rounded-lg">
-          <p class="text-shock-green font-body text-sm">{{ successMessage }}</p>
-        </div>
-        <div v-if="errorMessage" class="mb-4 p-3 bg-pink/20 border border-pink rounded-lg">
-          <p class="text-primary font-body text-sm">{{ errorMessage }}</p>
+          <h1 class="font-title text-2xl mb-2">Create Navi Account</h1>
         </div>
 
         <form @submit.prevent="handleSignupSubmit" class="space-y-4">
           <div>
-            <label for="email" class="block font-body text-sm text-primary mb-2">email</label>
+            <label for="email" class="block font-body text-sm mb-2">Email:</label>
             <input
               id="email"
               v-model="email"
+              class="w-full px-4 py-2 border text-sm"
               type="email"
-              required
               placeholder="name@example.com"
-              class="w-full px-4 py-2 bg-secondary border-2 border-primary rounded-lg text-primary placeholder-primary/40 font-body text-sm focus:outline-none focus:border-pink transition-all"
+              @input="handleEmailInput"
             />
+            <div id="email-errors" class="text-red h-6 mt-1 text-xs">
+              {{ allEmailErrors[0] }}
+            </div>
           </div>
-          <div v-if="emailErrors" class="text-primary font-body text-sm">Email Error</div>
-
           <div>
-            <label for="password" class="block font-body text-sm text-primary mb-2">password</label>
+            <label for="password" class="block font-body text-sm mb-2">Password:</label>
             <input
               id="password"
               v-model="password"
               type="password"
               required
               placeholder="••••••••"
-              class="w-full px-4 py-2 bg-secondary border-2 border-primary rounded-lg text-primary placeholder-primary/40 font-body text-sm focus:outline-none focus:border-pink transition-all"
+              class="w-full px-4 py-2 border text-sm"
+              @input="markPasswordTouched"
             />
+            <div id="password-errors" class="text-red h-8">
+              <div class="mt-1 text-xs">
+                {{ allPasswordErrors[0] }}
+              </div>
+            </div>
           </div>
 
           <div>
-            <label for="confirm-password" class="block font-body text-sm text-primary mb-2"
-              >confirm password</label
+            <label for="confirm-password" cclass="block font-body text-sm mb-2"
+              >Confirm password:</label
             >
             <input
               id="confirm-password"
@@ -122,22 +169,28 @@ const signUpNewUser = async () => {
               type="password"
               required
               placeholder="••••••••"
-              class="w-full px-4 py-2 bg-secondary border-2 border-primary rounded-lg text-primary placeholder-primary/40 font-body text-sm focus:outline-none focus:border-pink transition-all"
+              class="w-full px-4 py-2 border text-sm"
+              @input="markConfirmPasswordTouched"
             />
+            <div id="password-errors" class="text-red h-8">
+              <div v-if="confirmPasswordError !== ''" class="mt-1 text-xs">
+                {{ confirmPasswordError }}
+              </div>
+            </div>
           </div>
 
           <button
             type="submit"
             :disabled="loading"
-            class="w-full bg-primary text-secondary py-3 px-4 rounded-lg font-body text-base hover:scale-105 focus:outline-none transition-transform disabled:opacity-50 disabled:cursor-not-allowed mt-6"
+            class="w-full py-3 px-4 bg-alt text-primary rounded-lg font-body text-base focus:outline-none transition-transform disabled:opacity-50 disabled:cursor-not-allowed mt-6 cursor-pointer"
           >
             {{ loading ? 'creating account...' : 'Sign Up' }}
           </button>
         </form>
 
-        <p class="mt-6 text-center font-body text-sm text-primary/70">
+        <p class="mt-6 text-alt text-center font-body text-sm">
           already have an account?
-          <RouterLink to="/login" class="text-primary hover:underline ml-1"> sign in </RouterLink>
+          <RouterLink to="/login" class="hover:underline ml-1"> sign in </RouterLink>
         </p>
       </div>
     </div>
