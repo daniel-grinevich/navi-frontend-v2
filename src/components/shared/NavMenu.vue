@@ -4,11 +4,13 @@ import { useRouter } from 'vue-router'
 /*** components ****/
 /*** stores ***/
 import { useSessionStore } from '@/stores/session'
+import { useShoppingCart } from '@/stores/shoppingCart'
 import { computed } from 'vue'
 /*** composables ****/
 /*** types ****/
 
 const session = useSessionStore()
+const cart = useShoppingCart()
 const router = useRouter()
 
 const handleLogout = () => {
@@ -46,7 +48,22 @@ const userDisplayName = computed(() => {
 
         <!-- Right side auth -->
         <div class="flex flex-row gap-4 items-center">
+          <!-- Cart Icon -->
+          <router-link to="/cart" class="relative text-xs">
+            <span class="hover:text-green-300 transition-colors">[ CART ]</span>
+            <span
+              v-if="cart.itemCount > 0"
+              class="absolute -top-2 -right-2 bg-green-400 text-black text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center"
+            >
+              {{ cart.itemCount > 9 ? '9+' : cart.itemCount }}
+            </span>
+          </router-link>
+          <router-link to="/find-navi" class="relative text-xs">
+            <span class="hover:text-green-300 transition-colors">[ NaviPort ]</span>
+          </router-link>
+
           <div v-if="session.isAuthenticated" class="flex flex-row gap-4 items-center">
+            <router-link to="/orders" class="px-3 py-1 text-xs"> [ Orders ] </router-link>
             <span class="text-xs"> &gt;&gt; USER: {{ userDisplayName }} &lt;&lt; </span>
             <button type="button" @click="handleLogout" class="px-3 py-1 text-xs cursor-pointer">
               [ LOGOUT ]

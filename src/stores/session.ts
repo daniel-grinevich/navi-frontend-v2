@@ -1,10 +1,11 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import { useStorage } from '@vueuse/core'
-import { apiClient } from '@/lib/apiClient'
+import { apiClientSession } from '@/lib/apiClientSession'
 
 interface User {
   email?: string
+  guestEmail?: string
   [key: string]: any
 }
 
@@ -25,18 +26,7 @@ export const useSessionStore = defineStore('session', () => {
       return
     }
 
-    try {
-      const fullToken = 'Bearer ' + session.value.accessToken
-      const data = await apiClient('/api/users/me', {
-        method: 'GET',
-        headers: { Authorization: fullToken }
-      })
-
-      user.value = data
-    } catch (err) {
-      session.value = { accessToken: '', refreshToken: '' }
-      user.value = {}
-    }
+    await getUser()
   }
 
   const getUser = async () => {
@@ -45,15 +35,24 @@ export const useSessionStore = defineStore('session', () => {
     }
     try {
       const fullToken = 'Bearer ' + session.value.accessToken
-      const data = await apiClient('/api/users/me', {
+      const data = await apiClientSession('/api/users/me', {
         method: 'GET',
-        headers: { Authorization: fullToken }
+        headers: { Authorization: fullToken },
       })
-
-      user.value = data
-    } catch (err) {
-      session.value = { accessToken: '', refreshToken: '' }
-      user.value = {}
+      if (data.is_guest) {
+        user.value.guestEmail = data.email
+      } else {
+        user.value = data
+      }
+    } catch (err: any) {
+      if (err.status === 401) {
+        const refreshed = await refreshAccessToken()
+        if (refreshed) {
+          return getUser() // retry
+        }
+      } else {
+        logout()
+      }
     }
   }
 
@@ -61,12 +60,59 @@ export const useSessionStore = defineStore('session', () => {
     session.value = { accessToken: '', refreshToken: '' }
     user.value = {}
   }
+
+  const setGuestEmail = (guestEmail: string) => {
+    user.value = { guestEmail }
+  }
+
+  const createGuest = async () => {
+    if (!user.value.guestEmail) return
+
+    try {
+      const response = await apiClientSession('api/create-guest/', {
+        method: 'POST',
+        body: JSON.stringify({
+          guestUser: user.value.guestEmail,
+        }),
+      })
+
+      const { accessToken, refreshToken, user: userData } = response
+      console.log(accessToken)
+
+      session.value = { accessToken: accessToken, refreshToken: refreshToken }
+    } catch (error) {
+      console.error(`Error when creating guest user ${error}`)
+    }
+  }
+
+  const refreshAccessToken = async () => {
+    if (!session.value.refreshToken) return false
+
+    try {
+      const data = await apiClientSession('/api/token/refresh/', {
+        method: 'POST',
+        body: JSON.stringify({
+          refresh: session.value.refreshToken,
+        }),
+      })
+
+      session.value.accessToken = data.access
+      return true
+    } catch {
+      logout()
+      return false
+    }
+  }
+
   return {
     user,
     session,
     initAuth,
     getUser,
+    createGuest,
     isAuthenticated,
     logout,
+    setGuestEmail,
+    refreshAccessToken,
   }
 })

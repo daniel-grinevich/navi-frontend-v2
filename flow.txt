@@ -1,0 +1,16 @@
+1. User Picks NaviPort First
+    - check which navi port is closest
+    - they don't assume one is offline
+    (we can make this global later but still probably want to show them the location of naviports at some point)
+
+2. Menu
+3. Customize Item -> on done we go to checkout? or menu?
+
+4. Cart (easy place to edit... if not signed in they must put in a guest email)
+5. If guest email is put in then they must accept the invite.
+    - otherwise they may not get their invoice / reciept
+    - other ppl could use other ppls emails
+    - probably good/fine to store customers emails
+    - once they sign up they can get their whole order history
+
+6. Checkout.

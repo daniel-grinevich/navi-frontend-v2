@@ -1,8 +1,9 @@
 import { apiClient } from '@/lib/apiClient'
 import { useApi } from './useApi'
+import { type CustomizationGroup } from '@/types/customization'
 
 export type MenuItem = {
-  id?: string | number
+  id: string
   slug: string
   name: string
   status: string
@@ -10,8 +11,15 @@ export type MenuItem = {
   body: string
   description: string
   price: string
+  category?: {
+    id: string
+    name: string
+    customization_groups: CustomizationGroup[]
+  }
 }
 
 export const useMenu = () => {
-  return useApi<MenuItem[]>(['menu'], () => apiClient('api/menu-items/', { method: 'GET' }))
+  return useApi<MenuItem[]>(['menu'], () =>
+    apiClient('api/menu-items/?status=A', { method: 'GET' }),
+  )
 }

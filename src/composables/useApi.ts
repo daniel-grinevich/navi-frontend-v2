@@ -5,6 +5,7 @@ import {
   type UseMutationOptions,
 } from '@tanstack/vue-query'
 import type { ComputedRef } from 'vue'
+import type { Session } from '@/types/user'
 
 export const useApi = <TData = unknown, TError = Error>(
   queryKey: string[],
@@ -47,4 +48,15 @@ export const useApiWrite = <TData = unknown, TError = Error, TVariables = void, 
     mutateAsync,
     reset,
   }
+}
+
+export const getTokenFromSession = (session: Session) => {
+  const accessToken = session.accessToken
+
+  const headers: Record<string, string> = {}
+
+  if (accessToken) {
+    headers['Authorization'] = `Bearer ${accessToken}`
+  }
+  return headers
 }
