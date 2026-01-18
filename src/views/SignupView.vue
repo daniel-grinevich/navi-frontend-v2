@@ -121,7 +121,7 @@ const handleSignupSubmit = async (e: Event) => {
 <template>
   <div class="min-h-screen flex justify-center py-3">
     <div class="w-full max-w-md">
-      <div class="p-8 border-dash">
+      <div class="p-8 border">
         <div class="mb-8">
           <h1 class="font-title text-2xl mb-2">Create Navi Account</h1>
         </div>
