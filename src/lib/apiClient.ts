@@ -4,8 +4,19 @@ const API_BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:8000'
 export async function apiClient<T = any>(
   endpoint: string,
   options: RequestInit = {},
-  retry: boolean = true,
+  retry: boolean = false,
 ): Promise<T> {
+  const { isAuthenticated, refreshAccessToken, session } = useSessionStore()
+
+  const auth = (options?.headers as Record<string, string> | undefined)?.Authorization
+
+  debugger
+  if (isAuthenticated && !auth) {
+    const headers: Record<string, string> = {}
+    headers['Authorization'] = `Bearer ${session.accessToken}`
+    options = { ...options, headers: headers }
+  }
+
   const response = await fetch(`${API_BASE_URL}/${endpoint}`, {
     ...options,
     headers: {
@@ -13,8 +24,17 @@ export async function apiClient<T = any>(
       ...options.headers,
     },
   })
-  if (response.status === 401 && retry) {
-    return retryApiClient<T>(endpoint, options)
+
+  if (response.status === 401) {
+    if (!isAuthenticated) throw Error('Not Authorized')
+
+    const authResponse: boolean = await refreshAccessToken()
+
+    delete (options?.headers as Record<string, string> | undefined)?.Authorization
+
+    if (!authResponse) throw Error('Could not use refresh tooken to authenticate')
+
+    return apiClient(endpoint, options)
   }
 
   if (!response.ok) {
@@ -31,30 +51,11 @@ export async function apiClient<T = any>(
     throw error
   }
 
-  // Handle 204 No Content
   if (response.status === 204) {
-    return undefined as T
+    return new Promise(() => {
+      return { success: true, body: null }
+    })
   }
 
   return response.json()
-}
-
-async function retryApiClient<T>(endpoint: string, options: RequestInit = {}):Promise<T> {
-  const sessionStore = useSessionStore()
-  try {
-    await sessionStore.refreshAccessToken()
-
-    const retryHeaders = {
-      ...options.headers,
-      Authorization: `Bearer ${sessionStore.session.accessToken}`,
-    }
-    return apiClient(
-      endpoint,
-      { ...options, headers: retryHeaders },
-      false, // prevent infinite loop
-    )
-  } catch (err) {
-    sessionStore.logout()
-    throw err
-  }
 }

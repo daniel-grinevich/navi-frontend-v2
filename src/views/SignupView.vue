@@ -42,7 +42,10 @@ const allEmailErrors = computed(() => {
     zodEmailErrors = zodValueorError.value.error.email?.map((error: string) => error) ?? []
   }
 
-  const duplicateError = duplicateEmails.value?.id ? ['This email is already in use.'] : []
+  const duplicateError =
+    duplicateEmails.value?.id && !duplicateEmails.value?.is_guest
+      ? ['This email is already in use.']
+      : []
 
   return [...zodEmailErrors, ...errorMessages.value.email, ...duplicateError]
 })
