@@ -6,15 +6,16 @@ import { refDebounced, useDebounceFn } from '@vueuse/core'
 /*** components ****/
 /*** stores ***/
 /*** composables ****/
-import { useUserByEmail, useUserSignup } from '@/composables/useUser'
+import { useUserByEmail,useUserLogin, useUserSignup } from '@/composables/useUser'
 import { useZod } from '@/composables/useZod'
 /*** types ****/
 /*** schemas ****/
 import { SignupSchema } from '@/schemas/user/SignupSchema'
 import LoadingSpinnerTwo from '@/components/shared/LoadingSpinnerTwo.vue'
+import { useSessionStore } from '@/stores/session'
 
 const router = useRouter()
-
+const sessionStore = useSessionStore()
 const email = ref<string>('')
 const emailDebounced = refDebounced(email, 500)
 const password = ref('')
@@ -79,6 +80,7 @@ const {
 } = useUserByEmail(emailDebounced, enableQuery)
 
 const { data: signupData, isError: signupError, mutateAsync } = useUserSignup()
+const { mutateAsync: login } = useUserLogin()
 
 const markEmailTouched = useDebounceFn(() => {
   touched.value.email = true
@@ -112,12 +114,24 @@ const handleSignupSubmit = async (e: Event) => {
 
   try {
     await mutateAsync(signupFields.value)
-    router.push('/login')
+    try {
+      const response=await login(signupFields.value)
+      router.push({name:'menu'})
+      sessionStore.session = {
+      accessToken: response.access,
+      refreshToken: response.refresh,
+    }
+    sessionStore.getUser()
+    }
+    catch (error){
+      errorMessages.value.submit.push('Failed to login after creating account. Please try again.')
+    }
   } catch (error) {
     errorMessages.value.submit.push('Failed to create account. Please try again.')
   } finally {
     loading.value = false
   }
+
 }
 </script>
 
