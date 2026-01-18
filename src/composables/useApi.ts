@@ -3,12 +3,13 @@ import {
   useMutation,
   type UseQueryOptions,
   type UseMutationOptions,
+  type QueryKey,
 } from '@tanstack/vue-query'
-import type { ComputedRef } from 'vue'
+import type { ComputedRef, Ref } from 'vue'
 import type { Session } from '@/types/user'
 
 export const useApi = <TData = unknown, TError = Error>(
-  queryKey: string[],
+  queryKey: QueryKey | Ref<QueryKey> | ComputedRef<QueryKey>,
   queryFn: () => Promise<TData>,
   options?: Omit<UseQueryOptions<TData, TError>, 'queryKey' | 'queryFn'>,
 ) => {
