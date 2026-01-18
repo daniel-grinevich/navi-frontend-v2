@@ -22,8 +22,8 @@ export const useUserByEmail = (
 }
 
 export const useUserSignup = () => {
-  return useApiWrite(async (signupData) => {
-    return await apiClient('api/orders/', {
+  return useApiWrite<unknown, Error, { email: string; password: string }>(async (signupData) => {
+    return await apiClient('api/users/', {
       method: 'POST',
       body: JSON.stringify(signupData),
     })

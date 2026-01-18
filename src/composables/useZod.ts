@@ -14,7 +14,6 @@ export const useZod = (ref: MaybeRefOrGetter<object>, schema: ZodObject) => {
   }
 
   const zodValueorError = computed(() => {
-    console.log('computed is running')
     const input = toValue(ref)
 
     switch (typeof input) {
