@@ -2,8 +2,7 @@
 /*** libraries ****/
 import { computed, ref } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
-import { useDebounceFn } from '@vueuse/core'
-import { apiClient } from '@/lib/apiClient'
+import { refDebounced, useDebounceFn } from '@vueuse/core'
 /*** components ****/
 /*** stores ***/
 /*** composables ****/
@@ -12,14 +11,17 @@ import { useZod } from '@/composables/useZod'
 /*** types ****/
 /*** schemas ****/
 import { SignupSchema } from '@/schemas/user/SignupSchema'
+import LoadingSpinnerTwo from '@/components/shared/LoadingSpinnerTwo.vue'
 
 const router = useRouter()
 
 const email = ref<string>('')
+const emailDebounced = refDebounced(email, 500)
 const password = ref('')
 const confirmPassword = ref('')
 const loading = ref(false)
-const enableQuery = ref(false)
+const enableQueryImmediate = ref(false)
+const enableQuery = refDebounced(enableQueryImmediate, 500)
 const errorMessages = ref<{ email: string[]; password: string[]; submit: string[] }>({
   email: [],
   password: [],
@@ -40,8 +42,7 @@ const allEmailErrors = computed(() => {
     zodEmailErrors = zodValueorError.value.error.email?.map((error: string) => error) ?? []
   }
 
-  const duplicateError =
-    duplicateEmails.value && duplicateEmails.value !== 0 ? ['This email is already in use.'] : []
+  const duplicateError = duplicateEmails.value?.id ? ['This email is already in use.'] : []
 
   return [...zodEmailErrors, ...errorMessages.value.email, ...duplicateError]
 })
@@ -67,7 +68,12 @@ const confirmPasswordError = computed(() => {
 
 const { zodValueorError } = useZod(signupFields, SignupSchema)
 
-const { isLoading, isPending, isError, data: duplicateEmails } = useUserByEmail(email, enableQuery)
+const {
+  isLoading,
+  isPending,
+  isError,
+  data: duplicateEmails,
+} = useUserByEmail(emailDebounced, enableQuery)
 
 const { data: signupData, isError: signupError, mutateAsync } = useUserSignup()
 
@@ -85,10 +91,10 @@ const markConfirmPasswordTouched = useDebounceFn(() => {
 
 const handleEmailInput = () => {
   markEmailTouched()
-  if (zodValueorError.value.success && email.value.length > 0) {
-    enableQuery.value = true
+  if (!zodValueorError.value.error?.email && email.value.length > 0) {
+    enableQueryImmediate.value = true
   } else {
-    enableQuery.value = false
+    enableQueryImmediate.value = false
   }
 }
 
@@ -113,9 +119,9 @@ const handleSignupSubmit = async (e: Event) => {
 </script>
 
 <template>
-  <div class="min-h-screen items-center justify-center py-3">
-    <div class="w-full max-w-sm">
-      <div class="rounded-lg p-8 border-dash">
+  <div class="min-h-screen flex justify-center py-3">
+    <div class="w-full max-w-md">
+      <div class="p-8 border-dash">
         <div class="mb-8">
           <h1 class="font-title text-2xl mb-2">Create Navi Account</h1>
         </div>
