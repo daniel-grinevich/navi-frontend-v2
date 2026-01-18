@@ -1,7 +1,7 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import { useStorage } from '@vueuse/core'
-import { apiClientSession } from '@/lib/apiClientSession'
+import { apiClient } from '@/lib/apiClient'
 
 interface User {
   email?: string
@@ -18,32 +18,27 @@ export const useSessionStore = defineStore('session', () => {
   )
 
   const isAuthenticated = computed(() => {
-    return Object.keys(user.value).length > 0 && !!session.value.accessToken
+    return !!session.value.accessToken
   })
 
   const initAuth = async () => {
-    if (!session.value.accessToken || !session.value.refreshToken) {
-      return
-    }
-
     await getUser()
   }
 
   const getUser = async () => {
+    debugger
     if (!session.value.accessToken || !session.value.refreshToken) {
       return
     }
     try {
       const fullToken = 'Bearer ' + session.value.accessToken
-      const data = await apiClientSession('/api/users/me', {
+      const data = await apiClient('/api/users/me', {
         method: 'GET',
         headers: { Authorization: fullToken },
       })
-      if (data.is_guest) {
-        user.value.guestEmail = data.email
-      } else {
-        user.value = data
-      }
+      debugger
+
+      data.is_guest ? (user.value.guestEmail = data.email) : (user.value = data)
     } catch (err: any) {
       if (err.status === 401) {
         const refreshed = await refreshAccessToken()
@@ -69,7 +64,7 @@ export const useSessionStore = defineStore('session', () => {
     if (!user.value.guestEmail) return
 
     try {
-      const response = await apiClientSession('api/create-guest/', {
+      const response = await apiClient('api/create-guest/', {
         method: 'POST',
         body: JSON.stringify({
           guestUser: user.value.guestEmail,
@@ -89,7 +84,7 @@ export const useSessionStore = defineStore('session', () => {
     if (!session.value.refreshToken) return false
 
     try {
-      const data = await apiClientSession('/api/token/refresh/', {
+      const data = await apiClient('/api/token/refresh/', {
         method: 'POST',
         body: JSON.stringify({
           refresh: session.value.refreshToken,
