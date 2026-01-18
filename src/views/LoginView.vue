@@ -5,7 +5,8 @@ import { useApiWrite } from '@/composables/useApi'
 import { useSessionStore } from '@/stores/session'
 import LoadingSpinnerTwo from '@/components/shared/LoadingSpinnerTwo.vue'
 import { apiClient } from '@/lib/apiClient'
-import { LoginSchema } from '@/schemas/LoginSchema'
+import { LoginSchema } from '@/schemas/user/LoginSchema'
+import { useUserLogin } from '@/composables/useUser'
 
 const sessionStore = useSessionStore()
 const router = useRouter()
@@ -14,27 +15,8 @@ const email = ref('')
 const password = ref('')
 const loading = ref(false)
 const loginErrorMessage = ref('')
-const fieldErrors = ref({})
 
-const { mutateAsync, isPending } = useApiWrite<
-  { access: string; refresh: string },
-  Error,
-  { email: string; password: string }
->((userData) => apiClient('api/token/', { method: 'POST', body: JSON.stringify(userData) }), {
-  onSuccess: (responseData: { access: string; refresh: string }) => {
-    sessionStore.session = {
-      accessToken: responseData.access,
-      refreshToken: responseData.refresh,
-    }
-    sessionStore.getUser()
-    loading.value = false
-    router.push('/')
-  },
-  onError: (err: Error) => {
-    loginErrorMessage.value = err.message
-    loading.value = false
-  },
-})
+const { mutateAsync, isPending } = useUserLogin()
 
 const handleLoginSubmit = async (e: Event) => {
   loading.value = true
@@ -46,9 +28,26 @@ const handleLoginSubmit = async (e: Event) => {
     loginErrorMessage.value = result.error.message
     loading.value = false
   } else {
-    await mutateAsync(formData)
-  }
-}
+    try {
+      const response=await mutateAsync(formData)
+      sessionStore.session = {
+      accessToken: response.access,
+      refreshToken: response.refresh,
+    }
+    sessionStore.getUser()
+    loading.value = false
+    const canGoBack = window.history.state?.back !== null
+    if (canGoBack) {
+      router.go(-1)
+    } else {
+      router.push({ name: 'menu' })
+    }}
+    catch (error) {
+    console.error('Login Failed:', error)
+    alert('Failed to Login. Please try again.')
+    loading.value=false
+    }
+}}
 </script>
 
 <template>

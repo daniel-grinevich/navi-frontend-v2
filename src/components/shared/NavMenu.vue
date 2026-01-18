@@ -34,21 +34,14 @@ const userDisplayName = computed(() => {
       <div class="flex flex-row justify-between items-center px-4">
         <!-- Left side navigation -->
         <div class="flex flex-row gap-6 items-center">
-          <div class="text-xs">
-            <router-link to="/" class="hover:text-green-300 hover:underline transition-colors">
-              [ HOME ]
-            </router-link>
-          </div>
-          <div class="text-xs">
-            <router-link to="/about" class="hover:text-green-300 hover:underline transition-colors">
-              [ ABOUT ]
-            </router-link>
-          </div>
-        </div>
+          <router-link to="/" class="text-xs hover:text-green-300 transition-colors">
+            [ HOME ]
+          </router-link>
 
-        <!-- Right side auth -->
-        <div class="flex flex-row gap-4 items-center">
-          <!-- Cart Icon -->
+          <router-link to="/about" class="text-xs hover:text-green-300 transition-colors">
+            [ ABOUT ]
+          </router-link>
+
           <router-link to="/cart" class="relative text-xs">
             <span class="hover:text-green-300 transition-colors">[ CART ]</span>
             <span
@@ -59,9 +52,12 @@ const userDisplayName = computed(() => {
             </span>
           </router-link>
           <router-link to="/find-navi" class="relative text-xs">
-            <span class="hover:text-green-300 transition-colors">[ NaviPort ]</span>
+            <span class="hover:text-green-300 transition-colors">[ NAVIPORT ]</span>
           </router-link>
+        </div>
 
+        <!-- Right side auth -->
+        <div class="flex flex-row gap-4 items-center">
           <div v-if="session.isAuthenticated" class="flex flex-row gap-4 items-center">
             <router-link to="/orders" class="px-3 py-1 text-xs"> [ Orders ] </router-link>
             <span class="text-xs"> &gt;&gt; USER: {{ userDisplayName }} &lt;&lt; </span>

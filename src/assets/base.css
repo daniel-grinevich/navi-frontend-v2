@@ -41,6 +41,8 @@
 
 /* --- CSS CUSTOM PROPERTIES FOR LIGHT/DARK MODE --- */
 :root {
+  color-scheme: light dark;
+
   /* Light mode (default) */
   --bg-primary: var(--color-bone);
   --bg-secondary: var(--color-bone-dark);

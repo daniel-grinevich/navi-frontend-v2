@@ -47,7 +47,6 @@ const goToCheckout = () => {
       emailError.value = 'Please enter a valid email address'
       return
     }
-    debugger
     session.setGuestEmail(guestEmail.value)
   }
 
