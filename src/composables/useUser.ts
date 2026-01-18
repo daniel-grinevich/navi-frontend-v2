@@ -23,7 +23,7 @@ export const useUserByEmail = (
 
 export const useUserSignup = () => {
   return useApiWrite<unknown, Error, { email: string; password: string }>(async (signupData) => {
-    return await apiClient('api/users/', {
+    return await apiClient('api/signup/', {
       method: 'POST',
       body: JSON.stringify(signupData),
     })
