@@ -11,9 +11,7 @@ const router = useRouter()
 const cart = useShoppingCart()
 const session = useSessionStore()
 
-const { data, isPending, mutateAsync } = useCreateOrder()
-
-const orderNotes = ref('')
+const { isPending, mutateAsync } = useCreateOrder()
 
 const hasNaviPort = computed(() => cart.selectedNaviPort !== null)
 
@@ -128,22 +126,6 @@ const submitOrder = async () => {
                 <p class="font-medium">${{ item.totalPrice.toFixed(2) }}</p>
               </div>
             </div>
-          </template>
-        </Card>
-
-        <Card>
-          <template #header>
-            <h2 class="text-lg font-semibold">Additional Notes (Optional)</h2>
-          </template>
-          <template #body>
-            <textarea
-              v-model="orderNotes"
-              rows="3"
-              maxlength="500"
-              placeholder="Any special requests for your order..."
-              class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-            />
-            <p class="text-xs mt-2">{{ orderNotes.length }} / 500 characters</p>
           </template>
         </Card>
       </div>
