@@ -4,12 +4,15 @@ import { computed } from 'vue'
 import Card from '@/components/shared/Card.vue'
 import Qrcode from '@/components/shared/Qrcode.vue'
 import { useOrder } from '@/composables/useOrder'
+import { useSessionStore } from '../stores/session'
 
 const router = useRouter()
 const route = useRoute()
 
 const orderId = computed(() => route.params.orderId as string)
 const { isLoading, data: order, isError } = useOrder(orderId.value)
+
+const sessionStore = useSessionStore()
 
 const estimatedTime = computed(() => {
   if (!order.value?.estimatedReadyTime) return null
@@ -18,11 +21,28 @@ const estimatedTime = computed(() => {
     minute: '2-digit',
   })
 })
+
+const onDispatchClick = () => {
+  const token = '3943943'
+  const response = fetch(``, {
+    headers: {
+      Authentication: 'Bearer' + '' + token,
+      'Content-type': 'application/json',
+    },
+    method: 'POST',
+    body: JSON.stringify({
+      orderId: orderId,
+    }),
+  })
+
+  console.log(response)
+}
 </script>
 
 <template>
-  <div class="max-w-2xl mx-auto p-6">
-    <!-- Success Animation/Icon -->
+  <div v-if="isLoading">Loading . . .</div>
+  <div v-else-if="isError">Error . . .</div>
+  <div v-else class="max-w-2xl mx-auto p-6">
     <div class="text-center mb-6">
       <div
         class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse"
@@ -40,7 +60,6 @@ const estimatedTime = computed(() => {
       <p>Thank you for your order</p>
     </div>
 
-    <!-- Order Details Card -->
     <Card class="mb-6">
       <template #header>
         <h2 class="text-lg font-semibold">Order Details</h2>
@@ -70,7 +89,6 @@ const estimatedTime = computed(() => {
       </template>
     </Card>
 
-    <!-- Information Box -->
     <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-md">
       <div class="flex items-start">
         <svg class="w-5 h-5 text-blue-600 mr-3 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
@@ -80,14 +98,12 @@ const estimatedTime = computed(() => {
             clip-rule="evenodd"
           />
         </svg>
-        {{ console.log(order) }}
         <div v-if="order?.id && order.status == 'O'">
           <Qrcode :value="'{{order.id}}'" :size="500" />
         </div>
       </div>
     </div>
 
-    <!-- Action Buttons -->
     <div class="space-y-3">
       <button
         @click="router.push({ name: 'menu' })"
@@ -101,9 +117,16 @@ const estimatedTime = computed(() => {
       >
         Back to Home
       </button>
+      <div v-if="sessionStore.isAdmin">
+        <button
+          @click="onDispatchClick"
+          class="w-full px-6 py-3 border-2 bg-green text-primary border-gray-300 rounded-md hover:bg-gray-50 font-medium transition-colors"
+        >
+          Dispatch Order (must be admin)
+        </button>
+      </div>
     </div>
 
-    <!-- Success Message -->
     <p class="text-center text-sm text-gray-500 mt-6">
       We appreciate your business! Enjoy your order.
     </p>

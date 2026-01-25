@@ -56,6 +56,14 @@ export const useSessionStore = defineStore('session', () => {
     user.value = {}
   }
 
+  const isAdmin = computed(async () => {
+    if (!user) await getUser()
+
+    if (user.value?.is_admin) return true
+
+    return false
+  })
+
   const setGuestEmail = (guestEmail: string) => {
     user.value = { guestEmail }
   }
@@ -106,6 +114,7 @@ export const useSessionStore = defineStore('session', () => {
     getUser,
     createGuest,
     isAuthenticated,
+    isAdmin,
     logout,
     setGuestEmail,
     refreshAccessToken,
