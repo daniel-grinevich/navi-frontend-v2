@@ -3,12 +3,14 @@ import { computed } from 'vue'
 import { useShoppingCart } from '@/stores/shoppingCart'
 import { type CartItem } from '@/types/cart'
 import Card from '@/components/shared/Card.vue'
+import { useRouter } from 'vue-router'
 
 const props = defineProps<{
   item: CartItem
 }>()
 
 const cart = useShoppingCart()
+const router = useRouter()
 
 const itemSubtotal = computed(() => {
   return props.item.totalPrice
@@ -25,6 +27,13 @@ const removeItem = () => {
   }
 }
 
+const edit = () =>{
+  router.push({
+    name: 'menuItemDetail', // your product route
+    params: { id: props.item.menuItemSlug, cartId:props.item.cartItemId },
+  })
+}
+
 // Format customizations for display
 const customizationSummary = computed(() => {
   return props.item.customizations.map((customization) => {
@@ -38,6 +47,12 @@ const customizationSummary = computed(() => {
     <template #header>
       <div class="flex justify-between items-start">
         <h3 class="text-lg font-semibold">{{ item.menuItemName }}</h3>
+        <button
+          @click="edit"
+          class="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors"
+        >
+          Edit
+        </button>
         <button
           @click="removeItem"
           class="text-red-600 hover:text-red-800 text-sm font-medium transition-colors"

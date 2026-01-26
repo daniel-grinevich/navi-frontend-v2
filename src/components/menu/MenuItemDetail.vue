@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /*** libraries ****/
 import { useRouter, useRoute } from 'vue-router'
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 /*** components ****/
 import CustomizationGroup from '@/components/menu/CustomizationGroup.vue'
 /*** stores ***/
@@ -16,11 +16,29 @@ const router = useRouter()
 const route = useRoute()
 const shoppingCart = useShoppingCart()
 
+const cartId=route.params.cartId as string
+const cartItem=shoppingCart.localCart.find((value) => value.cartItemId==cartId)
+
 const id = route.params.id as string
 const { isLoading, data: menuItem, isError } = useMenuItem(id)
 
 const selectedCustomizations = ref<Map<string, SelectedCustomization[]>>(new Map())
-const quantity = ref<number>(1)
+const quantity = ref<number>(cartItem ? cartItem.quantity : 1)
+
+//set item values if editing
+watch(menuItem, (item) => {
+  if (!item || !cartItem) return
+  // Rebuild selectedCustomizations Map
+  const map = new Map<string, SelectedCustomization[]>()
+
+  ;(cartItem.customizations as SelectedCustomization[]).forEach((c) => {
+    const list = map.get(c.groupId) || []
+    list.push(c)
+    map.set(c.groupId, list)
+  })
+
+  selectedCustomizations.value = map
+}, { immediate: true })
 
 const customizationGroups = computed(() => {
   return menuItem.value?.category?.customization_groups || []
@@ -105,7 +123,7 @@ const canAddToCart = computed(() => {
 const onAddToCartClick = () => {
   if (!menuItem.value || !canAddToCart.value) return
 
-  const cartItem: Omit<CartItem, 'cartItemId' | 'totalPrice'> = {
+  const cartItemData: Omit<CartItem, 'cartItemId' | 'totalPrice'> = {
     menuItemId: menuItem.value.id,
     menuItemName: menuItem.value.name,
     menuItemSlug: menuItem.value.slug,
@@ -114,8 +132,13 @@ const onAddToCartClick = () => {
     quantity: quantity.value,
   }
 
-  shoppingCart.addCartItem(cartItem)
-  router.push({ name: 'menu' })
+  if (cartId) {
+    shoppingCart.updateCartItem(cartId, cartItemData)
+    router.push({ name: 'cart' })
+  } else {
+    shoppingCart.addCartItem(cartItemData)
+    router.push({ name: 'menu' })
+  }
 }
 </script>
 
@@ -144,7 +167,7 @@ const onAddToCartClick = () => {
     <div v-else class="mb-6">
       <h3 class="text-xl font-semibold mb-4">Customize Your Order</h3>
       <div v-for="group in customizationGroups" :key="group.id">
-        <CustomizationGroup :group="group" @update-customization="updateCustomization" />
+        <CustomizationGroup :group="group" :preSelectedCustomizations="selectedCustomizations" @update-customization="updateCustomization" />
       </div>
     </div>
 
