@@ -8,6 +8,8 @@ import router from './router'
 
 import { VueQueryPlugin } from '@tanstack/vue-query'
 
+import '@stripe/stripe-js'
+
 const app = createApp(App)
 
 app.use(createPinia())
