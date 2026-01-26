@@ -4,14 +4,21 @@ import { useRouter } from 'vue-router'
 import { useShoppingCart } from '@/stores/shoppingCart'
 import { useSessionStore } from '@/stores/session'
 import Card from '@/components/shared/Card.vue'
-import { type Order } from '@/types/order'
 import { useCreateOrder } from '@/composables/useOrder'
+import { useStripe } from '@/composables/useStripe'
+import { nextTick } from 'vue'
 
 const router = useRouter()
 const cart = useShoppingCart()
 const session = useSessionStore()
 
+const paymentStep = ref<'review' | 'payment'>('review')
+const stripeElements = ref<any>(null)
+const paymentError = ref<string | null>(null)
+const orderId = ref<string | null>(null)
+
 const { isPending, mutateAsync } = useCreateOrder()
+const { getStripe } = useStripe()
 
 const hasNaviPort = computed(() => cart.selectedNaviPort !== null)
 
@@ -45,17 +52,44 @@ const submitOrder = async () => {
   }
 
   try {
-    const response = await mutateAsync(orderData)
+    const { client_secret, order } = await mutateAsync(orderData)
 
-    cart.clearCart()
+    orderId.value = order.id || null
 
-    router.push({
-      name: 'orderConfirmation',
-      params: { orderId: response.order.id },
-    })
+    if (orderId.value === null) {
+      throw new Error('Cannot continue payment without order id')
+    }
+
+    const stripe = await getStripe()
+    if (!stripe) throw new Error('Stripe failed to load')
+
+    const elements = stripe.elements({ clientSecret: client_secret })
+    const paymentElement = elements.create('payment')
+    paymentStep.value = 'payment'
+    await nextTick()
+    paymentElement.mount('#payment-element')
+    stripeElements.value = elements
   } catch (error) {
     console.error('Order submission failed:', error)
     alert('Failed to submit order. Please try again.')
+  }
+}
+
+const confirmPayment = async () => {
+  paymentError.value = null
+  const stripe = await getStripe()
+  if (!stripe || !stripeElements.value) return
+
+  const { error } = await stripe.confirmPayment({
+    elements: stripeElements.value,
+    redirect: 'if_required',
+  })
+
+  if (error) {
+    paymentError.value = error.message ?? 'Payment failed'
+  } else {
+    cart.clearCart()
+    router.push({ name: 'orderConfirmation', params: { orderId: orderId.value } })
   }
 }
 </script>
@@ -151,7 +185,7 @@ const submitOrder = async () => {
               </div>
             </div>
 
-            <div class="space-y-3">
+            <div v-if="paymentStep === 'review'" class="space-y-3">
               <button
                 @click="submitOrder"
                 :disabled="!hasNaviPort || isPending || cart.itemCount === 0"
@@ -182,6 +216,16 @@ const submitOrder = async () => {
                 class="w-full px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 font-medium transition-colors"
               >
                 Back to Cart
+              </button>
+            </div>
+            <div v-else class="space-y-3">
+              <div id="payment-element" class="mb-4"></div>
+              <p v-if="paymentError" class="text-red-600 text-sm">{{ paymentError }}</p>
+              <button
+                @click="confirmPayment"
+                class="w-full px-6 py-4 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 transition-colors"
+              >
+                Confirm Payment
               </button>
             </div>
           </template>

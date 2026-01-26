@@ -61,12 +61,7 @@ const onDispatchClick = () => {
             >
           </div>
           <div class="flex justify-between items-center">
-            <span>Status:</span>
-            <span
-              class="inline-block px-3 py-1 text-xs bg-yellow-100 text-yellow-800 rounded-full font-medium"
-            >
-              Preparing
-            </span>
+            <span>Status: {{ order?.status }}</span>
           </div>
         </div>
       </template>

@@ -8,7 +8,7 @@ import { computed } from 'vue'
 const router = useRouter()
 
 const { isLoading, data: orders, isError } = useOrders()
-const orderDate = (iso:Date) => {
+const orderDate = (iso: Date) => {
   const date = new Date(iso)
   const formatted = date.toLocaleString(undefined, {
     dateStyle: 'medium',
@@ -19,30 +19,34 @@ const orderDate = (iso:Date) => {
 </script>
 
 <template>
-    <div>
-      <AsyncList :items="orders" :loading="isLoading">
-        <template #item="order">
-          <Card>
-            <template #body>
-              <div class="flex flex-row justify-between">
-                <div>Order: {{ order.id }}</div>
+  <div>
+    <AsyncList :items="orders" :loading="isLoading">
+      <template #item="order">
+        <Card>
+          <template #body>
+            <div class="flex flex-row justify-between">
+              <div>Order: {{ order.id }}</div>
+              <div>
                 <div>Date: {{ orderDate(order.created_at) }}</div>
-                <button
-                  class="p-1 border cursor-pointer w-24"
-                  @click="
-                    router.push({
-                      name: 'orderConfirmation',
-                      params: { orderId: order.id },
-                    })
-                  "
-                  type="button"
-                >
-                  Select
-                </button>
+                <div>Status: {{ order.status }}</div>
               </div>
-            </template>
-          </Card>
-        </template>
-      </AsyncList>
-    </div>
+
+              <button
+                class="p-1 border cursor-pointer w-24"
+                @click="
+                  router.push({
+                    name: 'orderConfirmation',
+                    params: { orderId: order.id },
+                  })
+                "
+                type="button"
+              >
+                Select
+              </button>
+            </div>
+          </template>
+        </Card>
+      </template>
+    </AsyncList>
+  </div>
 </template>
