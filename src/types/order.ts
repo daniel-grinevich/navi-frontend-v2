@@ -1,11 +1,7 @@
 import { type CartItem } from './cart'
 import { type User } from './user'
 
-export type OrderStatus =
-  | 'O'
-  | 'S'
-  | 'D'
-  | 'C'
+export type OrderStatus = 'O' | 'S' | 'D' | 'C'
 
 export type Order = {
   id?: string
@@ -36,10 +32,6 @@ export type ServerOrder = {
 }
 
 export type OrderSubmissionResponse = {
-  success: boolean
-  id: string
-  message: string
-  estimatedReadyTime?: string
-  status: string
+  client_secret: string
   order: Order
 }

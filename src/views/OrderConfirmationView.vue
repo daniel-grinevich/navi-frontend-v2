@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { useRouter, useRoute } from 'vue-router'
-import { computed } from 'vue'
+import { computed, toValue } from 'vue'
 import Card from '@/components/shared/Card.vue'
 import Qrcode from '@/components/shared/Qrcode.vue'
 import { useOrder } from '@/composables/useOrder'
+import { useSessionStore } from '../stores/session'
+import { apiClient } from '@/lib/apiClient'
 
 const router = useRouter()
 const route = useRoute()
@@ -11,18 +13,23 @@ const route = useRoute()
 const orderId = computed(() => route.params.orderId as string)
 const { isLoading, data: order, isError } = useOrder(orderId.value)
 
-const estimatedTime = computed(() => {
-  if (!order.value?.estimatedReadyTime) return null
-  return new Date(order.value.estimatedReadyTime).toLocaleTimeString([], {
-    hour: '2-digit',
-    minute: '2-digit',
+const sessionStore = useSessionStore()
+
+const onDispatchClick = () => {
+  const naviPort = { id: '65065f88-e474-4c8d-a22b-e50254fd49c5' }
+  const response = apiClient(`api/orders/${toValue(orderId)}/dispatch/`, {
+    method: 'POST',
+    body: JSON.stringify({ orderId: toValue(orderId), naviportId: naviPort.id }),
   })
-})
+
+  console.log(response)
+}
 </script>
 
 <template>
-  <div class="max-w-2xl mx-auto p-6">
-    <!-- Success Animation/Icon -->
+  <div v-if="isLoading">Loading . . .</div>
+  <div v-else-if="isError">Error . . .</div>
+  <div v-else class="max-w-2xl mx-auto p-6">
     <div class="text-center mb-6">
       <div
         class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse"
@@ -40,7 +47,6 @@ const estimatedTime = computed(() => {
       <p>Thank you for your order</p>
     </div>
 
-    <!-- Order Details Card -->
     <Card class="mb-6">
       <template #header>
         <h2 class="text-lg font-semibold">Order Details</h2>
@@ -54,23 +60,13 @@ const estimatedTime = computed(() => {
               >{{ orderId }}</span
             >
           </div>
-          <div v-if="estimatedTime" class="flex justify-between items-center">
-            <span>Estimated Ready Time:</span>
-            <span class="font-semibold text-lg text-green-600">{{ estimatedTime }}</span>
-          </div>
           <div class="flex justify-between items-center">
-            <span>Status:</span>
-            <span
-              class="inline-block px-3 py-1 text-xs bg-yellow-100 text-yellow-800 rounded-full font-medium"
-            >
-              Preparing
-            </span>
+            <span>Status: {{ order?.status }}</span>
           </div>
         </div>
       </template>
     </Card>
 
-    <!-- Information Box -->
     <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-md">
       <div class="flex items-start">
         <svg class="w-5 h-5 text-blue-600 mr-3 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
@@ -80,14 +76,12 @@ const estimatedTime = computed(() => {
             clip-rule="evenodd"
           />
         </svg>
-        {{ console.log(order) }}
         <div v-if="order?.id && order.status == 'O'">
           <Qrcode :value="'{{order.id}}'" :size="500" />
         </div>
       </div>
     </div>
 
-    <!-- Action Buttons -->
     <div class="space-y-3">
       <button
         @click="router.push({ name: 'menu' })"
@@ -101,9 +95,16 @@ const estimatedTime = computed(() => {
       >
         Back to Home
       </button>
+      <div v-if="sessionStore.isAdmin">
+        <button
+          @click="onDispatchClick"
+          class="w-full px-6 py-3 border-2 bg-green text-primary border-gray-300 rounded-md hover:bg-gray-50 hover:text-alt font-medium transition-colors"
+        >
+          Dispatch Order (must be admin)
+        </button>
+      </div>
     </div>
 
-    <!-- Success Message -->
     <p class="text-center text-sm text-gray-500 mt-6">
       We appreciate your business! Enjoy your order.
     </p>
