@@ -28,7 +28,12 @@ const { mutateAsync, isPending } = useApiWrite<
     }
     sessionStore.getUser()
     loading.value = false
-    router.push('/')
+    const canGoBack = window.history.state?.back !== null
+    if (canGoBack) {
+      router.go(-1)
+    } else {
+      router.push({ name: 'menu' })
+    }
   },
   onError: (err: Error) => {
     loginErrorMessage.value = err.message
