@@ -26,7 +26,6 @@ export const useSessionStore = defineStore('session', () => {
   }
 
   const getUser = async () => {
-    debugger
     if (!session.value.accessToken || !session.value.refreshToken) {
       return
     }
@@ -36,7 +35,6 @@ export const useSessionStore = defineStore('session', () => {
         method: 'GET',
         headers: { Authorization: fullToken },
       })
-      debugger
 
       data.is_guest ? (user.value.guestEmail = data.email) : (user.value = data)
     } catch (err: any) {
@@ -56,8 +54,8 @@ export const useSessionStore = defineStore('session', () => {
     user.value = {}
   }
 
-  const isAdmin = computed(async () => {
-    if (!user) await getUser()
+  const isAdmin = computed(() => {
+    if (!user) getUser()
 
     if (user.value?.is_admin) return true
 

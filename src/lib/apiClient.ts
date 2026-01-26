@@ -10,7 +10,6 @@ export async function apiClient<T = any>(
 
   const auth = (options?.headers as Record<string, string> | undefined)?.Authorization
 
-  debugger
   if (isAuthenticated && !auth) {
     const headers: Record<string, string> = {}
     headers['Authorization'] = `Bearer ${session.accessToken}`

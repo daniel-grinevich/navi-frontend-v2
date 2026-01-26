@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { useRouter, useRoute } from 'vue-router'
-import { computed } from 'vue'
+import { computed, toValue } from 'vue'
 import Card from '@/components/shared/Card.vue'
 import Qrcode from '@/components/shared/Qrcode.vue'
 import { useOrder } from '@/composables/useOrder'
 import { useSessionStore } from '../stores/session'
+import { apiClient } from '@/lib/apiClient'
 
 const router = useRouter()
 const route = useRoute()
@@ -14,25 +15,11 @@ const { isLoading, data: order, isError } = useOrder(orderId.value)
 
 const sessionStore = useSessionStore()
 
-const estimatedTime = computed(() => {
-  if (!order.value?.estimatedReadyTime) return null
-  return new Date(order.value.estimatedReadyTime).toLocaleTimeString([], {
-    hour: '2-digit',
-    minute: '2-digit',
-  })
-})
-
 const onDispatchClick = () => {
-  const token = '3943943'
-  const response = fetch(``, {
-    headers: {
-      Authentication: 'Bearer' + '' + token,
-      'Content-type': 'application/json',
-    },
+  const naviPort = { id: '65065f88-e474-4c8d-a22b-e50254fd49c5' }
+  const response = apiClient(`api/orders/${toValue(orderId)}/dispatch/`, {
     method: 'POST',
-    body: JSON.stringify({
-      orderId: orderId,
-    }),
+    body: JSON.stringify({ orderId: toValue(orderId), naviportId: naviPort.id }),
   })
 
   console.log(response)
@@ -72,10 +59,6 @@ const onDispatchClick = () => {
               class="font-mono font-medium text-sm bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200 px-3 py-1 rounded"
               >{{ orderId }}</span
             >
-          </div>
-          <div v-if="estimatedTime" class="flex justify-between items-center">
-            <span>Estimated Ready Time:</span>
-            <span class="font-semibold text-lg text-green-600">{{ estimatedTime }}</span>
           </div>
           <div class="flex justify-between items-center">
             <span>Status:</span>
@@ -120,7 +103,7 @@ const onDispatchClick = () => {
       <div v-if="sessionStore.isAdmin">
         <button
           @click="onDispatchClick"
-          class="w-full px-6 py-3 border-2 bg-green text-primary border-gray-300 rounded-md hover:bg-gray-50 font-medium transition-colors"
+          class="w-full px-6 py-3 border-2 bg-green text-primary border-gray-300 rounded-md hover:bg-gray-50 hover:text-alt font-medium transition-colors"
         >
           Dispatch Order (must be admin)
         </button>
