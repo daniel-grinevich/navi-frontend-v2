@@ -16,6 +16,8 @@ const handleLogout = () => {
 const userDisplayName = computed(() => {
   return session.user.name || session.user.email || 'unknown'
 })
+
+const menuArt = ['▪', '▪', '▪', '▪']
 </script>
 
 <template>
@@ -91,7 +93,7 @@ const userDisplayName = computed(() => {
           </router-link>
           <router-link
             to="/signup"
-            class="no-underline px-3 py-1 border-l border-alt flex items-center bg-green text-primary hover:opacity-80 transition-colors"
+            class="no-underline px-3 py-1 border-l border-alt flex items-center bg-green text-primary hover:bg-alt hover:text-primary transition-colors"
           >
             SIGN UP
           </router-link>

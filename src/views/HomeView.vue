@@ -14,10 +14,17 @@ const cart = useShoppingCart()
 
 // Animation refs
 const logoLines = ref<HTMLElement[]>([])
+const coffeeLines = ref<HTMLElement[]>([])
 const tagline = ref<HTMLElement | null>(null)
+const naviBlock = ref<HTMLElement | null>(null)
+const coffeeBlock = ref<HTMLElement | null>(null)
 
 const setLogoLine = (el: any) => {
   if (el) logoLines.value.push(el)
+}
+
+const setCoffeeLine = (el: any) => {
+  if (el) coffeeLines.value.push(el)
 }
 
 // prettier-ignore
@@ -28,6 +35,16 @@ const logoArt = [
   '██║╚██╗██║██╔══██║╚██╗ ██╔╝██║',
   '██║ ╚████║██║  ██║ ╚████╔╝ ██║',
   '╚═╝  ╚═══╝╚═╝  ╚═╝  ╚═══╝  ╚═╝',
+]
+
+// prettier-ignore
+const CoffeeArt = [
+  '███████╗███████╗███████╗███████╗███████╗███████╗',
+  '██╔════╝██╔══██╗██╔════╝██╔════╝██╔════╝██╔════╝',
+  '██║     ██║  ██║███████╗███████╗███████╗███████╗',
+  '██║     ██║  ██║██╔════╝██╔════╝██╔════╝██╔════╝',
+  '███████╗███████║██║     ██║     ███████╗███████╗',
+  ' ╚═════╝ ╚═════╝╚═╝     ╚═╝      ╚═════╝ ╚═════╝',
 ]
 
 const clock = ref('')
@@ -46,19 +63,72 @@ onMounted(() => {
   updateClock()
   clockInterval = setInterval(updateClock, 1000)
 
-  const tl = gsap.timeline({ defaults: { ease: 'power2.out' } })
+  const tl = gsap.timeline({ repeat: -1, defaults: { ease: 'power2.out' } })
 
-  // Logo lines reveal one by one
+  // Initial state: everything hidden
+  gsap.set(coffeeBlock.value, { display: 'none', opacity: 0 })
+  gsap.set(naviBlock.value, { display: 'none', opacity: 0 })
+  logoLines.value.forEach((el) => gsap.set(el, { opacity: 0, x: -20 }))
+  coffeeLines.value.forEach((el) => gsap.set(el, { opacity: 0, y: 20 }))
+  if (tagline.value) gsap.set(tagline.value, { opacity: 0 })
+
+  // --- NAVI cycle ---
+
+  // 1. Show NAVI, lines slide in
+  tl.set(naviBlock.value, { display: 'block', opacity: 1, x: 0 })
   logoLines.value.forEach((el, i) => {
-    gsap.set(el, { opacity: 0, x: -20 })
     tl.to(el, { opacity: 1, x: 0, duration: 0.25 }, i * 0.1)
   })
 
-  // Tagline fades in
+  // 2. Tagline fades in
   if (tagline.value) {
-    gsap.set(tagline.value, { opacity: 0 })
     tl.to(tagline.value, { opacity: 1, duration: 0.6 }, '-=0.1')
   }
+
+  // 3. Hold, then NAVI + tagline fly out right
+  tl.to([naviBlock.value, tagline.value].filter(Boolean), {
+    x: '120%',
+    opacity: 0,
+    duration: 0.6,
+    ease: 'power3.in',
+    delay: 1.5,
+  })
+
+  // 4. Hide NAVI, reset positions
+  tl.set(naviBlock.value, { display: 'none' })
+  tl.set(tagline.value, { x: 0, opacity: 0 })
+  logoLines.value.forEach((el) => {
+    tl.set(el, { opacity: 0, x: -20 })
+  })
+
+  // --- COFFEE cycle ---
+
+  // 5. Show COFFEE, lines drop in
+  tl.set(coffeeBlock.value, { display: 'flex', opacity: 1, x: 0 })
+  coffeeLines.value.forEach((el) => {
+    tl.to(el, { opacity: 1, y: 0, duration: 0.2, ease: 'power2.out' }, '>-0.1')
+  })
+
+  // 6. Tagline fades in
+  if (tagline.value) {
+    tl.to(tagline.value, { opacity: 1, duration: 0.5 }, '-=0.1')
+  }
+
+  // 7. Hold, then COFFEE + tagline fly out right
+  tl.to([coffeeBlock.value, tagline.value].filter(Boolean), {
+    x: '120%',
+    opacity: 0,
+    duration: 0.6,
+    ease: 'power3.in',
+    delay: 1.5,
+  })
+
+  // 8. Hide COFFEE, reset positions for next loop
+  tl.set(coffeeBlock.value, { display: 'none' })
+  tl.set(tagline.value, { x: 0, opacity: 0 })
+  coffeeLines.value.forEach((el) => {
+    tl.set(el, { opacity: 0, y: 20 })
+  })
 })
 
 onUnmounted(() => {
@@ -102,11 +172,6 @@ const statusDot = (status: string) => {
   }
   return map[status] || '·'
 }
-
-const userDisplay = computed(() => {
-  if (!session.isAuthenticated) return 'guest'
-  return session.user.name || session.user.email || 'user'
-})
 </script>
 
 <template>
@@ -116,9 +181,17 @@ const userDisplay = computed(() => {
         <div class="px-3 py-1 border-b border-alt bg-green">//</div>
 
         <div class="flex-1 flex flex-col items-center justify-center p-6 overflow-hidden">
-          <div class="text-green whitespace-pre leading-none select-none">
+          <div ref="naviBlock" class="text-green whitespace-pre leading-none select-none">
             <div v-for="(line, i) in logoArt" :key="i" :ref="setLogoLine">{{ line }}</div>
           </div>
+
+          <div
+            ref="coffeeBlock"
+            class="flex flex-col items-center text-green whitespace-pre leading-none select-none"
+          >
+            <div v-for="(line, i) in CoffeeArt" :key="'c' + i" :ref="setCoffeeLine">{{ line }}</div>
+          </div>
+
           <div ref="tagline" class="mt-6 text-center">
             <div class="font-secondary tracking-[0.2em]">coffee, your way</div>
             <div class="font-secondary mt-1">────────────────────</div>
