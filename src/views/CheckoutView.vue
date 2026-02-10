@@ -3,7 +3,6 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useShoppingCart } from '@/stores/shoppingCart'
 import { useSessionStore } from '@/stores/session'
-import Card from '@/components/shared/Card.vue'
 import { useCreateOrder } from '@/composables/useOrder'
 import { useStripe } from '@/composables/useStripe'
 import { nextTick } from 'vue'
@@ -95,141 +94,116 @@ const confirmPayment = async () => {
 </script>
 
 <template>
-  <div class="max-w-6xl mx-auto p-6">
-    <h1 class="text-3xl font-bold mb-6">Checkout</h1>
-
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+  <div class="max-w-6xl mx-auto p-6 space-y-4">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
       <!-- Left Column: Order Details -->
-      <div class="space-y-6">
+      <div class="space-y-4">
         <!-- NaviPort Selection -->
-        <Card>
-          <template #header>
-            <h2 class="text-lg font-semibold">Pickup Location</h2>
-          </template>
-          <template #body>
-            <div v-if="hasNaviPort">
-              <div class="flex items-center justify-between">
-                <div>
-                  <p class="font-medium">NaviPort #{{ cart.selectedNaviPort }}</p>
-                  <p class="text-sm mt-1">Selected pickup location</p>
-                </div>
-                <button
-                  @click="selectNaviPort"
-                  class="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                >
-                  Change
-                </button>
+        <div class="border border-alt text-xs">
+          <div class="px-3 py-1 border-b border-alt font-secondary text-alt">// pickup location</div>
+          <div v-if="hasNaviPort" class="px-3 py-3">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="font-mono">NaviPort #{{ cart.selectedNaviPort }}</p>
+                <p class="text-alt mt-1">selected pickup location</p>
               </div>
-            </div>
-            <div v-else class="text-center py-4">
-              <p class="mb-3">No location selected</p>
               <button
                 @click="selectNaviPort"
-                class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium"
+                class="font-mono text-green hover:text-green/70 cursor-pointer transition-colors"
               >
-                Select NaviPort
+                [change]
               </button>
             </div>
-          </template>
-        </Card>
+          </div>
+          <div v-else class="px-3 py-4 text-center">
+            <p class="mb-3">no location selected</p>
+            <button
+              @click="selectNaviPort"
+              class="group px-3 py-2 border border-green text-green cursor-pointer font-mono tracking-wide hover:bg-green hover:text-primary transition-colors"
+            >
+              <span>▸</span> SELECT NAVIPORT
+            </button>
+          </div>
+        </div>
 
         <!-- Order Items -->
-        <Card>
-          <template #header>
-            <h2 class="text-lg font-semibold">Order Items ({{ cart.itemCount }})</h2>
-          </template>
-          <template #body>
-            <div class="space-y-4 max-h-96 overflow-y-auto">
-              <div
-                v-for="item in cart.localCart"
-                :key="item.cartItemId"
-                class="flex justify-between text-sm pb-4 border-b last:border-b-0"
-              >
-                <div class="flex-1 pr-4">
-                  <p class="font-medium">{{ item.menuItemName }}</p>
-                  <p class="text-xs mt-1">Qty: {{ item.quantity }}</p>
-                  <ul v-if="item.customizations.length > 0" class="text-xs mt-2 space-y-1">
-                    <li v-for="(custom, idx) in item.customizations" :key="idx">
-                      {{ custom.groupName }}: {{ custom.optionName }}
-                    </li>
-                  </ul>
-                  <p v-if="item.specialInstructions" class="text-xs italic mt-2">
-                    Note: {{ item.specialInstructions }}
-                  </p>
-                </div>
-                <p class="font-medium">${{ item.totalPrice.toFixed(2) }}</p>
+        <div class="border border-alt text-xs">
+          <div class="px-3 py-1 border-b border-alt font-secondary text-alt">
+            // order items ({{ cart.itemCount }})
+          </div>
+          <div class="max-h-96 overflow-y-auto">
+            <div
+              v-for="item in cart.localCart"
+              :key="item.cartItemId"
+              class="px-3 py-3 border-b border-alt last:border-b-0 flex justify-between"
+            >
+              <div class="flex-1 pr-4">
+                <p class="text-alt">{{ item.menuItemName }}</p>
+                <p class="font-secondary mt-1">qty: {{ item.quantity }}</p>
+                <ul v-if="item.customizations.length > 0" class="mt-2 space-y-1 pl-2">
+                  <li v-for="(custom, idx) in item.customizations" :key="idx">
+                    <span class="text-green mr-1">▸</span> {{ custom.groupName }}: {{ custom.optionName }}
+                  </li>
+                </ul>
+                <p v-if="item.specialInstructions" class="italic mt-2 font-secondary">
+                  note: {{ item.specialInstructions }}
+                </p>
               </div>
+              <p class="font-mono">${{ item.totalPrice.toFixed(2) }}</p>
             </div>
-          </template>
-        </Card>
+          </div>
+        </div>
       </div>
 
+      <!-- Right Column: Order Summary -->
       <div>
-        <Card class="sticky top-6">
-          <template #header>
-            <h2 class="text-lg font-semibold">Order Summary</h2>
-          </template>
-          <template #body>
-            <div class="space-y-3 mb-6">
-              <div class="flex justify-between">
-                <span>Subtotal</span>
-                <span class="font-medium">${{ cart.subtotal.toFixed(2) }}</span>
-              </div>
-              <div class="flex justify-between">
-                <span>Tax (8%)</span>
-                <span class="font-medium">${{ cart.tax.toFixed(2) }}</span>
-              </div>
-              <div class="border-t pt-3 flex justify-between text-xl font-bold">
-                <span>Total</span>
-                <span>${{ cart.totalPrice.toFixed(2) }}</span>
-              </div>
-            </div>
+        <div class="border border-alt text-xs sticky top-6">
+          <div class="px-3 py-1 border-b border-alt font-secondary text-alt">// order summary</div>
+          <div class="px-3 py-2 flex justify-between">
+            <span>subtotal</span>
+            <span class="font-mono">${{ cart.subtotal.toFixed(2) }}</span>
+          </div>
+          <div class="px-3 py-2 flex justify-between">
+            <span>tax (8%)</span>
+            <span class="font-mono">${{ cart.tax.toFixed(2) }}</span>
+          </div>
+          <div class="px-3 py-2 flex justify-between border-t border-alt">
+            <span>total</span>
+            <span class="font-mono">${{ cart.totalPrice.toFixed(2) }}</span>
+          </div>
 
-            <div v-if="paymentStep === 'review'" class="space-y-3">
-              <button
-                @click="submitOrder"
-                :disabled="!hasNaviPort || isPending || cart.itemCount === 0"
-                class="w-full px-6 py-4 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
-              >
-                <span v-if="isPending" class="flex items-center justify-center">
-                  <svg class="animate-spin h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24">
-                    <circle
-                      class="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      stroke-width="4"
-                    ></circle>
-                    <path
-                      class="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
-                  Placing Order...
-                </span>
-                <span v-else>Place Order</span>
-              </button>
-              <button
-                @click="router.push({ name: 'cart' })"
-                class="w-full px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 font-medium transition-colors"
-              >
-                Back to Cart
-              </button>
-            </div>
-            <div v-else class="space-y-3">
-              <div id="payment-element" class="mb-4"></div>
-              <p v-if="paymentError" class="text-red-600 text-sm">{{ paymentError }}</p>
-              <button
-                @click="confirmPayment"
-                class="w-full px-6 py-4 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 transition-colors"
-              >
-                Confirm Payment
-              </button>
-            </div>
-          </template>
-        </Card>
+          <!-- Review Step -->
+          <div v-if="paymentStep === 'review'" class="px-3 py-3 border-t border-alt space-y-3">
+            <button
+              @click="submitOrder"
+              :disabled="!hasNaviPort || isPending || cart.itemCount === 0"
+              class="group w-full px-3 py-2 bg-green text-primary border border-green cursor-pointer font-mono tracking-wide hover:bg-alt hover:text-primary hover:border-alt disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              <span v-if="isPending" class="blink">PLACING ORDER...</span>
+              <span v-else><span>▸</span> PLACE ORDER</span>
+            </button>
+            <button
+              @click="router.push({ name: 'cart' })"
+              class="group w-full px-3 py-2 border border-alt cursor-pointer font-mono tracking-wide hover:bg-green hover:text-primary transition-colors"
+            >
+              <span class="text-green group-hover:text-primary">▸</span> BACK TO CART
+            </button>
+          </div>
+
+          <!-- Payment Step -->
+          <div v-else class="px-3 py-3 border-t border-alt space-y-3">
+            <div id="payment-element" class="mb-3"></div>
+            <p v-if="paymentError" class="text-red text-xs px-2 py-2 border border-red">
+              {{ paymentError }}
+            </p>
+            <button
+              @click="confirmPayment"
+              class="group w-full px-3 py-2 bg-green text-primary border border-green cursor-pointer font-mono tracking-wide hover:bg-alt hover:text-primary hover:border-alt transition-colors"
+            >
+              <span>▸</span> CONFIRM PAYMENT
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>

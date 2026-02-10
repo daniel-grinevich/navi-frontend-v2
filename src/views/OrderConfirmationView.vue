@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { useRouter, useRoute } from 'vue-router'
 import { computed, toValue } from 'vue'
-import Card from '@/components/shared/Card.vue'
 import Qrcode from '@/components/shared/Qrcode.vue'
 import { useOrder } from '@/composables/useOrder'
 import { useSessionStore } from '../stores/session'
@@ -24,89 +23,134 @@ const onDispatchClick = () => {
 
   console.log(response)
 }
+
+const steps = ['O', 'S', 'D', 'C']
+const stepLabels: Record<string, string> = {
+  O: 'OPEN',
+  S: 'SHIPPED',
+  D: 'DISPATCH',
+  C: 'DONE',
+}
+
+const stepIndex = computed(() => {
+  if (!order.value) return 0
+  return steps.indexOf(order.value.status)
+})
+
+const stepState = (i: number) => {
+  if (i < stepIndex.value) return 'done'
+  if (i === stepIndex.value) return 'active'
+  return 'pending'
+}
 </script>
 
 <template>
-  <div v-if="isLoading">Loading . . .</div>
-  <div v-else-if="isError">Error . . .</div>
-  <div v-else class="max-w-2xl mx-auto p-6">
-    <div class="text-center mb-6">
-      <div
-        class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse"
-      >
-        <svg class="w-14 h-14 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="3"
-            d="M5 13l4 4L19 7"
-          ></path>
-        </svg>
+  <!-- Loading -->
+  <div v-if="isLoading" class="max-w-6xl mx-auto p-6">
+    <div class="border border-alt text-xs">
+      <div class="px-3 py-1 border-b border-alt font-secondary text-alt">// order</div>
+      <div class="px-3 py-6 text-center font-mono blink">loading...</div>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div v-else-if="isError" class="max-w-6xl mx-auto p-6">
+    <div class="border-2 border-red text-xs">
+      <div class="px-3 py-1 border-b border-red bg-red text-primary font-mono">⚠ ERROR</div>
+      <div class="px-3 py-4 text-center">failed to load order</div>
+    </div>
+  </div>
+
+  <!-- Order Confirmation -->
+  <div v-else class="max-w-6xl mx-auto p-6 space-y-4">
+    <!-- ASCII Status Tracker -->
+    <div class="border border-alt text-xs">
+      <div class="px-3 py-1 border-b border-alt font-secondary text-alt">// order status</div>
+      <div class="px-4 py-6">
+        <!-- Progress Line -->
+        <div class="flex items-center justify-between font-mono">
+          <template v-for="(step, i) in steps" :key="step">
+            <div class="flex flex-col items-center gap-2">
+              <span
+                :class="[
+                  'text-lg',
+                  stepState(i) === 'done' ? 'text-green' : '',
+                  stepState(i) === 'active' ? 'text-green blink' : '',
+                  stepState(i) === 'pending' ? 'font-secondary' : '',
+                ]"
+              >
+                {{ stepState(i) === 'done' ? '●' : stepState(i) === 'active' ? '◉' : '○' }}
+              </span>
+              <span
+                :class="[
+                  'text-xs',
+                  stepState(i) === 'active' ? 'text-green' : '',
+                  stepState(i) === 'done' ? 'text-green' : '',
+                  stepState(i) === 'pending' ? 'font-secondary' : '',
+                ]"
+              >
+                {{ stepLabels[step] }}
+              </span>
+            </div>
+            <div
+              v-if="i < steps.length - 1"
+              :class="[
+                'flex-1 border-t mb-5',
+                i < stepIndex ? 'border-green' : 'border-alt',
+              ]"
+            ></div>
+          </template>
+        </div>
       </div>
-      <h1 class="text-3xl font-bold mb-2">Order Confirmed!</h1>
-      <p>Thank you for your order</p>
     </div>
 
-    <Card class="mb-6">
-      <template #header>
-        <h2 class="text-lg font-semibold">Order Details</h2>
-      </template>
-      <template #body>
-        <div class="space-y-3">
-          <div class="flex justify-between items-center">
-            <span>Order ID:</span>
-            <span
-              class="font-mono font-medium text-sm bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200 px-3 py-1 rounded"
-              >{{ orderId }}</span
-            >
-          </div>
-          <div class="flex justify-between items-center">
-            <span>Status: {{ order?.status }}</span>
-          </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <!-- Order Details -->
+      <div class="border border-alt text-xs">
+        <div class="px-3 py-1 border-b border-alt bg-green text-white">// order details</div>
+        <div class="px-3 py-2 flex justify-between">
+          <span>order id</span>
+          <span class="font-mono">{{ orderId }}</span>
         </div>
-      </template>
-    </Card>
+        <div class="px-3 py-2 flex justify-between border-t border-alt">
+          <span>status</span>
+          <span class="font-mono text-green">{{ stepLabels[order?.status ?? 'O'] }}</span>
+        </div>
+      </div>
 
-    <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-md">
-      <div class="flex items-start">
-        <svg class="w-5 h-5 text-blue-600 mr-3 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-          <path
-            fill-rule="evenodd"
-            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-            clip-rule="evenodd"
-          />
-        </svg>
-        <div v-if="order?.id && order.status == 'O'">
-          <Qrcode :value="'{{order.id}}'" :size="500" />
+      <!-- QR Code -->
+      <div v-if="order?.id && order.status === 'O'" class="border border-alt text-xs">
+        <div class="px-3 py-1 border-b border-alt font-secondary text-alt">// qr code</div>
+        <div class="px-3 py-4 flex justify-center">
+          <Qrcode :value="'{{order.id}}'" :size="200" />
         </div>
       </div>
     </div>
 
-    <div class="space-y-3">
+    <!-- Action Buttons -->
+    <div class="flex gap-4 flex-col sm:flex-row text-xs">
       <button
         @click="router.push({ name: 'menu' })"
-        class="w-full px-6 py-3 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition-colors"
+        class="group flex-1 px-3 py-2 bg-green text-primary border border-green cursor-pointer font-mono tracking-wide hover:bg-alt hover:text-primary hover:border-alt transition-colors"
       >
-        Order More Items
+        <span>▸</span> ORDER MORE
       </button>
       <button
         @click="router.push({ name: 'home' })"
-        class="w-full px-6 py-3 border-2 border-gray-300 rounded-md hover:bg-gray-50 font-medium transition-colors"
+        class="group flex-1 px-3 py-2 border border-alt cursor-pointer font-mono tracking-wide hover:bg-green hover:text-primary transition-colors"
       >
-        Back to Home
+        <span class="text-green group-hover:text-primary">▸</span> BACK TO HOME
       </button>
-      <div v-if="sessionStore.isAdmin">
-        <button
-          @click="onDispatchClick"
-          class="w-full px-6 py-3 border-2 bg-green text-primary border-gray-300 rounded-md hover:bg-gray-50 hover:text-alt font-medium transition-colors"
-        >
-          Dispatch Order (must be admin)
-        </button>
-      </div>
     </div>
 
-    <p class="text-center text-sm text-gray-500 mt-6">
-      We appreciate your business! Enjoy your order.
-    </p>
+    <!-- Admin Dispatch -->
+    <div v-if="sessionStore.isAdmin" class="text-xs">
+      <button
+        @click="onDispatchClick"
+        class="group w-full px-3 py-2 border border-red text-red cursor-pointer font-mono tracking-wide hover:bg-red hover:text-primary transition-colors"
+      >
+        ▸ DISPATCH ORDER (admin)
+      </button>
+    </div>
   </div>
 </template>

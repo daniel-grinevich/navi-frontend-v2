@@ -13,7 +13,11 @@ onMounted(() => {
 
 <template>
   <body>
-    <NavMenu />
-    <RouterView />
+    <div>
+      <NavMenu />
+    </div>
+    <div class="py-3">
+      <RouterView />
+    </div>
   </body>
 </template>
