@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { reactive } from 'vue'
-import { type CustomizationGroup } from '@/types/customization'
+import { reactive, watch } from 'vue'
+import type { CustomizationGroup, SelectedCustomization } from '@/types/customization'
 
 const props = defineProps<{
   group: CustomizationGroup
+  preSelectedCustomizations?: Map<string, SelectedCustomization[]>
 }>()
 
 const emit = defineEmits<{
@@ -11,6 +12,23 @@ const emit = defineEmits<{
 }>()
 
 const selectedCustomizations = reactive(new Set<string>())
+
+watch(
+  () => props.preSelectedCustomizations,
+  (map) => {
+    if (!props.preSelectedCustomizations || !map) {
+      return null
+    }
+    selectedCustomizations.clear()
+
+    const groupSelections = map.get(props.group.id) || []
+
+    groupSelections.forEach((c) => {
+      selectedCustomizations.add(c.optionId)
+    })
+  },
+  { immediate: true, deep: true },
+)
 
 const handleCustomizationClick = (customizationId: string) => {
   if (selectedCustomizations.has(customizationId)) {

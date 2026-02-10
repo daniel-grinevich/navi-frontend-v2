@@ -2,12 +2,14 @@
 import { computed } from 'vue'
 import { useShoppingCart } from '@/stores/shoppingCart'
 import { type CartItem } from '@/types/cart'
+import { useRouter } from 'vue-router'
 
 const props = defineProps<{
   item: CartItem
 }>()
 
 const cart = useShoppingCart()
+const router = useRouter()
 
 const itemSubtotal = computed(() => {
   return props.item.totalPrice
@@ -22,6 +24,13 @@ const removeItem = () => {
   if (confirm(`Remove "${props.item.menuItemName}" from your cart?`)) {
     cart.removeCartItem(props.item.cartItemId)
   }
+}
+
+const edit = () =>{
+  router.push({
+    name: 'menuItemDetail', // your product route
+    params: { id: props.item.menuItemSlug, cartId:props.item.cartItemId },
+  })
 }
 
 // Format customizations for display
@@ -42,13 +51,18 @@ const customizationSummary = computed(() => {
     <div class="px-3 py-1 border-b border-alt flex justify-between items-center">
       <span class="text-alt">{{ item.menuItemName }}</span>
       <button
+        @click="edit"
+        class="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors"
+      >
+        Edit
+      </button>
+      <button
         @click="removeItem"
         class="text-red hover:text-red/70 transition-colors cursor-pointer"
       >
         remove [x]
       </button>
     </div>
-
     <!-- Body -->
     <div class="px-3 py-2">
       <!-- Base Price -->

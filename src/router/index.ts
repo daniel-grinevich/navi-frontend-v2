@@ -31,7 +31,7 @@ const router = createRouter({
       props: true,
     },
     {
-      path: '/menuItemDetail/:id',
+      path: '/menuItemDetail/:id/:cartId?',
       name: 'menuItemDetail',
       component: () => import('../views/MenuItemDetailView.vue'),
       props: true,
