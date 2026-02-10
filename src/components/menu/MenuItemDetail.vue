@@ -120,78 +120,68 @@ const onAddToCartClick = () => {
 </script>
 
 <template>
-  <div v-if="isLoading" class="flex items-center justify-center p-8">
-    <div>Loading...</div>
+  <div v-if="isLoading" class="w-full text-xs border border-alt">
+    <div class="px-3 py-2 font-secondary">loading item...</div>
   </div>
-  <div v-else-if="isError" class="p-4">Error loading menu item</div>
-  <div v-else-if="menuItem" class="max-w-3xl mx-auto p-6">
-    <div class="border rounded-lg p-6 mb-6">
-      <div class="flex justify-between items-start">
-        <div class="flex-1">
-          <h2 class="text-3xl font-bold">{{ menuItem.name }}</h2>
-          <p v-if="menuItem.description" class="mt-2">
-            {{ menuItem.description }}
-          </p>
-        </div>
-        <div class="ml-6 text-right">
-          <p class="text-sm">Base Price</p>
-          <p class="text-2xl font-bold">${{ menuItem.price }}</p>
-        </div>
+  <div v-else-if="isError" class="w-full text-xs border border-alt">
+    <div class="px-3 py-2 font-secondary">error loading item.</div>
+  </div>
+  <div v-else-if="menuItem" class="w-full text-xs">
+    <!-- item info -->
+    <div class="border border-alt">
+      <div class="px-3 py-1 border-b border-alt font-secondary text-primary bg-green">
+        // {{ menuItem.name }}
       </div>
-    </div>
-
-    <div v-if="customizationGroups.length === 0">No customizations</div>
-    <div v-else class="mb-6">
-      <h3 class="text-xl font-semibold mb-4">Customize Your Order</h3>
-      <div v-for="group in customizationGroups" :key="group.id">
-        <CustomizationGroup :group="group" @update-customization="updateCustomization" />
+      <div class="px-3 py-3">
+        <div class="flex items-center justify-between">
+          <span class="tracking-wide font-mono text-sm">{{ menuItem.name }}</span>
+          <span class="font-mono">${{ menuItem.price }}</span>
+        </div>
+        <p v-if="menuItem.description" class="mt-2 font-secondary text-alt">
+          {{ menuItem.description }}
+        </p>
       </div>
-    </div>
-
-    <div class="border-t pt-6 sticky bottom-0 bg-primary text-gray-900 dark:bg-alt dark:text-white">
-      <div class="flex items-center justify-between gap-4 flex-wrap">
-        <div class="flex items-center gap-4">
-          <label for="quantity" class="text-sm font-medium"> Quantity: </label>
+      <div class="px-3 py-3 border-t border-alt flex items-center gap-4">
+        <div class="flex items-center gap-2">
+          <span class="font-secondary">qty:</span>
           <input
             id="quantity"
             v-model.number="quantity"
             type="number"
             min="1"
             max="99"
-            class="w-20 px-3 py-2 border rounded-md"
+            class="w-16 px-2 py-1 border border-alt bg-transparent text-xs font-mono"
           />
         </div>
-
-        <div class="text-right flex-1">
-          <p class="text-sm">Total Price</p>
-          <p class="text-3xl font-bold">${{ displayPrice.toFixed(2) }}</p>
-          <p v-if="totalCustomizationModifiers !== 0" class="text-x">
-            (includes
-            {{ totalCustomizationModifiers > 0 ? '+' : '' }}${{
-              totalCustomizationModifiers.toFixed(2)
-            }}
-            in customizations)
-          </p>
+        <div class="flex-1 text-right font-mono">
+          ${{ displayPrice.toFixed(2) }}
+          <span v-if="totalCustomizationModifiers !== 0" class="font-secondary text-alt">
+            ({{ totalCustomizationModifiers > 0 ? '+' : '' }}${{ totalCustomizationModifiers.toFixed(2) }})
+          </span>
         </div>
-
         <button
           @click="onAddToCartClick"
           :disabled="!canAddToCart"
-          class="px-8 py-3 bg-alt text-primary cursor-pointer font-semibold rounded-md disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+          class="group px-3 py-2 border border-alt cursor-pointer font-secondary tracking-wide hover:bg-green hover:text-primary transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
         >
-          Add to Cart
+          <span class="text-green group-hover:text-primary">▸</span> ADD TO CART
         </button>
       </div>
+    </div>
 
-      <div v-if="!hasAllRequiredCustomizations" class="mt-3 text-smflex items-center">
-        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-          <path
-            fill-rule="evenodd"
-            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-            clip-rule="evenodd"
-          />
-        </svg>
-        Please complete all required customizations
+    <!-- customizations -->
+    <div v-if="customizationGroups.length > 0" class="border border-alt mt-4">
+      <div class="px-3 py-1 border-b border-alt font-secondary text-alt">// customize</div>
+      <div class="divide-y divide-alt">
+        <CustomizationGroup
+          v-for="group in customizationGroups"
+          :key="group.id"
+          :group="group"
+          @update-customization="updateCustomization"
+        />
+      </div>
+      <div v-if="!hasAllRequiredCustomizations" class="px-3 py-2 border-t border-alt font-secondary text-alt">
+        * complete all required customizations
       </div>
     </div>
   </div>

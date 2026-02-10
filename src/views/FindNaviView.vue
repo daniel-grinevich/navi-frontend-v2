@@ -1,11 +1,9 @@
 <script setup lang="ts">
 /*** libraries ****/
-import { ref, onMounted, computed } from 'vue'
+import { onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 /*** components ****/
-import LoadingSpinnerTwo from '@/components/shared/LoadingSpinnerTwo.vue'
 import AsyncList from '@/components/shared/AsyncList.vue'
-import Card from '@/components/shared/Card.vue'
 import Address from '@/components/shared/Address.vue'
 /*** stores ***/
 import { useLocationStore } from '@/stores/location'
@@ -57,42 +55,66 @@ onMounted(() => {
 })
 </script>
 <template>
-  <div class="max-w-4xl mx-auto p-6">
-    <h1 class="text-2xl font-bold mb-4">Find Navi Location</h1>
-    <div class="h-8">
-      <p v-if="shoppingCartStore.selectedNaviPort == 0">No NaviPort selectd (T_T)</p>
-      <p v-else>NaviPort Selected {{ shoppingCartStore.selectedNaviPort }}</p>
-    </div>
+  <div class="max-w-6xl mx-auto p-6">
+    <div class="grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-4">
+      <!-- Left Column: Selected NaviPort -->
+      <div class="space-y-4">
+        <div class="border border-alt text-xs md:sticky md:top-6">
+          <div class="px-3 py-1 border-b border-alt font-secondary text-alt">// naviport status</div>
+          <div class="px-3 py-2">
+            <p v-if="shoppingCartStore.selectedNaviPort == 0" class="font-mono">no naviport selected</p>
+            <p v-else class="font-mono">
+              <span class="text-green">▪</span> naviport #{{ shoppingCartStore.selectedNaviPort }} selected
+            </p>
+          </div>
+        </div>
+      </div>
 
-    <div v-if="locationStore.error" class="bg-red-100 text-red-700 p-4 rounded-md mb-4">
-      Error getting location: {{ locationStore.error.message }}
-    </div>
+      <!-- Right Column: NaviPort Options -->
+      <div class="space-y-4">
+        <!-- Error State -->
+        <div v-if="locationStore.error" class="border-2 border-red text-xs">
+          <div class="px-3 py-1 border-b border-red bg-red text-primary font-mono">⚠ LOCATION ERROR</div>
+          <div class="px-3 py-3">
+            <p>{{ locationStore.error.message }}</p>
+          </div>
+        </div>
 
-    <div v-else-if="!locationStore.locatedAt" class="text-gray-600">
-      <LoadingSpinnerTwo />
-      <p>Can we have your location?</p>
-    </div>
+        <!-- Loading Location -->
+        <div v-else-if="!locationStore.locatedAt" class="border border-alt text-xs">
+          <div class="px-3 py-1 border-b border-alt font-secondary text-alt">// locating</div>
+          <div class="px-3 py-4 text-center">
+            <p class="font-mono blink">locating you...</p>
+            <p class="font-secondary mt-2">can we have your location?</p>
+          </div>
+        </div>
 
-    <div v-else>
-      <AsyncList :items="normalizedNaviPorts" :loading="isLoading">
-        <template #item="naviPort">
-          <Card>
-            <template #body>
-              <div class="flex flex-row justify-between">
-                <Address :address="naviPort.address" />
-                <button
-                  class="p-1 border cursor-pointer w-24"
-                  @click="handleNaviPortClick(naviPort.id)"
-                  type="button"
-                >
-                  Select
-                </button>
+        <!-- NaviPort List -->
+        <template v-else>
+          <AsyncList :items="normalizedNaviPorts" :loading="isLoading" flex-gap="gap-4">
+            <template #item="naviPort">
+              <div class="border border-alt border-l-[0.5rem] border-l-green text-xs">
+                <div class="px-3 py-1 border-b border-alt font-secondary text-alt">
+                  // naviport
+                </div>
+                <div class="px-3 py-3 flex flex-row justify-between items-center">
+                  <Address :address="naviPort.address" />
+                  <button
+                    class="px-3 py-2 bg-green text-primary border border-green cursor-pointer font-mono tracking-wide hover:bg-alt hover:text-primary hover:border-alt transition-colors"
+                    @click="handleNaviPortClick(naviPort.id)"
+                    type="button"
+                  >
+                    ▸ SELECT
+                  </button>
+                </div>
+                <div class="px-3 py-1 border-t border-alt font-mono">
+                  {{ naviPort.distance }} miles away
+                </div>
               </div>
             </template>
-            <template #footer> {{ naviPort.distance }} miles away </template>
-          </Card>
+          </AsyncList>
         </template>
-      </AsyncList>
+      </div>
     </div>
   </div>
 </template>

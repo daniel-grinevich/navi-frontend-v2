@@ -3,7 +3,6 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useShoppingCart } from '@/stores/shoppingCart'
 import CartItemCard from '@/components/cart/CartItemCard.vue'
-import Card from '@/components/shared/Card.vue'
 import { useSessionStore } from '@/stores/session'
 
 const router = useRouter()
@@ -59,95 +58,91 @@ const continueShopping = () => {
 </script>
 
 <template>
-  <div class="max-w-4xl mx-auto p-6">
-    <h1 class="text-3xl font-bold mb-6">Your Cart</h1>
-
+  <div class="max-w-4xl mx-auto p-6 space-y-4">
     <!-- Empty Cart State -->
-    <div v-if="cart.itemCount === 0" class="text-center py-12">
-      <svg
-        class="mx-auto h-16 w-16 text-gray-400 mb-4"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
-        />
-      </svg>
-      <p class="text-gray-500 text-lg mb-4">Your cart is empty</p>
-      <button
-        @click="continueShopping"
-        class="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium"
-      >
-        Browse Menu
-      </button>
+    <div v-if="cart.itemCount === 0" class="w-full text-xs border border-alt">
+      <div class="px-3 py-1 border-b border-alt font-secondary text-alt">// cart</div>
+      <div class="px-3 py-6 text-center">
+        <p>cart is empty.</p>
+        <button
+          @click="continueShopping"
+          class="group mt-3 px-3 py-2 border border-alt cursor-pointer font-secondary tracking-wide hover:bg-green hover:text-primary transition-colors"
+        >
+          <span class="text-green group-hover:text-primary">▸</span> BROWSE MENU
+        </button>
+      </div>
     </div>
 
     <!-- Cart Items -->
-    <div v-else>
-      <div v-if="!session.isAuthenticated" class="mb-6">
-        <span class="text-alt text-sm"
-          >Your email goes here just so we can send you your reciept ☺︎</span
-        >
-        <input
-          id="user-email"
-          v-model="guestEmail"
-          type="email"
-          placeholder="Enter email or log in"
-          @blur="handleEmailBlur"
-          @input="handleEmailInput"
+    <div v-else class="space-y-4">
+      <!-- Guest Email -->
+      <div
+        v-if="!session.isAuthenticated"
+        :class="['text-xs', emailError ? 'border-2 border-red' : 'border border-green']"
+      >
+        <div
           :class="[
-            'px-3 py-2 border rounded-md w-full mt-1',
-            emailError
-              ? 'border-red-500 focus:ring-red-500'
-              : 'border-gray-300 focus:ring-blue-500',
+            'px-3 py-1 border-b font-mono',
+            emailError ? 'border-red bg-red text-primary' : 'border-green bg-green text-primary',
           ]"
-        />
-        <p v-if="emailError" class="text-red-500 text-sm mt-1">{{ emailError }}</p>
+        >
+          {{ emailError ? '⚠ EMAIL REQUIRED' : '▸ EMAIL REQUIRED' }}
+        </div>
+        <div class="px-3 py-3">
+          <span class="text-alt text-xs">enter your email so we can send you your receipt</span>
+          <input
+            id="user-email"
+            v-model="guestEmail"
+            type="email"
+            placeholder="your@email.com"
+            @blur="handleEmailBlur"
+            @input="handleEmailInput"
+            :class="[
+              'w-full px-3 py-2 mt-2 border bg-transparent text-xs font-mono focus:outline-none',
+              emailError ? 'border-red' : 'border-alt',
+            ]"
+          />
+          <p v-if="emailError" class="text-red text-xs mt-3 px-2 py-2 border border-red">
+            {{ emailError }}
+          </p>
+        </div>
       </div>
 
-      <div class="space-y-4 mb-6">
+      <!-- Cart Items List -->
+      <div class="space-y-4">
         <CartItemCard v-for="item in cart.localCart" :key="item.cartItemId" :item="item" />
       </div>
 
-      <Card class="mb-6">
-        <template #header>
-          <h2 class="text-xl font-semibold">Order Summary</h2>
-        </template>
-        <template #body>
-          <div class="space-y-3">
-            <div class="flex justify-between">
-              <span>Subtotal ({{ cart.itemCount }} item{{ cart.itemCount > 1 ? 's' : '' }})</span>
-              <span class="font-medium">${{ cart.subtotal.toFixed(2) }}</span>
-            </div>
-            <div class="flex justify-between">
-              <span>Tax (8%)</span>
-              <span class="font-medium">${{ cart.tax.toFixed(2) }}</span>
-            </div>
-            <div class="border-t pt-3 flex justify-between text-xl font-bold">
-              <span>Total</span>
-              <span>${{ cart.totalPrice.toFixed(2) }}</span>
-            </div>
-          </div>
-        </template>
-      </Card>
+      <!-- Order Summary -->
+      <div class="border border-alt text-xs">
+        <div class="px-3 py-1 border-b border-alt font-secondary text-alt">// order summary</div>
+        <div class="px-3 py-2 flex justify-between">
+          <span>subtotal ({{ cart.itemCount }} item{{ cart.itemCount > 1 ? 's' : '' }})</span>
+          <span class="font-mono">${{ cart.subtotal.toFixed(2) }}</span>
+        </div>
+        <div class="px-3 py-2 flex justify-between">
+          <span>tax (8%)</span>
+          <span class="font-mono">${{ cart.tax.toFixed(2) }}</span>
+        </div>
+        <div class="px-3 py-2 flex justify-between border-t border-alt">
+          <span>total</span>
+          <span class="font-mono">${{ cart.totalPrice.toFixed(2) }}</span>
+        </div>
+      </div>
 
       <!-- Action Buttons -->
-      <div class="flex gap-4 flex-col sm:flex-row">
+      <div class="flex gap-4 flex-col sm:flex-row text-xs">
         <button
           @click="continueShopping"
-          class="flex-1 px-6 py-3 border-2 border-gray-300 rounded-md hover:bg-gray-50 font-medium transition-colors"
+          class="group flex-1 px-3 py-2 border border-alt cursor-pointer font-mono tracking-wide hover:bg-green hover:text-primary transition-colors"
         >
-          Continue Shopping
+          <span class="text-green group-hover:text-primary">▸</span> CONTINUE SHOPPING
         </button>
         <button
           @click="goToCheckout"
-          class="flex-1 px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-semibold transition-colors"
+          class="group flex-1 px-3 py-2 bg-green text-primary border border-alt cursor-pointer font-mono tracking-wide hover:bg-alt hover:text-primary hover:border-alt transition-colors"
         >
-          Proceed to Checkout
+          <span>▸</span> CHECKOUT
         </button>
       </div>
     </div>

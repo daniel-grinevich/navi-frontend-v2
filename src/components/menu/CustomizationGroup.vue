@@ -26,39 +26,30 @@ const isSelected = (optionId: string) => selectedCustomizations.has(optionId)
 </script>
 
 <template>
-  <div class="border rounded-lg p-4 mb-4">
-    <div class="flex justify-between items-start mb-3">
-      <div>
-        <h3 class="text-lg font-semibold text-gray-900">
-          {{ group.name }}
-        </h3>
-      </div>
-      <div class="flex flex-row items-end">
-        <span class="text-xs">
-          <span v-if="group.is_required" class="text-sm">*</span>
-          {{ group.is_required ? 'Required' : 'Optional' }}
-        </span>
-        <span v-if="group.min_allowed" class="text-xs">
-          Choose {{ group.min_allowed }}-{{ group.max_allowed }}
-        </span>
-      </div>
-    </div>
-
-    <div class="flex flex-row flex-wrap gap-3">
-      <div v-for="option in group.customizations" :key="option.id">
-        <button
-          class="p-3 border cursor-pointer"
-          :class="[
-            isSelected(option.id)
-              ? 'bg-gray-200 text-gray-900 dark:bg-gray-700 dark:text-white'
-              : 'bg-transparent',
-          ]"
-          type="button"
-          @click="handleCustomizationClick(option.id)"
+  <div>
+    <div class="px-3 py-2 flex items-center justify-between gap-2">
+      <span class="font-secondary tracking-wide">{{ group.name }}</span>
+      <span class="font-secondary text-alt font-mono">
+        <span v-if="group.is_required" class="text-green">*</span>
+        {{ group.is_required ? 'required' : 'optional' }}
+        <span v-if="group.min_allowed" class="ml-1"
+          >({{ group.min_allowed }}-{{ group.max_allowed }})</span
         >
-          {{ option.name }}
-        </button>
-      </div>
+      </span>
+    </div>
+    <div class="px-3 pb-3 flex flex-row flex-wrap gap-2">
+      <button
+        v-for="option in group.customizations"
+        :key="option.id"
+        class="px-3 py-1 border border-alt cursor-pointer font-secondary transition-colors"
+        :class="[
+          isSelected(option.id) ? 'bg-green text-primary' : 'hover:bg-green hover:text-primary',
+        ]"
+        type="button"
+        @click="handleCustomizationClick(option.id)"
+      >
+        {{ option.name }}
+      </button>
     </div>
   </div>
 </template>
