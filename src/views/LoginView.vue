@@ -1,12 +1,16 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+/*** libraries ****/
+import { ref, computed } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
-import { useApiWrite } from '@/composables/useApi'
+/*** components ****/
+import TinyLoadingSpinner from '@/components/shared/TinyLoadingSpinner.vue'
+/*** stores ***/
 import { useSessionStore } from '@/stores/session'
-import LoadingSpinnerTwo from '@/components/shared/LoadingSpinnerTwo.vue'
-import { apiClient } from '@/lib/apiClient'
-import { LoginSchema } from '@/schemas/user/LoginSchema'
+/*** composables ****/
 import { useUserLogin } from '@/composables/useUser'
+import { useZod } from '@/composables/useZod'
+/*** types ****/
+import { LoginSchema } from '@/schemas/user/LoginSchema'
 
 const sessionStore = useSessionStore()
 const router = useRouter()
@@ -16,38 +20,39 @@ const password = ref('')
 const loading = ref(false)
 const loginErrorMessage = ref('')
 
-const { mutateAsync, isPending } = useUserLogin()
+const loginFields = computed(() => {
+  return { email: email.value, password: password.value }
+})
+
+const { zodValueorError } = useZod(loginFields, LoginSchema)
+
+const { mutateAsync } = useUserLogin()
 
 const handleLoginSubmit = async (e: Event) => {
   loading.value = true
   loginErrorMessage.value = ''
-  const formData = { email: email.value, password: password.value }
-  const result = LoginSchema.safeParse(formData)
 
-  if (!result.success) {
-    loginErrorMessage.value = result.error.message
-    loading.value = false
-  } else {
-    try {
-      const response=await mutateAsync(formData)
-      sessionStore.session = {
-      accessToken: response.access,
-      refreshToken: response.refresh,
+  try {
+    if (!zodValueorError.value.success && zodValueorError.value.error) {
+      loginErrorMessage.value = Object.values(zodValueorError.value.error).join(',')
+      throw Error('Schema was not validated')
     }
-    sessionStore.getUser()
+
+    await mutateAsync(loginFields.value)
+  } catch (error) {
+    console.error('Login Failed:', error)
+  } finally {
+    sessionStore.initAuth()
     loading.value = false
+
     const canGoBack = window.history.state?.back !== null
     if (canGoBack) {
       router.go(-1)
     } else {
       router.push({ name: 'menu' })
-    }}
-    catch (error) {
-    console.error('Login Failed:', error)
-    alert('Failed to Login. Please try again.')
-    loading.value=false
     }
-}}
+  }
+}
 </script>
 
 <template>
@@ -59,30 +64,30 @@ const handleLoginSubmit = async (e: Event) => {
 
         <div class="flex-1 flex flex-col items-center justify-center p-6 overflow-hidden">
           <div class="text-green whitespace-pre leading-none select-none text-[8px] md:text-[10px]">
-            <div>    ·  .    *      ✦   ·      .    *   ✦    ·</div>
-            <div>  *     ✦    ·  .     *    ·    ✦    .     *</div>
-            <div>     .     *    ✦   .    ·   *    .   ✦   ·</div>
-            <div>  ✦    ·      .    *   ✦        ·   .    *</div>
-            <div>                          ┌───┐</div>
-            <div>                    ┌───┐ │░░░│</div>
-            <div>              ┌──┐  │░█░│ │░█░│  ┌────┐</div>
-            <div>         ┌──┐ │░░│  │░░░│ │░░░│  │░░█░│</div>
-            <div>    ┌──┐ │█░│ │░█│  │░█░│ │░█░│  │░░░░│ ┌──┐</div>
-            <div>    │░░│ │░░│ │░░│  │░░░│ │░░░│  │░█░░│ │░█│</div>
-            <div>    │░█│ │░█│ │█░│  │█░░│ │░░█│  │░░░░│ │░░│</div>
-            <div>    │░░│ │░░│ │░░│  │░█░│ │░█░│  │░░█░│ │█░│</div>
-            <div>    │█░│ │░░│ │░░│  │░░░│ │░░░│  │░░░░│ │░░│</div>
-            <div>    │░░│ │█░│ │░█│  │░░█│ │█░░│  │█░░░│ │░░│</div>
-            <div>    │░█│ │░░│ │░░│  │░░░│ │░░░│  │░░░░│ │░█│</div>
-            <div>    │░░│ │░░│ │░░│  │█░░│ │░░█│  │░░█░│ │░░│</div>
-            <div>    │░░│ │░█│ │█░│  │░░░│ │░░░│  │░░░░│ │░░│</div>
-            <div>────┘  └─┘  └─┘  └──┘   └─┘   └──┘    └─┘  └───</div>
+            <div>· . * ✦ · . * ✦ ·</div>
+            <div>* ✦ · . * · ✦ . *</div>
+            <div>. * ✦ . · * . ✦ ·</div>
+            <div>✦ · . * ✦ · . *</div>
+            <div>┌───┐</div>
+            <div>┌───┐ │░░░│</div>
+            <div>┌──┐ │░█░│ │░█░│ ┌────┐</div>
+            <div>┌──┐ │░░│ │░░░│ │░░░│ │░░█░│</div>
+            <div>┌──┐ │█░│ │░█│ │░█░│ │░█░│ │░░░░│ ┌──┐</div>
+            <div>│░░│ │░░│ │░░│ │░░░│ │░░░│ │░█░░│ │░█│</div>
+            <div>│░█│ │░█│ │█░│ │█░░│ │░░█│ │░░░░│ │░░│</div>
+            <div>│░░│ │░░│ │░░│ │░█░│ │░█░│ │░░█░│ │█░│</div>
+            <div>│█░│ │░░│ │░░│ │░░░│ │░░░│ │░░░░│ │░░│</div>
+            <div>│░░│ │█░│ │░█│ │░░█│ │█░░│ │█░░░│ │░░│</div>
+            <div>│░█│ │░░│ │░░│ │░░░│ │░░░│ │░░░░│ │░█│</div>
+            <div>│░░│ │░░│ │░░│ │█░░│ │░░█│ │░░█░│ │░░│</div>
+            <div>│░░│ │░█│ │█░│ │░░░│ │░░░│ │░░░░│ │░░│</div>
+            <div>────┘ └─┘ └─┘ └──┘ └─┘ └──┘ └─┘ └───</div>
             <div>▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓</div>
-            <div>  ═══╗    ╔═══════╗       ╔══════╗    ╔═══╗</div>
-            <div>     ║    ║  NAVI ║       ║COFFEE║    ║   ║</div>
-            <div>═════╝    ╚═══════╝       ╚══════╝    ╚═══╝</div>
+            <div>═══╗ ╔═══════╗ ╔══════╗ ╔═══╗</div>
+            <div>║ ║ NAVI ║ ║COFFEE║ ║ ║</div>
+            <div>═════╝ ╚═══════╝ ╚══════╝ ╚═══╝</div>
             <div>▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓</div>
-            <div>  ·  .  ·  .  ·  .  ·  .  ·  .  ·  .  ·  .  ·</div>
+            <div>· . · . · . · . · . · . · . ·</div>
           </div>
         </div>
       </div>
@@ -92,9 +97,14 @@ const handleLoginSubmit = async (e: Event) => {
         <div class="px-3 py-1 border-b border-alt bg-green text-white">// sign in</div>
 
         <div class="flex-1 flex flex-col justify-center p-6">
-          <form @submit.prevent="handleLoginSubmit" class="flex flex-col gap-3 max-w-sm mx-auto w-full">
+          <form
+            @submit.prevent="handleLoginSubmit"
+            class="flex flex-col gap-3 max-w-sm mx-auto w-full"
+          >
             <div class="flex flex-col gap-0.5">
-              <label for="email" class="block text-xs border border-alt max-w-fit p-1">email:</label>
+              <label for="email" class="block text-xs border border-alt max-w-fit p-1">
+                email:
+              </label>
               <input
                 id="email"
                 v-model="email"
@@ -106,7 +116,9 @@ const handleLoginSubmit = async (e: Event) => {
               />
             </div>
             <div class="flex flex-col gap-0.5">
-              <label for="password" class="block text-xs border border-alt max-w-fit p-1">password:</label>
+              <label for="password" class="block text-xs border border-alt max-w-fit p-1">
+                password:
+              </label>
               <input
                 id="password"
                 v-model="password"
@@ -127,7 +139,8 @@ const handleLoginSubmit = async (e: Event) => {
               :disabled="loading"
               class="w-full py-2 px-4 bg-green text-white border border-green cursor-pointer font-mono tracking-wide text-xs hover:bg-alt hover:text-primary hover:border-alt transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-2"
             >
-              {{ loading ? 'signing in...' : '▸ SIGN IN' }}
+              <span v-if="loading"><TinyLoadingSpinner /> SIGN IN</span>
+              <span v-else>▸ SIGN IN</span>
             </button>
           </form>
 

@@ -11,51 +11,47 @@ interface User {
 
 export const useSessionStore = defineStore('session', () => {
   const user = ref<User>({})
-  const session = useStorage(
-    'my-access-token',
-    { accessToken: '', refreshToken: '' },
-    sessionStorage,
-  )
+  const isAuthenticated = ref<boolean>(false)
 
-  const isAuthenticated = computed(() => {
-    return !!session.value.accessToken
-  })
+  const initAuth = async (max_retries: number = 3) => {
+    const result = await getUser(0, max_retries)
 
-  const initAuth = async () => {
-    await getUser()
+    if (result && user.value) isAuthenticated.value = true
   }
 
-  const getUser = async () => {
-    if (!session.value.accessToken || !session.value.refreshToken) {
-      return
-    }
+  const getUser = async (retries: number = 0, maxRetries: number = 3) => {
+    debugger
     try {
-      const fullToken = 'Bearer ' + session.value.accessToken
-      const data = await apiClient('/api/users/me', {
+      const data = await apiClient('api/users/me', {
         method: 'GET',
-        headers: { Authorization: fullToken },
       })
 
       data.is_guest ? (user.value.guestEmail = data.email) : (user.value = data)
     } catch (err: any) {
       if (err.status === 401) {
         const refreshed = await refreshAccessToken()
+
         if (refreshed) {
-          return getUser() // retry
+          return getUser(retries + 1, maxRetries)
         }
-      } else {
-        logout()
+
+        throw Error('Not Authorized')
       }
+    }
+    return true
+  }
+
+  const logout = async () => {
+    try {
+      await apiClient('api/logout', { method: 'POST' })
+      return true
+    } catch {
+      return false
     }
   }
 
-  const logout = () => {
-    session.value = { accessToken: '', refreshToken: '' }
-    user.value = {}
-  }
-
-  const isAdmin = computed(() => {
-    if (!user) getUser()
+  const isAdmin = computed(async () => {
+    if (!user) await getUser()
 
     if (user.value?.is_admin) return true
 
@@ -78,7 +74,6 @@ export const useSessionStore = defineStore('session', () => {
       })
 
       const { accessToken, refreshToken, user: userData } = response
-      console.log(accessToken)
 
       session.value = { accessToken: accessToken, refreshToken: refreshToken }
     } catch (error) {
@@ -87,17 +82,8 @@ export const useSessionStore = defineStore('session', () => {
   }
 
   const refreshAccessToken = async () => {
-    if (!session.value.refreshToken) return false
-
     try {
-      const data = await apiClient('/api/token/refresh/', {
-        method: 'POST',
-        body: JSON.stringify({
-          refresh: session.value.refreshToken,
-        }),
-      })
-
-      session.value.accessToken = data.access
+      await apiClient('api/token/refresh/', { method: 'POST' })
       return true
     } catch {
       logout()
@@ -107,7 +93,6 @@ export const useSessionStore = defineStore('session', () => {
 
   return {
     user,
-    session,
     initAuth,
     getUser,
     createGuest,

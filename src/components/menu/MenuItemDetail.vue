@@ -59,6 +59,10 @@ const customizationMap = computed(() => {
   return customizationMap
 })
 
+const hasCustomizations = computed(() => {
+  return customizationGroups.value.length > 0
+})
+
 const updateCustomization = (groupId: string, customizationId: string, action: string) => {
   if (action === null || groupId === null) return
 
@@ -179,7 +183,9 @@ const onAddToCartClick = () => {
         <div class="flex-1 text-right font-mono">
           ${{ displayPrice.toFixed(2) }}
           <span v-if="totalCustomizationModifiers !== 0" class="font-secondary text-alt">
-            ({{ totalCustomizationModifiers > 0 ? '+' : '' }}${{ totalCustomizationModifiers.toFixed(2) }})
+            ({{ totalCustomizationModifiers > 0 ? '+' : '' }}${{
+              totalCustomizationModifiers.toFixed(2)
+            }})
           </span>
         </div>
         <button
@@ -193,7 +199,8 @@ const onAddToCartClick = () => {
     </div>
 
     <!-- customizations -->
-    <div v-if="customizationGroups.length > 0" class="border border-alt mt-4">
+    <div v-if="!hasCustomizations" class="text-alt font-mono">No customizations exist.</div>
+    <div v-else class="border border-alt mt-4">
       <div class="px-3 py-1 border-b border-alt font-secondary text-alt">// customize</div>
       <div class="divide-y divide-alt">
         <CustomizationGroup
@@ -203,7 +210,10 @@ const onAddToCartClick = () => {
           @update-customization="updateCustomization"
         />
       </div>
-      <div v-if="!hasAllRequiredCustomizations" class="px-3 py-2 border-t border-alt font-secondary text-alt">
+      <div
+        v-if="!hasAllRequiredCustomizations"
+        class="px-3 py-2 border-t border-alt font-secondary text-alt"
+      >
         * complete all required customizations
       </div>
     </div>
