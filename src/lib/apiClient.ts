@@ -13,7 +13,7 @@ export async function apiClient<T = any>(
   debugger
 
   if (options?.method && UNSAFE_METHODS.includes(options.method) && endpoint !== 'api/token/') {
-    options.headers = { ...options.headers, 'X-CSRF-Token': getCsrfCookie() }
+    options.headers = { ...options.headers, 'X-CSRFToken': getCsrfCookie() }
   }
 
   if (!options.credentials) options.credentials = 'include'

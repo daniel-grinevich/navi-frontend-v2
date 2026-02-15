@@ -61,7 +61,7 @@ const isSelected = (optionId: string) => selectedCustomizations.has(optionId)
         :key="option.id"
         class="px-3 py-1 border border-alt cursor-pointer font-secondary transition-colors"
         :class="[
-          isSelected(option.id) ? 'bg-green text-primary' : 'hover:bg-green hover:text-primary',
+          isSelected(option.id) ? 'bg-green text-white' : 'hover:bg-green hover:text-white',
         ]"
         type="button"
         @click="handleCustomizationClick(option.id)"
