@@ -4,13 +4,8 @@ import { getCsrfCookie } from '@/helpers/csrfHelper'
 const API_BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:8000'
 const UNSAFE_METHODS = ['POST', 'PUT', 'PATCH', 'DELETE']
 
-export async function apiClient<T = any>(
-  endpoint: string,
-  options: RequestInit = {},
-  retry: boolean = false,
-): Promise<T> {
+export async function apiClient<T = any>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const { isAuthenticated, refreshAccessToken } = useSessionStore()
-  debugger
 
   if (options?.method && UNSAFE_METHODS.includes(options.method) && endpoint !== 'api/token/') {
     options.headers = { ...options.headers, 'X-CSRFToken': getCsrfCookie() }
@@ -27,11 +22,12 @@ export async function apiClient<T = any>(
   })
 
   if (response.status === 401) {
-    if (endpoint === 'api/logout')
+    if (endpoint === 'api/logout' || endpoint === 'api/logout/')
       return new Promise(() => {
         return { success: false, body: null }
       })
 
+    debugger
     if (!isAuthenticated) throw Error('Not Authorized')
 
     const refreshResponse: boolean = await refreshAccessToken()

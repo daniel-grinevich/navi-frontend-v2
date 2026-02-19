@@ -1,6 +1,5 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
-import { useStorage } from '@vueuse/core'
 import { apiClient } from '@/lib/apiClient'
 
 interface User {
@@ -12,15 +11,17 @@ interface User {
 export const useSessionStore = defineStore('session', () => {
   const user = ref<User>({})
   const isAuthenticated = ref<boolean>(false)
+  const isInitialized = ref<boolean>(false)
 
-  const initAuth = async (max_retries: number = 3) => {
-    const result = await getUser(0, max_retries)
+  const initAuth = async () => {
+    console.log('INITALIZING AUTH')
+    const result = await getUser()
+    if (result && Object.keys(user.value).length > 0) isAuthenticated.value = true
 
-    if (result && user.value) isAuthenticated.value = true
+    isInitialized.value = true // TODO: Check this is needed?! or useful? idk.
   }
 
-  const getUser = async (retries: number = 0, maxRetries: number = 3) => {
-    debugger
+  const getUser = async (refresh: boolean = true) => {
     try {
       const data = await apiClient('api/users/me', {
         method: 'GET',
@@ -28,16 +29,16 @@ export const useSessionStore = defineStore('session', () => {
 
       data.is_guest ? (user.value.guestEmail = data.email) : (user.value = data)
     } catch (err: any) {
-      if (err.status === 401) {
+      if (err.status === 401 && refresh) {
         const refreshed = await refreshAccessToken()
+        if (!refreshed) return false
 
-        if (refreshed) {
-          return getUser(retries + 1, maxRetries)
-        }
-
-        throw Error('Not Authorized')
+        return await getUser(false)
       }
+
+      return false
     }
+
     return true
   }
 
