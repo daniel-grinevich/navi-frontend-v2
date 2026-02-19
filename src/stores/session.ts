@@ -43,7 +43,7 @@ export const useSessionStore = defineStore('session', () => {
 
   const logout = async () => {
     try {
-      await apiClient('api/logout', { method: 'POST' })
+      await apiClient('api/logout/', { method: 'POST' })
       return true
     } catch {
       return false
