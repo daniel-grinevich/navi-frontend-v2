@@ -23,7 +23,7 @@ export const useSessionStore = defineStore('session', () => {
 
   const getUser = async (refresh: boolean = true) => {
     try {
-      const data = await apiClient('api/users/me', {
+      const data = await apiClient('api/users/me/', {
         method: 'GET',
       })
 
@@ -48,6 +48,9 @@ export const useSessionStore = defineStore('session', () => {
       return true
     } catch {
       return false
+    } finally {
+      user.value = {}
+      isAuthenticated.value = false
     }
   }
 
@@ -74,11 +77,9 @@ export const useSessionStore = defineStore('session', () => {
         }),
       })
 
-      const { accessToken, refreshToken, user: userData } = response
-
-      session.value = { accessToken: accessToken, refreshToken: refreshToken }
+      return
     } catch (error) {
-      console.error(`Error when creating guest user ${error}`)
+      return
     }
   }
 

@@ -27,7 +27,6 @@ export async function apiClient<T = any>(endpoint: string, options: RequestInit 
         return { success: false, body: null }
       })
 
-    debugger
     if (!isAuthenticated) throw Error('Not Authorized')
 
     const refreshResponse: boolean = await refreshAccessToken()
