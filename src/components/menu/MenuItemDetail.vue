@@ -16,8 +16,8 @@ const router = useRouter()
 const route = useRoute()
 const shoppingCart = useShoppingCart()
 
-const cartId=route.params.cartId as string
-const cartItem=shoppingCart.localCart.find((value) => value.cartItemId==cartId)
+const cartId = route.params.cartId as string
+const cartItem = shoppingCart.localCart.find((value) => value.cartItemId == cartId)
 
 const id = route.params.id as string
 const { isLoading, data: menuItem, isError } = useMenuItem(id)
@@ -26,19 +26,23 @@ const selectedCustomizations = ref<Map<string, SelectedCustomization[]>>(new Map
 const quantity = ref<number>(cartItem ? cartItem.quantity : 1)
 
 //set item values if editing
-watch(menuItem, (item) => {
-  if (!item || !cartItem) return
-  // Rebuild selectedCustomizations Map
-  const map = new Map<string, SelectedCustomization[]>()
+watch(
+  menuItem,
+  (item) => {
+    if (!item || !cartItem) return
+    // Rebuild selectedCustomizations Map
+    const map = new Map<string, SelectedCustomization[]>()
 
-  ;(cartItem.customizations as SelectedCustomization[]).forEach((c) => {
-    const list = map.get(c.groupId) || []
-    list.push(c)
-    map.set(c.groupId, list)
-  })
+    ;(cartItem.customizations as SelectedCustomization[]).forEach((c) => {
+      const list = map.get(c.groupId) || []
+      list.push(c)
+      map.set(c.groupId, list)
+    })
 
-  selectedCustomizations.value = map
-}, { immediate: true })
+    selectedCustomizations.value = map
+  },
+  { immediate: true },
+)
 
 const customizationGroups = computed(() => {
   return menuItem.value?.category?.customization_groups || []
@@ -138,11 +142,10 @@ const onAddToCartClick = () => {
 
   if (cartId) {
     shoppingCart.updateCartItem(cartId, cartItemData)
-    router.push({ name: 'cart' })
   } else {
     shoppingCart.addCartItem(cartItemData)
-    router.push({ name: 'menu' })
   }
+  router.push({ name: 'cart' })
 }
 </script>
 
