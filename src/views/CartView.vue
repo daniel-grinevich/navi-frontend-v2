@@ -1,16 +1,33 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+/*** libraries ****/
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { useShoppingCart } from '@/stores/shoppingCart'
+/*** components ****/
 import CartItemCard from '@/components/cart/CartItemCard.vue'
+/*** stores ***/
+import { useShoppingCart } from '@/stores/shoppingCart'
 import { useSessionStore } from '@/stores/session'
+/*** composables ****/
+import { useZod } from '@/composables/useZod'
+/** schemas ***/
+import { CartSchema } from '@/schemas/checkout/CartSchema'
+/*** types ****/
 
 const router = useRouter()
 const cart = useShoppingCart()
 const session = useSessionStore()
+const guestEmail = ref<string>('')
 
-const guestEmail = ref('')
-const emailError = ref('')
+const cartErrorMessages = ref({
+  guestEmail: [],
+  cartItems: [],
+})
+
+const cartFields = computed(() => {
+  return { guestEmail: guestEmail.value, cartItems: cart.itemCount }
+})
+
+const { zodValueorError } = useZod(cartFields, CartSchema)
 
 const validateEmail = (email: string): boolean => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -34,8 +51,9 @@ const handleEmailInput = () => {
   }
 }
 
-const goToCheckout = () => {
-  if (cart.itemCount === 0) return
+const submitCart = () => {
+  if (cart.itemCount === 0) return cartErrors.value.push('Cart Cannot be empty.')
+  if (cart.itemCount === 15) return cartErrors.value.push('Cart cannot exceed 15 itmes.')
 
   if (!session.isAuthenticated) {
     if (!guestEmail.value) {
@@ -46,7 +64,7 @@ const goToCheckout = () => {
       emailError.value = 'Please enter a valid email address'
       return
     }
-    session.setGuestEmail(guestEmail.value)
+    const emailExists = session.setGuestEmail(guestEmail.value)
   }
 
   router.push({ name: 'checkout' })
@@ -108,12 +126,10 @@ const continueShopping = () => {
         </div>
       </div>
 
-      <!-- Cart Items List -->
       <div class="space-y-4">
         <CartItemCard v-for="item in cart.localCart" :key="item.cartItemId" :item="item" />
       </div>
 
-      <!-- Order Summary -->
       <div class="border border-alt text-xs">
         <div class="px-3 py-1 border-b border-alt font-secondary text-alt">// order summary</div>
         <div class="px-3 py-2 flex justify-between">
@@ -130,7 +146,6 @@ const continueShopping = () => {
         </div>
       </div>
 
-      <!-- Action Buttons -->
       <div class="flex gap-4 flex-col sm:flex-row text-xs">
         <button
           @click="continueShopping"
@@ -139,7 +154,7 @@ const continueShopping = () => {
           <span class="text-green group-hover:text-primary">▸</span> CONTINUE SHOPPING
         </button>
         <button
-          @click="goToCheckout"
+          @click="submitCart"
           class="group flex-1 px-3 py-2 bg-green text-primary border border-alt cursor-pointer font-mono tracking-wide hover:bg-alt hover:text-primary hover:border-alt transition-colors"
         >
           <span>▸</span> CHECKOUT

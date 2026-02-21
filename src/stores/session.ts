@@ -1,6 +1,7 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import { apiClient } from '@/lib/apiClient'
+import { useRouter } from 'vue-router'
 
 interface User {
   email?: string
@@ -9,6 +10,7 @@ interface User {
 }
 
 export const useSessionStore = defineStore('session', () => {
+  const router = useRouter()
   const user = ref<User>({})
   const isAuthenticated = ref<boolean>(false)
   const isInitialized = ref<boolean>(false)
@@ -51,6 +53,7 @@ export const useSessionStore = defineStore('session', () => {
     } finally {
       user.value = {}
       isAuthenticated.value = false
+      router.push('/')
     }
   }
 

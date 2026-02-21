@@ -1,16 +1,13 @@
 <script setup lang="ts">
-import { useRouter } from 'vue-router'
 import { useSessionStore } from '@/stores/session'
 import { useShoppingCart } from '@/stores/shoppingCart'
 import { computed } from 'vue'
 
 const session = useSessionStore()
 const cart = useShoppingCart()
-const router = useRouter()
 
 const handleLogout = () => {
   session.logout()
-  router.push('/login')
 }
 
 const userDisplayName = computed(() => {
