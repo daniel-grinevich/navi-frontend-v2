@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onBeforeMount } from 'vue'
 import { useRouter } from 'vue-router'
 import { useShoppingCart } from '@/stores/shoppingCart'
 import { useSessionStore } from '@/stores/session'
@@ -21,14 +21,31 @@ const { getStripe } = useStripe()
 
 const hasNaviPort = computed(() => cart.selectedNaviPort !== null)
 
-onMounted(() => {
+onBeforeMount(() => {
   if (cart.itemCount === 0) {
     router.push({ name: 'menu' })
   }
-  if (session.user.guestEmail !== null) {
-    session.createGuest()
+  debugger
+
+  if (session.user.guestEmail != null) {
+    setGuestOrRedirect()
+  }
+
+  if (!session.isAuthenticated) {
+    router.push({ name: 'cart' })
   }
 })
+
+const setGuestOrRedirect = async () => {
+  const response = await session.createGuest()
+  if (!response) {
+    router.push({ name: 'Login', query: { reason: 'auth-required' } })
+    return
+  }
+  if (response.redirect !== null) {
+    router.push({ name: response.redirect, query: { reason: 'auth-required' } })
+  }
+}
 
 const selectNaviPort = () => {
   router.push({ name: 'findNavi' })
@@ -100,7 +117,9 @@ const confirmPayment = async () => {
       <div class="space-y-4">
         <!-- NaviPort Selection -->
         <div class="border border-alt text-xs">
-          <div class="px-3 py-1 border-b border-alt font-secondary text-alt">// pickup location</div>
+          <div class="px-3 py-1 border-b border-alt font-secondary text-alt">
+            // pickup location
+          </div>
           <div v-if="hasNaviPort" class="px-3 py-3">
             <div class="flex items-center justify-between">
               <div>
@@ -142,7 +161,8 @@ const confirmPayment = async () => {
                 <p class="font-secondary mt-1">qty: {{ item.quantity }}</p>
                 <ul v-if="item.customizations.length > 0" class="mt-2 space-y-1 pl-2">
                   <li v-for="(custom, idx) in item.customizations" :key="idx">
-                    <span class="text-green mr-1">▸</span> {{ custom.groupName }}: {{ custom.optionName }}
+                    <span class="text-green mr-1">▸</span> {{ custom.groupName }}:
+                    {{ custom.optionName }}
                   </li>
                 </ul>
                 <p v-if="item.specialInstructions" class="italic mt-2 font-secondary">

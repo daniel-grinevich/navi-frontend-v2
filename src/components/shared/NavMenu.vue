@@ -60,13 +60,6 @@ const menuArt = ['▪', '▪', '▪', '▪']
         <span v-if="cart.itemCount > 0" class="text-green">[{{ cart.itemCount }}]</span>
       </router-link>
 
-      <router-link
-        to="/about"
-        class="no-underline px-3 py-1 border-r border-alt flex items-center hover:bg-green hover:text-primary transition-colors"
-      >
-        ABOUT
-      </router-link>
-
       <!-- Right side: spacer + auth -->
       <div class="ml-auto flex items-stretch">
         <template v-if="session.isAuthenticated">

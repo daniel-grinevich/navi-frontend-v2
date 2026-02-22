@@ -255,7 +255,7 @@ const statusDot = (status: string) => {
               <span class="text-green">{{ statusDot(order.status) }}</span>
               <span class="font-secondary w-20 shrink-0">{{ statusLabel(order.status) }}</span>
               <span class="shrink-0">{{ formatDate(order.created_at) }}</span>
-              <span class="ml-auto">${{ order.total.toFixed(2) }}</span>
+              <span class="ml-auto">${{ order.total }}</span>
             </div>
           </div>
         </div>

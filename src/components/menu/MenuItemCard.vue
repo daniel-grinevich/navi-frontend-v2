@@ -47,7 +47,7 @@ const isOffline = computed(() => props.status !== 'available')
     <div class="flex items-center justify-between gap-2">
       <span class="text-green">▸</span>
       <span class="tracking-wide font-mono text-sm flex-1">{{ name }}</span>
-      <span class="p-1 bg-black text-bone">${{ price }}</span>
+      <span class="p-1 bg-black text-bone font-mono">${{ price }}</span>
     </div>
     <p v-if="description" class="mt-2 font-secondary text-alt line-clamp-3">
       {{ description }}

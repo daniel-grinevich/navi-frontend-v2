@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /*** libraries ****/
-import { ref, computed } from 'vue'
-import { RouterLink, useRouter } from 'vue-router'
+import { ref, computed, onMounted } from 'vue'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 /*** components ****/
 import TinyLoadingSpinner from '@/components/shared/TinyLoadingSpinner.vue'
 /*** stores ***/
@@ -14,6 +14,7 @@ import { LoginSchema } from '@/schemas/user/LoginSchema'
 
 const sessionStore = useSessionStore()
 const router = useRouter()
+const route = useRoute()
 
 const email = ref('')
 const password = ref('')
@@ -95,6 +96,13 @@ const handleLoginSubmit = async (e: Event) => {
       <!-- Right: Login Form -->
       <div class="md:w-1/2 flex flex-col">
         <div class="px-3 py-1 border-b border-alt bg-green text-white">// sign in</div>
+
+        <div
+          v-if="route.query.reason === 'auth-required'"
+          class="border border-red text-red text-sm px-3 py-1 font-mono flex justify-center w-3/4 my-3 mx-auto"
+        >
+          You were redirected because you must login first.
+        </div>
 
         <div class="flex-1 flex flex-col justify-center p-6">
           <form

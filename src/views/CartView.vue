@@ -9,6 +9,7 @@ import { useShoppingCart } from '@/stores/shoppingCart'
 import { useSessionStore } from '@/stores/session'
 /*** composables ****/
 import { useZod } from '@/composables/useZod'
+import { useUserByEmail } from '@/composables/useUser'
 /** schemas ***/
 import { CartSchema } from '@/schemas/checkout/CartSchema'
 /*** types ****/
@@ -17,11 +18,44 @@ const router = useRouter()
 const cart = useShoppingCart()
 const session = useSessionStore()
 const guestEmail = ref<string>('')
+const guestEmailError = ref('')
 
-const cartErrorMessages = ref({
-  guestEmail: [],
-  cartItems: [],
+const cartErrorMessages = computed(() => {
+  let zodEmailErrors: string[] = []
+
+  if (!zodValueorError.value.success && zodValueorError.value.error) {
+    zodEmailErrors = zodValueorError.value.error.guestEmail ?? []
+  }
+
+  let allEmailErrors: string[] = []
+  if (guestEmailError.value.length) {
+    allEmailErrors = [...zodEmailErrors, guestEmailError.value]
+  } else {
+    allEmailErrors = [...zodEmailErrors]
+  }
+
+  let zodCartItemErrors: string[] = []
+
+  if (!zodValueorError.value.success && zodValueorError.value.error) {
+    zodCartItemErrors = zodValueorError.value.error.CartItem ?? []
+  }
+
+  return {
+    guestEmail: allEmailErrors,
+    cartItems: zodCartItemErrors,
+  }
 })
+
+const handleEmailInput = () => {
+  if (guestEmailError.value.length !== 0) guestEmailError.value = ''
+}
+
+const handleEmailBlur = () => {
+  debugger
+  if (cartErrorMessages.value.guestEmail.length) {
+    guestEmailError.value = cartErrorMessages.value.guestEmail[0] || 'Email has errors.'
+  }
+}
 
 const cartFields = computed(() => {
   return { guestEmail: guestEmail.value, cartItems: cart.itemCount }
@@ -29,45 +63,25 @@ const cartFields = computed(() => {
 
 const { zodValueorError } = useZod(cartFields, CartSchema)
 
-const validateEmail = (email: string): boolean => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  return emailRegex.test(email)
-}
+const submitCart = async () => {
+  debugger
+  if (cartErrorMessages.value.cartItems.length) return
+  if (session.isAuthenticated) router.push({ name: 'checkout' })
 
-const handleEmailBlur = () => {
-  if (!guestEmail.value) {
-    emailError.value = 'Email is required'
-  } else if (!validateEmail(guestEmail.value)) {
-    emailError.value = 'Please enter a valid email address'
-  } else {
-    emailError.value = ''
+  if (cartErrorMessages.value.guestEmail.length) {
+    guestEmailError.value = 'You must be logged in or provide an email! (◡︵◡)'
+    return
+  }
+
+  const response = await session.createGuest(guestEmail.value)
+
+  const redirect = response?.redirect || null
+  if (redirect === null) {
     session.setGuestEmail(guestEmail.value)
-  }
-}
-
-const handleEmailInput = () => {
-  if (emailError.value) {
-    emailError.value = ''
-  }
-}
-
-const submitCart = () => {
-  if (cart.itemCount === 0) return cartErrors.value.push('Cart Cannot be empty.')
-  if (cart.itemCount === 15) return cartErrors.value.push('Cart cannot exceed 15 itmes.')
-
-  if (!session.isAuthenticated) {
-    if (!guestEmail.value) {
-      emailError.value = 'Email is required'
-      return
-    }
-    if (!validateEmail(guestEmail.value)) {
-      emailError.value = 'Please enter a valid email address'
-      return
-    }
-    const emailExists = session.setGuestEmail(guestEmail.value)
+    router.push({ name: 'checkout' })
   }
 
-  router.push({ name: 'checkout' })
+  router.push({ name: redirect, query: { reason: 'auth-required' } })
 }
 
 const continueShopping = () => {
@@ -91,20 +105,20 @@ const continueShopping = () => {
       </div>
     </div>
 
-    <!-- Cart Items -->
     <div v-else class="space-y-4">
-      <!-- Guest Email -->
       <div
         v-if="!session.isAuthenticated"
-        :class="['text-xs', emailError ? 'border-2 border-red' : 'border border-green']"
+        :class="['text-xs', guestEmailError ? 'border-2 border-red' : 'border border-green']"
       >
         <div
           :class="[
             'px-3 py-1 border-b font-mono',
-            emailError ? 'border-red bg-red text-primary' : 'border-green bg-green text-primary',
+            guestEmailError
+              ? 'border-red bg-red text-primary'
+              : 'border-green bg-green text-primary',
           ]"
         >
-          {{ emailError ? '⚠ EMAIL REQUIRED' : '▸ EMAIL REQUIRED' }}
+          {{ guestEmailError ? '⚠ EMAIL REQUIRED' : '▸ EMAIL REQUIRED' }}
         </div>
         <div class="px-3 py-3">
           <span class="text-alt text-xs">enter your email so we can send you your receipt</span>
@@ -117,11 +131,11 @@ const continueShopping = () => {
             @input="handleEmailInput"
             :class="[
               'w-full px-3 py-2 mt-2 border bg-transparent text-xs font-mono focus:outline-none',
-              emailError ? 'border-red' : 'border-alt',
+              guestEmailError ? 'border-red' : 'border-alt',
             ]"
           />
-          <p v-if="emailError" class="text-red text-xs mt-3 px-2 py-2 border border-red">
-            {{ emailError }}
+          <p v-if="guestEmailError" class="text-red text-xs mt-3 px-2 py-2 border border-red">
+            {{ guestEmailError }}
           </p>
         </div>
       </div>

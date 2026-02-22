@@ -69,18 +69,19 @@ export const useSessionStore = defineStore('session', () => {
     user.value = { guestEmail }
   }
 
-  const createGuest = async () => {
-    if (!user.value.guestEmail) return
+  const createGuest = async (guestEmail: string | null = null) => {
+    const email = guestEmail || user.value.guestEmail
+    if (!email) return
 
     try {
       const response = await apiClient('api/create-guest/', {
         method: 'POST',
         body: JSON.stringify({
-          guestUser: user.value.guestEmail,
+          guestUser: email,
         }),
       })
 
-      return
+      return response
     } catch (error) {
       return
     }
