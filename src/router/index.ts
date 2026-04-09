@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
+import { useSessionStore } from '@/stores/session'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -46,6 +47,7 @@ const router = createRouter({
       path: '/checkout',
       name: 'checkout',
       component: () => import('../views/CheckoutView.vue'),
+      meta: { requiresAuth: true },
     },
     {
       path: '/order-confirmation/:orderId',
@@ -59,6 +61,15 @@ const router = createRouter({
       component: () => import('../views/OrdersView.vue'),
     },
   ],
+})
+
+router.beforeEach((to) => {
+  if (to.meta.requiresAuth) {
+    const session = useSessionStore()
+    if (!session.isAuthenticated) {
+      return { name: 'login', query: { reason: 'auth-required' } }
+    }
+  }
 })
 
 export default router

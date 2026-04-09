@@ -13,6 +13,7 @@ export const useSessionStore = defineStore('session', () => {
   const router = useRouter()
   const user = ref<User>({})
   const isAuthenticated = ref<boolean>(false)
+  const isGuest = ref<boolean>(false)
   const isInitialized = ref<boolean>(false)
 
   const initAuth = async () => {

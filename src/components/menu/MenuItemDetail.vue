@@ -4,6 +4,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { ref, computed, watch } from 'vue'
 /*** components ****/
 import CustomizationGroup from '@/components/menu/CustomizationGroup.vue'
+import NaviButton from '@/components/shared/NaviButton.vue'
 /*** stores ***/
 import { useShoppingCart } from '@/stores/shoppingCart'
 /*** composables ****/
@@ -202,13 +203,9 @@ const onAddToCartClick = () => {
             }})
           </span>
         </div>
-        <button
-          @click="onAddToCartClick"
-          :disabled="!canAddToCart"
-          class="group px-3 py-2 border border-alt cursor-pointer font-secondary tracking-wide hover:bg-green hover:text-primary transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-        >
-          <span class="text-green group-hover:text-primary">▸</span> ADD TO CART
-        </button>
+        <NaviButton :disabled="!canAddToCart" @click="onAddToCartClick">
+          ADD TO CART
+        </NaviButton>
       </div>
     </div>
 

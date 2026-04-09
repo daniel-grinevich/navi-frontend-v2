@@ -25,19 +25,16 @@ const form = useForm({
 </script>
 
 <template>
-  <form
-    @submit.prevent.stop="form.handleSubmit()"
-    :class="['text-xs', form.state.isTouched && !form.state.isValid ? 'border-2 border-red' : 'border border-green']"
-  >
+  <form @submit.prevent.stop="form.handleSubmit()" class="text-xs">
     <div
       :class="[
         'px-3 py-1 border-b font-mono',
         form.state.isTouched && !form.state.isValid
           ? 'border-red bg-red text-primary'
-          : 'border-green bg-green text-primary',
+          : 'border-alt font-secondary text-alt',
       ]"
     >
-      {{ form.state.isTouched && !form.state.isValid ? '⚠ EMAIL REQUIRED' : '▸ EMAIL REQUIRED' }}
+      {{ form.state.isTouched && !form.state.isValid ? '⚠ email required' : '// guest email' }}
     </div>
     <div class="px-3 py-3">
       <span class="text-alt text-xs">enter your email so we can send you your receipt</span>

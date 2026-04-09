@@ -120,7 +120,8 @@ body {
     @apply w-full max-w-sm;
   }
 
-  .card:hover {
+  .card:hover,
+  .navi-btn:hover:not(:disabled) {
     @apply -translate-x-0.5 -translate-y-0.5;
     box-shadow: 0.3rem 0.3rem 0px var(--color-alt);
   }

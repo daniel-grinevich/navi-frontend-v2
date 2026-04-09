@@ -41,11 +41,9 @@ const customizationSummary = computed(() => {
 </script>
 
 <template>
-  <div class="flex text-xs">
-    <!-- Green Ribbon -->
-    <div class="w-[0.5rem] bg-green border border-alt shrink-0"></div>
+  <div class="text-xs">
     <!-- Card Content -->
-    <div class="flex-1 border border-alt border-l-0">
+    <div class="flex-1">
       <!-- Header -->
       <div class="px-3 py-1 border-b border-alt flex justify-between items-center font-mono">
         <span class="text-alt">{{ item.menuItemName }}</span>
@@ -93,7 +91,7 @@ const customizationSummary = computed(() => {
       </div>
 
       <!-- Quantity + Total -->
-      <div class="px-3 py-2 border-t border-alt flex items-center justify-between">
+      <div class="px-3 py-2 flex items-center justify-between">
         <div class="flex items-center gap-2 font-secondary">
           <span class="text-alt">qty:</span>
           <button

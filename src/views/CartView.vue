@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 /*** components ****/
 import CartItemCard from '@/components/cart/CartItemCard.vue'
 import CartForm from '@/components/form/CartForm.vue'
+import NaviButton from '@/components/shared/NaviButton.vue'
 /*** stores ***/
 import { useShoppingCart } from '@/stores/shoppingCart'
 import { useSessionStore } from '@/stores/session'
@@ -22,57 +23,58 @@ const continueShopping = () => {
 </script>
 
 <template>
-  <div class="max-w-4xl mx-auto p-6 space-y-4">
-    <!-- Empty Cart State -->
-    <div v-if="cart.itemCount === 0" class="w-full text-xs border border-alt">
-      <div class="px-3 py-1 border-b border-alt font-secondary text-alt">// cart</div>
+  <div class="w-full text-xs">
+    <!-- Empty Cart -->
+    <div v-if="cart.itemCount === 0" class="border border-alt">
+      <div class="px-3 py-1 border-b border-alt text-primary bg-green">// cart</div>
       <div class="px-3 py-6 text-center">
-        <p>cart is empty.</p>
-        <button
-          @click="continueShopping"
-          class="group mt-3 px-3 py-2 border border-alt cursor-pointer font-secondary tracking-wide hover:bg-green hover:text-primary transition-colors"
-        >
-          <span class="text-green group-hover:text-primary">▸</span> BROWSE MENU
-        </button>
+        <p class="font-mono">cart is empty.</p>
+        <div class="mt-3 inline-block">
+          <NaviButton @click="continueShopping">BROWSE MENU</NaviButton>
+        </div>
       </div>
     </div>
 
-    <div v-else class="space-y-4">
-      <CartForm v-if="!session.isAuthenticated" />
-
-      <div class="space-y-4">
-        <CartItemCard v-for="item in cart.localCart" :key="item.cartItemId" :item="item" />
+    <!-- Filled Cart -->
+    <div v-else>
+      <!-- Guest Email -->
+      <div v-if="!session.isAuthenticated" class="border border-alt mb-4">
+        <CartForm />
       </div>
 
-      <div class="border border-alt text-xs">
-        <div class="px-3 py-1 border-b border-alt font-secondary text-alt">// order summary</div>
-        <div class="px-3 py-2 flex justify-between">
-          <span>subtotal ({{ cart.itemCount }} item{{ cart.itemCount > 1 ? 's' : '' }})</span>
-          <span class="font-mono">${{ cart.subtotal.toFixed(2) }}</span>
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <!-- Left Column: Items -->
+        <div class="lg:col-span-2 border border-alt">
+          <div class="px-3 py-1 border-b border-alt text-primary bg-green">
+            // cart ({{ cart.itemCount }} item{{ cart.itemCount > 1 ? 's' : '' }})
+          </div>
+          <div class="divide-y divide-alt">
+            <CartItemCard v-for="item in cart.localCart" :key="item.cartItemId" :item="item" />
+          </div>
         </div>
-        <div class="px-3 py-2 flex justify-between">
-          <span>tax (8%)</span>
-          <span class="font-mono">${{ cart.tax.toFixed(2) }}</span>
-        </div>
-        <div class="px-3 py-2 flex justify-between border-t border-alt">
-          <span>total</span>
-          <span class="font-mono">${{ cart.totalPrice.toFixed(2) }}</span>
-        </div>
-      </div>
 
-      <div class="flex gap-4 flex-col sm:flex-row text-xs">
-        <button
-          @click="continueShopping"
-          class="group flex-1 px-3 py-2 border border-alt cursor-pointer font-mono tracking-wide hover:bg-green hover:text-primary transition-colors"
-        >
-          <span class="text-green group-hover:text-primary">▸</span> CONTINUE SHOPPING
-        </button>
-        <button
-          @click="submitCart"
-          class="group flex-1 px-3 py-2 bg-green text-primary border border-alt cursor-pointer font-mono tracking-wide hover:bg-alt hover:text-primary hover:border-alt transition-colors"
-        >
-          <span>▸</span> CHECKOUT
-        </button>
+        <!-- Right Column: Summary -->
+        <div class="lg:col-span-1">
+          <div class="border border-alt lg:sticky lg:top-4">
+            <div class="px-3 py-1 border-b border-alt font-secondary text-alt">// order summary</div>
+            <div class="px-3 py-2 flex justify-between">
+              <span>subtotal ({{ cart.itemCount }} item{{ cart.itemCount > 1 ? 's' : '' }})</span>
+              <span class="font-mono">${{ cart.subtotal.toFixed(2) }}</span>
+            </div>
+            <div class="px-3 py-2 flex justify-between">
+              <span>tax (8%)</span>
+              <span class="font-mono">${{ cart.tax.toFixed(2) }}</span>
+            </div>
+            <div class="px-3 py-2 flex justify-between border-t border-dashed border-alt">
+              <span class="font-bold">total</span>
+              <span class="font-mono font-bold">${{ cart.totalPrice.toFixed(2) }}</span>
+            </div>
+            <div class="px-3 py-3 border-t border-alt space-y-2">
+              <NaviButton variant="filled" full-width @click="submitCart">CHECKOUT</NaviButton>
+              <NaviButton full-width @click="continueShopping">CONTINUE SHOPPING</NaviButton>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
