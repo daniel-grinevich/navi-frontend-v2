@@ -66,6 +66,7 @@ export type CustomizationGroup = {
   description?: string
   display_order: number
   is_required: boolean
+  allow_multiple: boolean
   min_allowed: number
   max_allowed: number
   customizations: CustomizationOption[]

@@ -45,7 +45,9 @@ watch(
 )
 
 const customizationGroups = computed(() => {
-  return menuItem.value?.category?.customization_groups || []
+  return [...(menuItem.value?.category?.customization_groups || [])].sort(
+    (a, b) => Number(b.is_required) - Number(a.is_required),
+  )
 })
 
 const customizationMap = computed(() => {
@@ -159,7 +161,7 @@ const onAddToCartClick = () => {
   <div v-else-if="menuItem" class="w-full text-xs">
     <!-- item info -->
     <div class="border border-alt">
-      <div class="px-3 py-1 border-b border-alt font-secondary text-primary bg-green">
+      <div class="px-3 py-1 border-b border-alt text-primary bg-green">
         // {{ menuItem.name }}
       </div>
       <div class="px-3 py-3">
@@ -173,15 +175,24 @@ const onAddToCartClick = () => {
       </div>
       <div class="px-3 py-3 border-t border-alt flex items-center gap-4">
         <div class="flex items-center gap-2">
-          <span class="font-secondary">qty:</span>
-          <input
-            id="quantity"
-            v-model.number="quantity"
-            type="number"
-            min="1"
-            max="99"
-            class="w-16 px-2 py-1 border border-alt bg-transparent text-xs font-mono"
-          />
+          <span class="font-primary">quantity:</span>
+          <button
+            type="button"
+            :disabled="quantity <= 1"
+            @click="quantity = Math.max(1, quantity - 1)"
+            class="w-7 h-7 border border-alt bg-transparent text-xs font-mono cursor-pointer hover:bg-green hover:text-primary transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+          >
+            −
+          </button>
+          <span class="w-8 text-center font-mono text-xs">{{ quantity }}</span>
+          <button
+            type="button"
+            :disabled="quantity >= 99"
+            @click="quantity = Math.min(99, quantity + 1)"
+            class="w-7 h-7 border border-alt bg-transparent text-xs font-mono cursor-pointer hover:bg-green hover:text-primary transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+          >
+            +
+          </button>
         </div>
         <div class="flex-1 text-right font-mono">
           ${{ displayPrice.toFixed(2) }}
