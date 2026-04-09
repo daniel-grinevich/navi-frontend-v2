@@ -1,5 +1,6 @@
 <script setup lang="ts">
 /*** libraries ****/
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 /*** components ****/
 import CartItemCard from '@/components/cart/CartItemCard.vue'
@@ -12,6 +13,7 @@ import { useSessionStore } from '@/stores/session'
 const router = useRouter()
 const cart = useShoppingCart()
 const session = useSessionStore()
+const isEditingEmail = ref(false)
 
 const submitCart = () => {
   if (session.isAuthenticated || session.isGuest) {
@@ -40,8 +42,24 @@ const continueShopping = () => {
     <!-- Filled Cart -->
     <div v-else>
       <!-- Guest Email -->
-      <div v-if="!session.isAuthenticated" class="border border-alt mb-4">
-        <CartForm />
+      <div v-if="!session.isAuthenticated && (!session.isGuest || isEditingEmail)" class="border border-alt mb-4">
+        <CartForm
+          :prefill-email="session.user.guestEmail || ''"
+          @cancel="isEditingEmail = false"
+        />
+      </div>
+      <div v-else-if="session.isGuest && !isEditingEmail" class="border border-alt mb-4 text-xs">
+        <div class="px-3 py-2 flex items-center justify-between">
+          <span>
+            <span class="text-green">▸</span> guest: <span class="font-mono">{{ session.user.guestEmail }}</span>
+          </span>
+          <button
+            @click="isEditingEmail = true"
+            class="font-mono text-green hover:text-green/70 cursor-pointer transition-colors"
+          >
+            [change]
+          </button>
+        </div>
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">

@@ -1,14 +1,32 @@
 <script setup lang="ts">
 import { useForm } from '@tanstack/vue-form'
+import { useRouter } from 'vue-router'
 import { useSessionStore } from '@/stores/session'
-import { cartFormOptions, validateEmail } from '@/schemas/form/CartOptions'
+import { validateEmail } from '@/schemas/form/CartOptions'
 
+const props = defineProps<{
+  prefillEmail?: string
+}>()
+
+const emit = defineEmits<{
+  cancel: []
+}>()
+
+const router = useRouter()
 const session = useSessionStore()
 
 const form = useForm({
-  ...cartFormOptions,
+  defaultValues: {
+    guestEmail: props.prefillEmail || '',
+  },
   onSubmit: async ({ value }) => {
-    await session.createGuest(value.guestEmail)
+    const response = await session.createGuest(value.guestEmail)
+
+    if (response?.redirect) {
+      router.push({ name: response.redirect, query: { reason: 'auth-required' } })
+      return
+    }
+
     session.setGuestEmail(value.guestEmail)
   },
 })
@@ -53,12 +71,20 @@ const form = useForm({
         </div>
       </template>
     </form.Field>
-    <div class="px-3 pb-3">
+    <div class="px-3 pb-3 flex gap-3">
       <button
         type="submit"
         class="group px-3 py-2 border border-alt cursor-pointer font-mono tracking-wide hover:bg-green hover:text-primary transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
       >
-        <span class="text-green group-hover:text-primary">▸</span> CONTINUE AS GUEST
+        <span class="text-green group-hover:text-primary">▸</span> {{ prefillEmail ? 'UPDATE EMAIL' : 'CONTINUE AS GUEST' }}
+      </button>
+      <button
+        v-if="prefillEmail"
+        type="button"
+        @click="emit('cancel')"
+        class="px-3 py-2 border border-alt cursor-pointer font-mono tracking-wide hover:bg-alt hover:text-primary transition-colors"
+      >
+        [cancel]
       </button>
     </div>
   </form>
