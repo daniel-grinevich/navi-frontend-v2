@@ -30,7 +30,13 @@ export const useSessionStore = defineStore('session', () => {
         method: 'GET',
       })
 
-      data.is_guest ? (user.value.guestEmail = data.email) : (user.value = data)
+      if (data.is_guest) {
+        user.value.guestEmail = data.email
+        isGuest.value = true
+      } else {
+        user.value = data
+        isGuest.value = false
+      }
     } catch (err: any) {
       if (err.status === 401 && refresh) {
         const refreshed = await refreshAccessToken()
