@@ -66,8 +66,8 @@ const router = createRouter({
 router.beforeEach((to) => {
   if (to.meta.requiresAuth) {
     const session = useSessionStore()
-    if (!session.isAuthenticated) {
-      return { name: 'login', query: { reason: 'auth-required' } }
+    if (!session.isAuthenticated && !session.isGuest) {
+      return { name: 'cart', query: { reason: 'auth-required' } }
     }
   }
 })

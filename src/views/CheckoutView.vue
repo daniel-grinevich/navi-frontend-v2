@@ -24,28 +24,13 @@ const hasNaviPort = computed(() => cart.selectedNaviPort !== null)
 onBeforeMount(() => {
   if (cart.itemCount === 0) {
     router.push({ name: 'menu' })
-  }
-  debugger
-
-  if (session.user.guestEmail != null) {
-    setGuestOrRedirect()
-  }
-
-  if (!session.isAuthenticated) {
-    router.push({ name: 'cart' })
-  }
-})
-
-const setGuestOrRedirect = async () => {
-  const response = await session.createGuest()
-  if (!response) {
-    router.push({ name: 'Login', query: { reason: 'auth-required' } })
     return
   }
-  if (response.redirect !== null) {
-    router.push({ name: response.redirect, query: { reason: 'auth-required' } })
+
+  if (!session.isAuthenticated && !session.isGuest) {
+    router.push({ name: 'cart', query: { reason: 'auth-required' } })
   }
-}
+})
 
 const selectNaviPort = () => {
   router.push({ name: 'findNavi' })

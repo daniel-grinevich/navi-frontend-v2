@@ -14,7 +14,9 @@ const cart = useShoppingCart()
 const session = useSessionStore()
 
 const submitCart = () => {
-  if (session.isAuthenticated) router.push({ name: 'checkout' })
+  if (session.isAuthenticated || session.isGuest) {
+    router.push({ name: 'checkout' })
+  }
 }
 
 const continueShopping = () => {

@@ -1,45 +1,41 @@
 <script setup lang="ts">
 import { useForm } from '@tanstack/vue-form'
-import { useRouter } from 'vue-router'
 import { useSessionStore } from '@/stores/session'
-import { cartFormOptions } from '@/schemas/form/CartOptions'
+import { cartFormOptions, validateEmail } from '@/schemas/form/CartOptions'
 
-const router = useRouter()
 const session = useSessionStore()
 
 const form = useForm({
   ...cartFormOptions,
   onSubmit: async ({ value }) => {
-    const response = await session.createGuest(value.guestEmail)
-
-    const redirect = response?.redirect || null
-    if (redirect === null) {
-      session.setGuestEmail(value.guestEmail)
-      router.push({ name: 'checkout' })
-      return
-    }
-
-    router.push({ name: redirect, query: { reason: 'auth-required' } })
+    await session.createGuest(value.guestEmail)
+    session.setGuestEmail(value.guestEmail)
   },
 })
 </script>
 
 <template>
   <form @submit.prevent.stop="form.handleSubmit()" class="text-xs">
-    <div
-      :class="[
-        'px-3 py-1 border-b font-mono',
-        form.state.isTouched && !form.state.isValid
-          ? 'border-red bg-red text-primary'
-          : 'border-alt font-secondary text-alt',
-      ]"
+    <form.Field
+      name="guestEmail"
+      :validators="{
+        onBlur: ({ value }: { value: string }) => validateEmail(value),
+        onSubmit: ({ value }: { value: string }) => validateEmail(value),
+      }"
     >
-      {{ form.state.isTouched && !form.state.isValid ? '⚠ email required' : '// guest email' }}
-    </div>
-    <div class="px-3 py-3">
-      <span class="text-alt text-xs">enter your email so we can send you your receipt</span>
-      <form.Field name="guestEmail">
-        <template #default="{ field, state }">
+      <template #default="{ field, state }">
+        <div
+          :class="[
+            'px-3 py-1 border-b font-mono',
+            state.meta.errors.length
+              ? 'border-red bg-red text-primary'
+              : 'border-alt font-secondary text-alt',
+          ]"
+        >
+          {{ state.meta.errors.length ? '⚠ EMAIL REQUIRED' : '// guest email' }}
+        </div>
+        <div class="px-3 py-3">
+          <span class="text-alt text-xs">enter your email so we can send you your receipt</span>
           <input
             :value="field.state.value"
             @input="(e: Event) => field.handleChange((e.target as HTMLInputElement).value)"
@@ -54,13 +50,12 @@ const form = useForm({
           <p v-if="state.meta.errors.length" class="text-red text-xs mt-3 px-2 py-2 border border-red">
             {{ state.meta.errors[0] }}
           </p>
-        </template>
-      </form.Field>
-    </div>
+        </div>
+      </template>
+    </form.Field>
     <div class="px-3 pb-3">
       <button
         type="submit"
-        :disabled="!form.state.isValid && form.state.isTouched"
         class="group px-3 py-2 border border-alt cursor-pointer font-mono tracking-wide hover:bg-green hover:text-primary transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
       >
         <span class="text-green group-hover:text-primary">▸</span> CONTINUE AS GUEST

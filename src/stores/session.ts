@@ -16,12 +16,20 @@ export const useSessionStore = defineStore('session', () => {
   const isGuest = ref<boolean>(false)
   const isInitialized = ref<boolean>(false)
 
-  const initAuth = async () => {
-    console.log('INITALIZING AUTH')
-    const result = await getUser()
-    if (result && Object.keys(user.value).length > 0) isAuthenticated.value = true
+  let initPromise: Promise<void> | null = null
 
-    isInitialized.value = true // TODO: Check this is needed?! or useful? idk.
+  const initAuth = () => {
+    if (initPromise) return initPromise
+
+    initPromise = (async () => {
+      const result = await getUser()
+      if (result && !isGuest.value && Object.keys(user.value).length > 0) {
+        isAuthenticated.value = true
+      }
+      isInitialized.value = true
+    })()
+
+    return initPromise
   }
 
   const getUser = async (refresh: boolean = true) => {
@@ -60,6 +68,7 @@ export const useSessionStore = defineStore('session', () => {
     } finally {
       user.value = {}
       isAuthenticated.value = false
+      isGuest.value = false
       router.push('/')
     }
   }
@@ -74,6 +83,7 @@ export const useSessionStore = defineStore('session', () => {
 
   const setGuestEmail = (guestEmail: string) => {
     user.value = { guestEmail }
+    isGuest.value = true
   }
 
   const createGuest = async (guestEmail: string | null = null) => {
@@ -110,6 +120,7 @@ export const useSessionStore = defineStore('session', () => {
     getUser,
     createGuest,
     isAuthenticated,
+    isGuest,
     isAdmin,
     logout,
     setGuestEmail,
