@@ -121,6 +121,7 @@ export const useSessionStore = defineStore('session', () => {
     createGuest,
     isAuthenticated,
     isGuest,
+    isInitialized,
     isAdmin,
     logout,
     setGuestEmail,

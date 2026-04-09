@@ -63,9 +63,14 @@ const router = createRouter({
   ],
 })
 
-router.beforeEach((to) => {
+router.beforeEach(async (to) => {
   if (to.meta.requiresAuth) {
     const session = useSessionStore()
+
+    if (!session.isInitialized) {
+      await session.initAuth()
+    }
+
     if (!session.isAuthenticated && !session.isGuest) {
       return { name: 'cart', query: { reason: 'auth-required' } }
     }

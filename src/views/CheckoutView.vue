@@ -24,11 +24,6 @@ const hasNaviPort = computed(() => cart.selectedNaviPort !== null)
 onBeforeMount(() => {
   if (cart.itemCount === 0) {
     router.push({ name: 'menu' })
-    return
-  }
-
-  if (!session.isAuthenticated && !session.isGuest) {
-    router.push({ name: 'cart', query: { reason: 'auth-required' } })
   }
 })
 
