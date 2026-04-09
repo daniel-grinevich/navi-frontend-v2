@@ -136,79 +136,113 @@ const handleSignupSubmit = async (e: Event) => {
 </script>
 
 <template>
-  <div class="min-h-screen flex justify-center py-3">
-    <div class="w-full max-w-md">
-      <div class="p-8 border">
-        <div class="mb-8">
-          <h1 class="font-title text-2xl mb-2">Create Navi Account</h1>
-        </div>
+  <div class="w-full text-xs border border-alt">
+    <div class="flex flex-col md:flex-row min-h-[75vh]">
+      <!-- Left: Sign Up Form -->
+      <div class="md:w-1/2 border-b md:border-b-0 md:border-r border-alt flex flex-col">
+        <div class="px-3 py-1 border-b border-alt bg-green text-white">// sign up</div>
 
-        <form @submit.prevent="handleSignupSubmit" class="space-y-4">
-          <div>
-            <label for="email" class="block font-body text-sm mb-2">Email:</label>
-            <input
-              id="email"
-              v-model="email"
-              class="w-full px-4 py-2 border text-sm"
-              type="email"
-              placeholder="name@example.com"
-              @input="handleEmailInput"
-            />
-            <div id="email-errors" class="text-red h-6 mt-1 text-xs">
-              {{ allEmailErrors[0] }}
+        <div class="flex-1 flex flex-col justify-center p-6">
+          <form @submit.prevent="handleSignupSubmit" class="flex flex-col gap-3 max-w-sm mx-auto w-full">
+            <div class="flex flex-col gap-0.5">
+              <label for="email" class="block text-xs border border-alt max-w-fit p-1">email:</label>
+              <input
+                id="email"
+                v-model="email"
+                type="email"
+                placeholder="you@example.com"
+                autocomplete="email"
+                class="w-full px-4 py-2 border border-alt outline-0 focus:border-green"
+                @input="handleEmailInput"
+              />
+              <div id="email-errors" class="text-red h-5 mt-0.5 text-xs">
+                {{ allEmailErrors[0] }}
+              </div>
             </div>
-          </div>
-          <div>
-            <label for="password" class="block font-body text-sm mb-2">Password:</label>
-            <input
-              id="password"
-              v-model="password"
-              type="password"
-              required
-              placeholder="••••••••"
-              class="w-full px-4 py-2 border text-sm"
-              @input="markPasswordTouched"
-            />
-            <div id="password-errors" class="text-red h-8">
-              <div class="mt-1 text-xs">
+
+            <div class="flex flex-col gap-0.5">
+              <label for="password" class="block text-xs border border-alt max-w-fit p-1">password:</label>
+              <input
+                id="password"
+                v-model="password"
+                type="password"
+                required
+                placeholder="••••••••"
+                autocomplete="new-password"
+                class="w-full px-4 py-2 border border-alt outline-0 focus:border-green"
+                @input="markPasswordTouched"
+              />
+              <div class="text-red h-5 mt-0.5 text-xs">
                 {{ allPasswordErrors[0] }}
               </div>
             </div>
-          </div>
 
-          <div>
-            <label for="confirm-password" cclass="block font-body text-sm mb-2"
-              >Confirm password:</label
-            >
-            <input
-              id="confirm-password"
-              v-model="confirmPassword"
-              type="password"
-              required
-              placeholder="••••••••"
-              class="w-full px-4 py-2 border text-sm"
-              @input="markConfirmPasswordTouched"
-            />
-            <div id="password-errors" class="text-red h-8">
-              <div v-if="confirmPasswordError !== ''" class="mt-1 text-xs">
-                {{ confirmPasswordError }}
+            <div class="flex flex-col gap-0.5">
+              <label for="confirm-password" class="block text-xs border border-alt max-w-fit p-1">confirm password:</label>
+              <input
+                id="confirm-password"
+                v-model="confirmPassword"
+                type="password"
+                required
+                placeholder="••••••••"
+                autocomplete="new-password"
+                class="w-full px-4 py-2 border border-alt outline-0 focus:border-green"
+                @input="markConfirmPasswordTouched"
+              />
+              <div class="text-red h-5 mt-0.5 text-xs">
+                <span v-if="confirmPasswordError !== ''">{{ confirmPasswordError }}</span>
               </div>
             </div>
+
+            <div v-if="errorMessages.submit.length" class="p-2 border border-red text-red text-xs">
+              {{ errorMessages.submit[0] }}
+            </div>
+
+            <button
+              type="submit"
+              :disabled="loading"
+              class="w-full py-2 px-4 bg-green text-white border border-green cursor-pointer font-mono tracking-wide text-xs hover:bg-alt hover:text-primary hover:border-alt transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+            >
+              {{ loading ? 'creating account...' : '▸ SIGN UP' }}
+            </button>
+          </form>
+
+          <p class="text-center text-xs mt-6">
+            already have an account?
+            <RouterLink to="/login" class="text-green hover:underline">sign in</RouterLink>
+          </p>
+        </div>
+      </div>
+
+      <!-- Right: ASCII Art -->
+      <div class="md:w-1/2 flex flex-col">
+        <div class="px-3 py-1 border-b border-alt font-secondary text-alt">//</div>
+
+        <div class="flex-1 flex flex-col items-center justify-center p-6 overflow-hidden">
+          <div class="text-green whitespace-pre leading-none select-none">
+            <div>        ( (</div>
+            <div>         ) )</div>
+            <div>      .─────.</div>
+            <div>      │~~~~~│┐</div>
+            <div>      │~~~~~││</div>
+            <div>      │_____│┘</div>
+            <div>      ╰─────╯</div>
+            <div>     ▀▀▀▀▀▀▀▀▀</div>
           </div>
 
-          <button
-            type="submit"
-            :disabled="loading"
-            class="w-full py-3 px-4 bg-alt text-primary rounded-lg font-body text-base focus:outline-none transition-transform disabled:opacity-50 disabled:cursor-not-allowed mt-6 cursor-pointer"
-          >
-            {{ loading ? 'creating account...' : 'Sign Up' }}
-          </button>
-        </form>
-
-        <p class="mt-6 text-alt text-center font-body text-sm">
-          already have an account?
-          <RouterLink to="/login" class="hover:underline ml-1"> sign in </RouterLink>
-        </p>
+          <div class="mt-8 text-green whitespace-pre leading-tight select-none text-center">
+            <div>┌─────────────────────┐</div>
+            <div>│  WELCOME TO NAVI    │</div>
+            <div>│                     │</div>
+            <div>│  ▸ save favorites   │</div>
+            <div>│  ▸ track orders     │</div>
+            <div>│  ▸ earn rewards     │</div>
+            <div>│                     │</div>
+            <div>│  status: awaiting   │</div>
+            <div>│  new user... █      │</div>
+            <div>└─────────────────────┘</div>
+          </div>
+        </div>
       </div>
     </div>
   </div>

@@ -1,7 +1,7 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
-import { useStorage } from '@vueuse/core'
 import { apiClient } from '@/lib/apiClient'
+import { useRouter } from 'vue-router'
 
 interface User {
   email?: string
@@ -10,52 +10,71 @@ interface User {
 }
 
 export const useSessionStore = defineStore('session', () => {
+  const router = useRouter()
   const user = ref<User>({})
-  const session = useStorage(
-    'my-access-token',
-    { accessToken: '', refreshToken: '' },
-    sessionStorage,
-  )
+  const isAuthenticated = ref<boolean>(false)
+  const isGuest = ref<boolean>(false)
+  const isInitialized = ref<boolean>(false)
 
-  const isAuthenticated = computed(() => {
-    return !!session.value.accessToken
-  })
+  let initPromise: Promise<void> | null = null
 
-  const initAuth = async () => {
-    await getUser()
+  const initAuth = () => {
+    if (initPromise) return initPromise
+
+    initPromise = (async () => {
+      const result = await getUser()
+      if (result && !isGuest.value && Object.keys(user.value).length > 0) {
+        isAuthenticated.value = true
+      }
+      isInitialized.value = true
+    })()
+
+    return initPromise
   }
 
-  const getUser = async () => {
-    if (!session.value.accessToken || !session.value.refreshToken) {
-      return
-    }
+  const getUser = async (refresh: boolean = true) => {
     try {
-      const fullToken = 'Bearer ' + session.value.accessToken
-      const data = await apiClient('/api/users/me', {
+      const data = await apiClient('api/users/me/', {
         method: 'GET',
-        headers: { Authorization: fullToken },
       })
 
-      data.is_guest ? (user.value.guestEmail = data.email) : (user.value = data)
-    } catch (err: any) {
-      if (err.status === 401) {
-        const refreshed = await refreshAccessToken()
-        if (refreshed) {
-          return getUser() // retry
-        }
+      if (data.is_guest) {
+        user.value.guestEmail = data.email
+        isGuest.value = true
       } else {
-        logout()
+        user.value = data
+        isGuest.value = false
       }
+    } catch (err: any) {
+      if (err.status === 401 && refresh) {
+        const refreshed = await refreshAccessToken()
+        if (!refreshed) return false
+
+        return await getUser(false)
+      }
+
+      return false
+    }
+
+    return true
+  }
+
+  const logout = async () => {
+    try {
+      await apiClient('api/logout/', { method: 'POST' })
+      return true
+    } catch {
+      return false
+    } finally {
+      user.value = {}
+      isAuthenticated.value = false
+      isGuest.value = false
+      router.push('/')
     }
   }
 
-  const logout = () => {
-    session.value = { accessToken: '', refreshToken: '' }
-    user.value = {}
-  }
-
-  const isAdmin = computed(() => {
-    if (!user) getUser()
+  const isAdmin = computed(async () => {
+    if (!user) await getUser()
 
     if (user.value?.is_admin) return true
 
@@ -64,40 +83,30 @@ export const useSessionStore = defineStore('session', () => {
 
   const setGuestEmail = (guestEmail: string) => {
     user.value = { guestEmail }
+    isGuest.value = true
   }
 
-  const createGuest = async () => {
-    if (!user.value.guestEmail) return
+  const createGuest = async (guestEmail: string | null = null) => {
+    const email = guestEmail || user.value.guestEmail
+    if (!email) return
 
     try {
       const response = await apiClient('api/create-guest/', {
         method: 'POST',
         body: JSON.stringify({
-          guestUser: user.value.guestEmail,
+          guestUser: email,
         }),
       })
 
-      const { accessToken, refreshToken, user: userData } = response
-      console.log(accessToken)
-
-      session.value = { accessToken: accessToken, refreshToken: refreshToken }
+      return response
     } catch (error) {
-      console.error(`Error when creating guest user ${error}`)
+      return
     }
   }
 
   const refreshAccessToken = async () => {
-    if (!session.value.refreshToken) return false
-
     try {
-      const data = await apiClient('/api/token/refresh/', {
-        method: 'POST',
-        body: JSON.stringify({
-          refresh: session.value.refreshToken,
-        }),
-      })
-
-      session.value.accessToken = data.access
+      await apiClient('api/token/refresh/', { method: 'POST' })
       return true
     } catch {
       logout()
@@ -107,11 +116,12 @@ export const useSessionStore = defineStore('session', () => {
 
   return {
     user,
-    session,
     initAuth,
     getUser,
     createGuest,
     isAuthenticated,
+    isGuest,
+    isInitialized,
     isAdmin,
     logout,
     setGuestEmail,

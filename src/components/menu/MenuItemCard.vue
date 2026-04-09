@@ -40,21 +40,17 @@ const isOffline = computed(() => props.status !== 'available')
 </script>
 
 <template>
-  <div class="card h-72 w-64 flex flex-col" @click="onMenuItemClick()">
-    <!-- Action Button -->
-    <div class="w-full border h-36 mx-auto flex items-center justify-center">Placeholder</div>
-    <div id="info">
-      <div class="flex flex-row">
-        <h2 class="text-2xl font-primary grow">{{ props.name }}</h2>
-        <div class="flex justify-end align-bottom">
-          <div class="bg-dark-bg text-bone p-1 items-center align-middle">${{ props.price }}</div>
-        </div>
-      </div>
-      <div class="font-secondary">
-        <p>---------------------</p>
-      </div>
-
-      <button class="bg-opposite" @click.stop="onMenuItemClick()">Start Order</button>
+  <div
+    class="card w-56 h-36 shrink-0 border border-alt p-3 cursor-pointer transition-colors flex flex-col"
+    @click="onMenuItemClick"
+  >
+    <div class="flex items-center justify-between gap-2">
+      <span class="text-green">▸</span>
+      <span class="tracking-wide font-mono text-sm flex-1">{{ name }}</span>
+      <span class="p-1 bg-black text-bone font-mono">${{ price }}</span>
     </div>
+    <p v-if="description" class="mt-2 font-secondary text-alt line-clamp-3">
+      {{ description }}
+    </p>
   </div>
 </template>

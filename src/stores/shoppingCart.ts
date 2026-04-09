@@ -61,6 +61,20 @@ export const useShoppingCart = defineStore('shopping-cart', () => {
     localCart.value = localCart.value.filter((item) => item.cartItemId !== cartItemId)
   }
 
+  const updateCartItem = (cartItemId: string, updated: Omit<CartItem, 'cartItemId' | 'totalPrice'>) => {
+    localCart.value = localCart.value.map((item) => {
+      if (item.cartItemId !== cartItemId) return item
+  
+      const mergedItem: CartItem = {
+        ...item,
+        ...updated,
+        totalPrice: calculateItemTotal(updated),
+      }
+  
+      return mergedItem
+    })
+  }
+
   const updateCartItemQuantity = (cartItemId: string, quantity: number) => {
     if (quantity < 1) return
 
@@ -88,6 +102,7 @@ export const useShoppingCart = defineStore('shopping-cart', () => {
     totalPrice,
     addCartItem,
     removeCartItem,
+    updateCartItem,
     updateCartItemQuantity,
     clearCart,
   }

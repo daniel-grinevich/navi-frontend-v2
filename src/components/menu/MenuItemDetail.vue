@@ -1,9 +1,10 @@
 <script setup lang="ts">
 /*** libraries ****/
 import { useRouter, useRoute } from 'vue-router'
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 /*** components ****/
 import CustomizationGroup from '@/components/menu/CustomizationGroup.vue'
+import NaviButton from '@/components/shared/NaviButton.vue'
 /*** stores ***/
 import { useShoppingCart } from '@/stores/shoppingCart'
 /*** composables ****/
@@ -16,14 +17,38 @@ const router = useRouter()
 const route = useRoute()
 const shoppingCart = useShoppingCart()
 
+const cartId = route.params.cartId as string
+const cartItem = shoppingCart.localCart.find((value) => value.cartItemId == cartId)
+
 const id = route.params.id as string
 const { isLoading, data: menuItem, isError } = useMenuItem(id)
 
 const selectedCustomizations = ref<Map<string, SelectedCustomization[]>>(new Map())
-const quantity = ref<number>(1)
+const quantity = ref<number>(cartItem ? cartItem.quantity : 1)
+
+//set item values if editing
+watch(
+  menuItem,
+  (item) => {
+    if (!item || !cartItem) return
+    // Rebuild selectedCustomizations Map
+    const map = new Map<string, SelectedCustomization[]>()
+
+    ;(cartItem.customizations as SelectedCustomization[]).forEach((c) => {
+      const list = map.get(c.groupId) || []
+      list.push(c)
+      map.set(c.groupId, list)
+    })
+
+    selectedCustomizations.value = map
+  },
+  { immediate: true },
+)
 
 const customizationGroups = computed(() => {
-  return menuItem.value?.category?.customization_groups || []
+  return [...(menuItem.value?.category?.customization_groups || [])].sort(
+    (a, b) => Number(b.is_required) - Number(a.is_required),
+  )
 })
 
 const customizationMap = computed(() => {
@@ -39,6 +64,10 @@ const customizationMap = computed(() => {
   })
 
   return customizationMap
+})
+
+const hasCustomizations = computed(() => {
+  return customizationGroups.value.length > 0
 })
 
 const updateCustomization = (groupId: string, customizationId: string, action: string) => {
@@ -105,7 +134,7 @@ const canAddToCart = computed(() => {
 const onAddToCartClick = () => {
   if (!menuItem.value || !canAddToCart.value) return
 
-  const cartItem: Omit<CartItem, 'cartItemId' | 'totalPrice'> = {
+  const cartItemData: Omit<CartItem, 'cartItemId' | 'totalPrice'> = {
     menuItemId: menuItem.value.id,
     menuItemName: menuItem.value.name,
     menuItemSlug: menuItem.value.slug,
@@ -114,84 +143,89 @@ const onAddToCartClick = () => {
     quantity: quantity.value,
   }
 
-  shoppingCart.addCartItem(cartItem)
-  router.push({ name: 'menu' })
+  if (cartId) {
+    shoppingCart.updateCartItem(cartId, cartItemData)
+  } else {
+    shoppingCart.addCartItem(cartItemData)
+  }
+  router.push({ name: 'cart' })
 }
 </script>
 
 <template>
-  <div v-if="isLoading" class="flex items-center justify-center p-8">
-    <div>Loading...</div>
+  <div v-if="isLoading" class="w-full text-xs border border-alt">
+    <div class="px-3 py-2 font-secondary">loading item...</div>
   </div>
-  <div v-else-if="isError" class="p-4">Error loading menu item</div>
-  <div v-else-if="menuItem" class="max-w-3xl mx-auto p-6">
-    <div class="border rounded-lg p-6 mb-6">
-      <div class="flex justify-between items-start">
-        <div class="flex-1">
-          <h2 class="text-3xl font-bold">{{ menuItem.name }}</h2>
-          <p v-if="menuItem.description" class="mt-2">
-            {{ menuItem.description }}
-          </p>
-        </div>
-        <div class="ml-6 text-right">
-          <p class="text-sm">Base Price</p>
-          <p class="text-2xl font-bold">${{ menuItem.price }}</p>
-        </div>
+  <div v-else-if="isError" class="w-full text-xs border border-alt">
+    <div class="px-3 py-2 font-secondary">error loading item.</div>
+  </div>
+  <div v-else-if="menuItem" class="w-full text-xs">
+    <!-- item info -->
+    <div class="border border-alt">
+      <div class="px-3 py-1 border-b border-alt text-primary bg-green">
+        // {{ menuItem.name }}
       </div>
-    </div>
-
-    <div v-if="customizationGroups.length === 0">No customizations</div>
-    <div v-else class="mb-6">
-      <h3 class="text-xl font-semibold mb-4">Customize Your Order</h3>
-      <div v-for="group in customizationGroups" :key="group.id">
-        <CustomizationGroup :group="group" @update-customization="updateCustomization" />
-      </div>
-    </div>
-
-    <div class="border-t pt-6 sticky bottom-0 bg-primary text-gray-900 dark:bg-alt dark:text-white">
-      <div class="flex items-center justify-between gap-4 flex-wrap">
-        <div class="flex items-center gap-4">
-          <label for="quantity" class="text-sm font-medium"> Quantity: </label>
-          <input
-            id="quantity"
-            v-model.number="quantity"
-            type="number"
-            min="1"
-            max="99"
-            class="w-20 px-3 py-2 border rounded-md"
-          />
+      <div class="px-3 py-3">
+        <div class="flex items-center justify-between">
+          <span class="tracking-wide font-mono text-sm">{{ menuItem.name }}</span>
+          <span class="font-mono">${{ menuItem.price }}</span>
         </div>
-
-        <div class="text-right flex-1">
-          <p class="text-sm">Total Price</p>
-          <p class="text-3xl font-bold">${{ displayPrice.toFixed(2) }}</p>
-          <p v-if="totalCustomizationModifiers !== 0" class="text-x">
-            (includes
-            {{ totalCustomizationModifiers > 0 ? '+' : '' }}${{
+        <p v-if="menuItem.description" class="mt-2 font-secondary text-alt">
+          {{ menuItem.description }}
+        </p>
+      </div>
+      <div class="px-3 py-3 border-t border-alt flex items-center gap-4">
+        <div class="flex items-center gap-2">
+          <span class="font-primary">quantity:</span>
+          <button
+            type="button"
+            :disabled="quantity <= 1"
+            @click="quantity = Math.max(1, quantity - 1)"
+            class="w-7 h-7 border border-alt bg-transparent text-xs font-mono cursor-pointer hover:bg-green hover:text-primary transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+          >
+            −
+          </button>
+          <span class="w-8 text-center font-mono text-xs">{{ quantity }}</span>
+          <button
+            type="button"
+            :disabled="quantity >= 99"
+            @click="quantity = Math.min(99, quantity + 1)"
+            class="w-7 h-7 border border-alt bg-transparent text-xs font-mono cursor-pointer hover:bg-green hover:text-primary transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+          >
+            +
+          </button>
+        </div>
+        <div class="flex-1 text-right font-mono">
+          ${{ displayPrice.toFixed(2) }}
+          <span v-if="totalCustomizationModifiers !== 0" class="font-secondary text-alt">
+            ({{ totalCustomizationModifiers > 0 ? '+' : '' }}${{
               totalCustomizationModifiers.toFixed(2)
-            }}
-            in customizations)
-          </p>
+            }})
+          </span>
         </div>
-
-        <button
-          @click="onAddToCartClick"
-          :disabled="!canAddToCart"
-          class="px-8 py-3 bg-alt text-primary cursor-pointer font-semibold rounded-md disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
-        >
-          Add to Cart
-        </button>
+        <NaviButton :disabled="!canAddToCart" @click="onAddToCartClick">
+          ADD TO CART
+        </NaviButton>
       </div>
+    </div>
 
-      <div v-if="!hasAllRequiredCustomizations" class="mt-3 text-smflex items-center">
-        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-          <path
-            fill-rule="evenodd"
-            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-            clip-rule="evenodd"
-          />
-        </svg>
-        Please complete all required customizations
+    <!-- customizations -->
+    <div v-if="!hasCustomizations" class="text-alt font-mono">No customizations exist.</div>
+    <div v-else class="border border-alt mt-4">
+      <div class="px-3 py-1 border-b border-alt font-secondary text-alt">// customize</div>
+      <div class="divide-y divide-alt">
+        <CustomizationGroup
+          v-for="group in customizationGroups"
+          :key="group.id"
+          :group="group"
+          @update-customization="updateCustomization"
+        />
+      </div>
+      <div
+        v-if="!hasAllRequiredCustomizations"
+        class="px-3 py-2 border-t border-alt font-secondary text-alt"
+      >
+        * complete all required customizations
       </div>
     </div>
   </div>

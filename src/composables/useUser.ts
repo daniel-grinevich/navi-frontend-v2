@@ -34,6 +34,13 @@ export const useUserLogin = () => {
   return useApiWrite<
     { access: string; refresh: string },
     Error,
-    { email: string; password: string, }
-  >( async (userData) => await apiClient('api/token/', { method: 'POST', body: JSON.stringify(userData) }))
-  }
+    { email: string; password: string }
+  >(
+    async (userData) =>
+      await apiClient('api/token/', {
+        method: 'POST',
+        body: JSON.stringify(userData),
+        credentials: 'include',
+      }),
+  )
+}

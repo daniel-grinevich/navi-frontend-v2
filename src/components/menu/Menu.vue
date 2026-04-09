@@ -3,7 +3,6 @@
 import { computed } from 'vue'
 /*** components ****/
 import AsyncList from '@/components/shared/AsyncList.vue'
-import LoadingSpinnerTwo from '@/components/shared/LoadingSpinnerTwo.vue'
 import MenuItemCard from './MenuItemCard.vue'
 /*** stores ***/
 /*** composables ****/
@@ -30,28 +29,34 @@ const groupedMenuItems = computed(() => {
 </script>
 
 <template>
-  <div v-if="isLoading">
-    <LoadingSpinnerTwo />
+  <div v-if="isLoading" class="w-full text-xs border border-alt">
+    <div class="px-3 py-2 font-secondary">loading menu...</div>
   </div>
-  <div v-else-if="isError">Error...</div>
-  <div v-else>
+  <div v-else-if="isError" class="w-full text-xs border border-alt">
+    <div class="px-3 py-2 font-secondary">error loading menu.</div>
+  </div>
+  <div v-else class="w-full text-xs border border-alt">
     <div
-      v-for="(items, category) in groupedMenuItems"
+      v-for="(items, category, index) in groupedMenuItems"
       :key="category"
-      class="mb-6 overflow-x-scroll px-3"
+      :class="{ 'border-t border-alt': index !== 0 }"
     >
-      <h2 class="text-2xl font-bold my-3">{{ category }}</h2>
-      <AsyncList
-        :items="items"
-        :loading="isLoading"
-        :error="isError"
-        :flexGap="'gap-6'"
-        :flex-direction="'row'"
-      >
-        <template #item="item">
-          <MenuItemCard v-bind="item" />
-        </template>
-      </AsyncList>
+      <div class="px-3 py-1 border-b border-alt text-xl font-secondary">
+        {{ category }}
+      </div>
+      <div class="overflow-x-auto px-3 py-6">
+        <AsyncList
+          :items="items"
+          :loading="isLoading"
+          :error="isError"
+          :flex-direction="'row'"
+          :flex-gap="'gap-3'"
+        >
+          <template #item="item">
+            <MenuItemCard v-bind="item" />
+          </template>
+        </AsyncList>
+      </div>
     </div>
   </div>
 </template>

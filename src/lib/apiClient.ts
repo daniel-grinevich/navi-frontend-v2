@@ -1,20 +1,17 @@
 import { useSessionStore } from '@/stores/session'
+import { getCsrfCookie } from '@/helpers/csrfHelper'
+
 const API_BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:8000'
+const UNSAFE_METHODS = ['POST', 'PUT', 'PATCH', 'DELETE']
 
-export async function apiClient<T = any>(
-  endpoint: string,
-  options: RequestInit = {},
-  retry: boolean = false,
-): Promise<T> {
-  const { isAuthenticated, refreshAccessToken, session } = useSessionStore()
+export async function apiClient<T = any>(endpoint: string, options: RequestInit = {}): Promise<T> {
+  const { isAuthenticated, refreshAccessToken } = useSessionStore()
 
-  const auth = (options?.headers as Record<string, string> | undefined)?.Authorization
-
-  if (isAuthenticated && !auth) {
-    const headers: Record<string, string> = {}
-    headers['Authorization'] = `Bearer ${session.accessToken}`
-    options = { ...options, headers: headers }
+  if (options?.method && UNSAFE_METHODS.includes(options.method) && endpoint !== 'api/token/') {
+    options.headers = { ...options.headers, 'X-CSRFToken': getCsrfCookie() }
   }
+
+  if (!options.credentials) options.credentials = 'include'
 
   const response = await fetch(`${API_BASE_URL}/${endpoint}`, {
     ...options,
@@ -25,13 +22,16 @@ export async function apiClient<T = any>(
   })
 
   if (response.status === 401) {
+    if (endpoint === 'api/logout' || endpoint === 'api/logout/')
+      return new Promise(() => {
+        return { success: false, body: null }
+      })
+
     if (!isAuthenticated) throw Error('Not Authorized')
 
-    const authResponse: boolean = await refreshAccessToken()
+    const refreshResponse: boolean = await refreshAccessToken()
 
-    delete (options?.headers as Record<string, string> | undefined)?.Authorization
-
-    if (!authResponse) throw Error('Could not use refresh tooken to authenticate')
+    if (!refreshResponse) throw Error('Could not use refresh token to authenticate')
 
     return apiClient(endpoint, options)
   }

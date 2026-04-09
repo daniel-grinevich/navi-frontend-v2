@@ -1,115 +1,163 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { RouterLink, useRouter } from 'vue-router'
-import { useApiWrite } from '@/composables/useApi'
+/*** libraries ****/
+import { ref, computed, onMounted } from 'vue'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
+/*** components ****/
+import TinyLoadingSpinner from '@/components/shared/TinyLoadingSpinner.vue'
+/*** stores ***/
 import { useSessionStore } from '@/stores/session'
-import LoadingSpinnerTwo from '@/components/shared/LoadingSpinnerTwo.vue'
-import { apiClient } from '@/lib/apiClient'
-import { LoginSchema } from '@/schemas/user/LoginSchema'
+/*** composables ****/
 import { useUserLogin } from '@/composables/useUser'
+import { useZod } from '@/composables/useZod'
+/*** types ****/
+import { LoginSchema } from '@/schemas/user/LoginSchema'
 
 const sessionStore = useSessionStore()
 const router = useRouter()
+const route = useRoute()
 
 const email = ref('')
 const password = ref('')
 const loading = ref(false)
 const loginErrorMessage = ref('')
 
-const { mutateAsync, isPending } = useUserLogin()
+const loginFields = computed(() => {
+  return { email: email.value, password: password.value }
+})
+
+const { zodValueorError } = useZod(loginFields, LoginSchema)
+
+const { mutateAsync } = useUserLogin()
 
 const handleLoginSubmit = async (e: Event) => {
   loading.value = true
   loginErrorMessage.value = ''
-  const formData = { email: email.value, password: password.value }
-  const result = LoginSchema.safeParse(formData)
 
-  if (!result.success) {
-    loginErrorMessage.value = result.error.message
-    loading.value = false
-  } else {
-    try {
-      const response=await mutateAsync(formData)
-      sessionStore.session = {
-      accessToken: response.access,
-      refreshToken: response.refresh,
+  try {
+    if (!zodValueorError.value.success && zodValueorError.value.error) {
+      loginErrorMessage.value = Object.values(zodValueorError.value.error).join(',')
+      throw Error('Schema was not validated')
     }
-    sessionStore.getUser()
+
+    await mutateAsync(loginFields.value)
+  } catch (error) {
+    console.error('Login Failed:', error)
+  } finally {
+    sessionStore.initAuth()
     loading.value = false
+
     const canGoBack = window.history.state?.back !== null
     if (canGoBack) {
       router.go(-1)
     } else {
       router.push({ name: 'menu' })
-    }}
-    catch (error) {
-    console.error('Login Failed:', error)
-    alert('Failed to Login. Please try again.')
-    loading.value=false
     }
-}}
+  }
+}
 </script>
 
 <template>
-  <div class="flex p-6 flex-row">
-    <div class="flex-1 h-full">
-      <div v-if="loading || isPending">
-        <LoadingSpinnerTwo />
+  <div class="w-full text-xs border border-alt">
+    <div class="flex flex-col md:flex-row min-h-[75vh]">
+      <!-- Left: ASCII Art -->
+      <div class="md:w-1/2 border-b md:border-b-0 md:border-r border-alt flex flex-col">
+        <div class="px-3 py-1 border-b border-alt font-secondary text-alt">//</div>
+
+        <div class="flex-1 flex flex-col items-center justify-center p-6 overflow-hidden">
+          <div class="text-green whitespace-pre leading-none select-none text-[8px] md:text-[10px]">
+            <div>· . * ✦ · . * ✦ ·</div>
+            <div>* ✦ · . * · ✦ . *</div>
+            <div>. * ✦ . · * . ✦ ·</div>
+            <div>✦ · . * ✦ · . *</div>
+            <div>┌───┐</div>
+            <div>┌───┐ │░░░│</div>
+            <div>┌──┐ │░█░│ │░█░│ ┌────┐</div>
+            <div>┌──┐ │░░│ │░░░│ │░░░│ │░░█░│</div>
+            <div>┌──┐ │█░│ │░█│ │░█░│ │░█░│ │░░░░│ ┌──┐</div>
+            <div>│░░│ │░░│ │░░│ │░░░│ │░░░│ │░█░░│ │░█│</div>
+            <div>│░█│ │░█│ │█░│ │█░░│ │░░█│ │░░░░│ │░░│</div>
+            <div>│░░│ │░░│ │░░│ │░█░│ │░█░│ │░░█░│ │█░│</div>
+            <div>│█░│ │░░│ │░░│ │░░░│ │░░░│ │░░░░│ │░░│</div>
+            <div>│░░│ │█░│ │░█│ │░░█│ │█░░│ │█░░░│ │░░│</div>
+            <div>│░█│ │░░│ │░░│ │░░░│ │░░░│ │░░░░│ │░█│</div>
+            <div>│░░│ │░░│ │░░│ │█░░│ │░░█│ │░░█░│ │░░│</div>
+            <div>│░░│ │░█│ │█░│ │░░░│ │░░░│ │░░░░│ │░░│</div>
+            <div>────┘ └─┘ └─┘ └──┘ └─┘ └──┘ └─┘ └───</div>
+            <div>▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓</div>
+            <div>═══╗ ╔═══════╗ ╔══════╗ ╔═══╗</div>
+            <div>║ ║ NAVI ║ ║COFFEE║ ║ ║</div>
+            <div>═════╝ ╚═══════╝ ╚══════╝ ╚═══╝</div>
+            <div>▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓</div>
+            <div>· . · . · . · . · . · . · . ·</div>
+          </div>
+        </div>
       </div>
-    </div>
-    <div class="flex-1 border h-full">
-      <form @submit.prevent="handleLoginSubmit" class="p-3 flex flex-col gap-3">
-        <div class="flex flex-col gap-0.5">
-          <label for="email" class="block text-xs border max-w-fit p-1">email:</label>
-          <input
-            id="email"
-            v-model="email"
-            type="email"
-            required
-            placeholder="you@example.com"
-            autocomplete="email"
-            class="w-full px-4 py-2 border outline-0 focus:border-blue-600"
-          />
-        </div>
-        <div class="flex flex-col gap-0.5">
-          <label for="password" class="block text-xs border max-w-fit p-1">password</label>
-          <input
-            id="password"
-            v-model="password"
-            type="password"
-            required
-            placeholder="••••••••"
-            autocomplete="current-password"
-            class="w-full px-4 py-2 border outline-0 focus:border-blue-600"
-          />
-        </div>
 
-        <div v-if="loginErrorMessage" class="mb-4 p-3 border rounded-xl">
-          <p class="text-red-400 text-xs font-light">{{ loginErrorMessage }}</p>
-        </div>
+      <!-- Right: Login Form -->
+      <div class="md:w-1/2 flex flex-col">
+        <div class="px-3 py-1 border-b border-alt bg-green text-white">// sign in</div>
 
-        <button
-          type="submit"
-          :disabled="loading"
-          class="w-full py-2 px-4 font-light text-white bg-slate-900 transition-all border cursor-pointer disabled:opacity-20 disabled:cursor-not-allowed mt-6 text-xs"
+        <div
+          v-if="route.query.reason === 'auth-required'"
+          class="border border-red text-red text-sm px-3 py-1 font-mono flex justify-center w-3/4 my-3 mx-auto"
         >
-          {{ loading ? 'signing in...' : 'sign in' }}
-        </button>
-      </form>
-
-      <div class="relative">
-        <div class="absolute inset-0 flex items-center">
-          <div class="w-full border-t"></div>
+          You were redirected because you must login first.
         </div>
-        <div class="relative flex justify-center text-xs">
-          <span class="px-3 bg-slate-900 text-white">or</span>
+
+        <div class="flex-1 flex flex-col justify-center p-6">
+          <form
+            @submit.prevent="handleLoginSubmit"
+            class="flex flex-col gap-3 max-w-sm mx-auto w-full"
+          >
+            <div class="flex flex-col gap-0.5">
+              <label for="email" class="block text-xs border border-alt max-w-fit p-1">
+                email:
+              </label>
+              <input
+                id="email"
+                v-model="email"
+                type="email"
+                required
+                placeholder="you@example.com"
+                autocomplete="email"
+                class="w-full px-4 py-2 border border-alt outline-0 focus:border-green"
+              />
+            </div>
+            <div class="flex flex-col gap-0.5">
+              <label for="password" class="block text-xs border border-alt max-w-fit p-1">
+                password:
+              </label>
+              <input
+                id="password"
+                v-model="password"
+                type="password"
+                required
+                placeholder="••••••••"
+                autocomplete="current-password"
+                class="w-full px-4 py-2 border border-alt outline-0 focus:border-green"
+              />
+            </div>
+
+            <div v-if="loginErrorMessage" class="p-2 border border-red text-red text-xs">
+              {{ loginErrorMessage }}
+            </div>
+
+            <button
+              type="submit"
+              :disabled="loading"
+              class="w-full py-2 px-4 bg-green text-white border border-green cursor-pointer font-mono tracking-wide text-xs hover:bg-alt hover:text-primary hover:border-alt transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+            >
+              <span v-if="loading"><TinyLoadingSpinner /> SIGN IN</span>
+              <span v-else>▸ SIGN IN</span>
+            </button>
+          </form>
+
+          <p class="text-center text-xs mt-6">
+            don't have an account?
+            <RouterLink to="/signup" class="text-green hover:underline">sign up</RouterLink>
+          </p>
         </div>
       </div>
-
-      <p class="text-center text-xs">
-        don't have an account?
-        <RouterLink to="/signup"> sign up</RouterLink>
-      </p>
     </div>
   </div>
 </template>
