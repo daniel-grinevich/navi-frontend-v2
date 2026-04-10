@@ -1,14 +1,11 @@
 <script setup lang="ts">
-import { computed, ref, onMounted, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, onMounted, onUnmounted } from 'vue'
 import gsap from 'gsap'
 import { useSessionStore } from '@/stores/session'
 import { useShoppingCart } from '@/stores/shoppingCart'
-import { useApi } from '@/composables/useApi'
-import { apiClient } from '@/lib/apiClient'
-import type { Order } from '@/types/order'
+import HealthBar from '@/components/home/HealthBar.vue'
+import AchievementsRow from '@/components/home/AchievementsRow.vue'
 
-const router = useRouter()
 const session = useSessionStore()
 const cart = useShoppingCart()
 
@@ -121,44 +118,6 @@ onMounted(() => {
 onUnmounted(() => {
   clearInterval(clockInterval)
 })
-
-const { data: orders } = useApi<Order[]>(
-  ['orders'],
-  () => apiClient('api/orders/', { method: 'GET' }),
-  { enabled: computed(() => session.isAuthenticated) },
-)
-
-const recentOrders = computed(() => {
-  if (!orders.value) return []
-  return orders.value.slice(0, 5)
-})
-
-const formatDate = (iso: Date) => {
-  return new Date(iso).toLocaleString(undefined, {
-    dateStyle: 'short',
-    timeStyle: 'short',
-  })
-}
-
-const statusLabel = (status: string) => {
-  const map: Record<string, string> = {
-    O: 'OPEN',
-    S: 'SHIPPED',
-    D: 'DISPATCH',
-    C: 'DONE',
-  }
-  return map[status] || status
-}
-
-const statusDot = (status: string) => {
-  const map: Record<string, string> = {
-    O: '●',
-    S: '◐',
-    D: '◑',
-    C: '○',
-  }
-  return map[status] || '·'
-}
 </script>
 
 <template>
@@ -240,24 +199,10 @@ const statusDot = (status: string) => {
           </div>
         </div>
 
-        <div v-if="session.isAuthenticated" class="border-t border-alt">
-          <div class="px-3 py-1 border-b border-alt font-secondary">┤ recent orders ├</div>
-
-          <div v-if="recentOrders.length === 0" class="p-4 font-secondary">no orders found.</div>
-
-          <div v-else class="divide-y divide-alt">
-            <div
-              v-for="order in recentOrders"
-              :key="order.id"
-              class="px-3 py-2 flex items-center gap-4 cursor-pointer hover:bg-green hover:text-primary transition-colors"
-              @click="router.push({ name: 'orderConfirmation', params: { orderId: order.id } })"
-            >
-              <span class="text-green">{{ statusDot(order.status) }}</span>
-              <span class="font-secondary w-20 shrink-0">{{ statusLabel(order.status) }}</span>
-              <span class="shrink-0">{{ formatDate(order.created_at) }}</span>
-              <span class="ml-auto">${{ order.total }}</span>
-            </div>
-          </div>
+        <div class="border-t border-alt">
+          <div class="px-3 py-1 border-b border-alt font-secondary">// Achievements</div>
+          <HealthBar />
+          <AchievementsRow />
         </div>
       </div>
     </div>
