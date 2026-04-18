@@ -1,6 +1,3 @@
-ARG NODE_ENV
-ARG NODE_VERSION
-
 FROM node:22-alpine AS build
 WORKDIR /app
 
