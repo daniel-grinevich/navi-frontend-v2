@@ -3,6 +3,7 @@ import { ref, computed, onBeforeMount } from 'vue'
 import { useRouter } from 'vue-router'
 import { useShoppingCart } from '@/stores/shoppingCart'
 import { useSessionStore } from '@/stores/session'
+import { useAchievementsStore } from '@/stores/achievements'
 import { useCreateOrder } from '@/composables/useOrder'
 import { useStripe } from '@/composables/useStripe'
 import { nextTick } from 'vue'
@@ -10,6 +11,7 @@ import { nextTick } from 'vue'
 const router = useRouter()
 const cart = useShoppingCart()
 const session = useSessionStore()
+const achievements = useAchievementsStore()
 
 const paymentStep = ref<'review' | 'payment'>('review')
 const stripeElements = ref<any>(null)
@@ -84,6 +86,7 @@ const confirmPayment = async () => {
   if (error) {
     paymentError.value = error.message ?? 'Payment failed'
   } else {
+    achievements.recordOrderPlaced(cart.localCart)
     cart.clearCart()
     router.push({ name: 'orderConfirmation', params: { orderId: orderId.value } })
   }

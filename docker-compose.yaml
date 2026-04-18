@@ -1,0 +1,8 @@
+services:
+  vue:
+    build:
+      context: .
+    environment:
+      NODE_ENV: staging
+    ports:
+      - 8080:80

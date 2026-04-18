@@ -91,7 +91,7 @@ const continueShopping = () => {
             </div>
             <div class="px-3 py-3 border-t border-alt space-y-2">
               <NaviButton variant="filled" full-width @click="submitCart">CHECKOUT</NaviButton>
-              <NaviButton full-width @click="continueShopping">CONTINUE SHOPPING</NaviButton>
+              <NaviButton variant="ghost" full-width @click="continueShopping">CONTINUE SHOPPING</NaviButton>
             </div>
           </div>
         </div>

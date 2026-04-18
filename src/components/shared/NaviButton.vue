@@ -1,6 +1,6 @@
 <script setup lang="ts">
 defineProps<{
-  variant?: 'outline' | 'filled'
+  variant?: 'outline' | 'filled' | 'ghost'
   disabled?: boolean
   fullWidth?: boolean
 }>()
@@ -13,11 +13,13 @@ defineProps<{
     :class="[
       fullWidth ? 'w-full' : '',
       variant === 'filled'
-        ? 'bg-green text-primary border-green hover:bg-alt hover:text-primary hover:border-alt'
-        : 'border-alt hover:bg-green hover:text-primary',
+        ? 'bg-primary text-alt border-alt hover:bg-green hover:text-primary hover:border-green'
+        : variant === 'ghost'
+          ? 'bg-primary text-alt border-alt'
+          : 'border-alt hover:bg-green hover:text-primary',
     ]"
   >
-    <span :class="variant === 'filled' ? '' : 'text-green group-hover:text-primary'">▸</span>
+    <span :class="variant === 'filled' || variant === 'ghost' ? '' : 'text-green group-hover:text-primary'">▸</span>
     <slot />
   </button>
 </template>
