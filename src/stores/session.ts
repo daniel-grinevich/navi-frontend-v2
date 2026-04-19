@@ -56,7 +56,7 @@ export const useSessionStore = defineStore('session', () => {
         isGuest.value = false
       }
     } catch (err: unknown) {
-      console.error(err)
+      console.log(err)
       return false
     }
     return true
@@ -101,7 +101,7 @@ export const useSessionStore = defineStore('session', () => {
 
       return data
     } catch (error: unknown) {
-      console.error(error)
+      console.log(error)
       return
     }
   }

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /*** libraries ****/
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 /*** components ****/
 import TinyLoadingSpinner from '@/components/shared/TinyLoadingSpinner.vue'
@@ -41,7 +41,7 @@ const handleLoginSubmit = async (e: Event) => {
 
     await mutateAsync(loginFields.value)
   } catch (error) {
-    console.error('Login Failed:', error)
+    console.log('Login Failed:', error)
   } finally {
     sessionStore.initAuth()
     loading.value = false
