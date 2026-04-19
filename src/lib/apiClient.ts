@@ -39,7 +39,7 @@ export async function apiClient<T>(endpoint: string, options: RequestInit = {}):
 
     if (response.status === 401) {
       if (cleanedEndpoint === 'api/logout/') {
-        return { success: true, body: 'User is already unathenticated.' } as T
+        return { success: true, body: 'User is already unauthenticated.' } as T
       }
 
       if (cleanedEndpoint === 'api/token/refresh/') {

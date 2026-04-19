@@ -3,7 +3,6 @@ import { defineStore } from 'pinia'
 import { apiClient } from '@/lib/apiClient'
 import { useRouter } from 'vue-router'
 import type { UserResponse } from '@/types/user'
-import ApiError from '@/lib/apiError'
 
 interface User {
   email?: string
