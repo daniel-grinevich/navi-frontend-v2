@@ -1,60 +1,80 @@
 import { useSessionStore } from '@/stores/session'
 import { getCsrfCookie } from '@/helpers/csrfHelper'
+import { cleanEndpoint } from '@/helpers/endpointHelper'
+import { nonAuthRoutes } from '@/constants/constants'
+import ApiError from '@/lib/apiError'
 
 const API_BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:8000'
 const UNSAFE_METHODS = ['POST', 'PUT', 'PATCH', 'DELETE']
 
-export async function apiClient<T = any>(endpoint: string, options: RequestInit = {}): Promise<T> {
+export async function apiClient<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const { isAuthenticated, refreshAccessToken } = useSessionStore()
 
-  if (options?.method && UNSAFE_METHODS.includes(options.method) && endpoint !== 'api/token/') {
+  const cleanedEndpoint = cleanEndpoint(endpoint)
+
+  if (
+    options?.method &&
+    UNSAFE_METHODS.includes(options.method) &&
+    cleanedEndpoint !== 'api/token/'
+  ) {
     options.headers = { ...options.headers, 'X-CSRFToken': getCsrfCookie() }
   }
 
   if (!options.credentials) options.credentials = 'include'
 
-  const response = await fetch(`${API_BASE_URL}/${endpoint}`, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
-  })
-
-  if (response.status === 401) {
-    if (endpoint === 'api/logout' || endpoint === 'api/logout/')
-      return new Promise(() => {
-        return { success: false, body: null }
-      })
-
-    if (!isAuthenticated) throw Error('Not Authorized')
-
-    const refreshResponse: boolean = await refreshAccessToken()
-
-    if (!refreshResponse) throw Error('Could not use refresh token to authenticate')
-
-    return apiClient(endpoint, options)
+  if (!nonAuthRoutes.includes(cleanedEndpoint) && !isAuthenticated) {
+    throw Error('Not authorized to make this request.')
   }
 
-  if (!response.ok) {
-    let errorBody = null
-    try {
-      errorBody = await response.json()
-    } catch {
-      errorBody = 'Something went wrong.'
+  let response: Response | null = null
+
+  try {
+    response = await fetch(`${API_BASE_URL}/${cleanedEndpoint}`, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers,
+      },
+    })
+
+    if (response.status === 401) {
+      if (cleanedEndpoint === 'api/logout/') {
+        return { success: true, body: 'User is already unathenticated.' } as T
+      }
+
+      if (cleanedEndpoint === 'api/token/refresh/') {
+        throw Error('Refresh token is invalid or expired.')
+      }
+
+      const refreshResponse: boolean = await refreshAccessToken()
+
+      if (!refreshResponse) throw Error('Could not use refresh token to authenticate user.')
+
+      return apiClient(cleanedEndpoint, options)
     }
 
-    const error: any = new Error('API Error')
-    error.status = response.status
-    error.body = errorBody
-    throw error
-  }
+    if (!response.ok) {
+      let errorMessage = null
 
-  if (response.status === 204) {
-    return new Promise(() => {
-      return { success: true, body: null }
-    })
-  }
+      try {
+        const errorBody = await response.json()
+        errorMessage = JSON.stringify(errorBody)
+      } catch {
+        errorMessage = 'Something went wrong. Could not parse error response.'
+      }
 
-  return response.json()
+      throw Error(errorMessage)
+    }
+
+    if (response.status === 204) {
+      return { success: true, body: null } as T
+    }
+
+    return response.json() as Promise<T>
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'unknown error occured'
+    const errorResponseStatus = response?.status ?? null
+
+    throw new ApiError(errorResponseStatus, errorMessage)
+  }
 }

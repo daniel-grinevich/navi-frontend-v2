@@ -2,11 +2,13 @@ import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import { apiClient } from '@/lib/apiClient'
 import { useRouter } from 'vue-router'
+import type { UserResponse } from '@/types/user'
+import ApiError from '@/lib/apiError'
 
 interface User {
   email?: string
   guestEmail?: string
-  [key: string]: any
+  [key: string]: object | string | undefined | boolean | Date
 }
 
 export const useSessionStore = defineStore('session', () => {
@@ -32,9 +34,9 @@ export const useSessionStore = defineStore('session', () => {
     return initPromise
   }
 
-  const getUser = async (refresh: boolean = true) => {
+  const getUser = async () => {
     try {
-      const data = await apiClient('api/users/me/', {
+      const data = await apiClient<UserResponse>('api/users/me/', {
         method: 'GET',
       })
 
@@ -42,20 +44,22 @@ export const useSessionStore = defineStore('session', () => {
         user.value.guestEmail = data.email
         isGuest.value = true
       } else {
-        user.value = data
+        const userData = {
+          id: data.id,
+          email: data.email,
+          name: data.name,
+          isGuest: data.is_guest,
+          dateJoined: data.date_joined,
+          stripeCustomerId: data.stripe_customer_id,
+        }
+
+        user.value = userData
         isGuest.value = false
       }
-    } catch (err: any) {
-      if (err.status === 401 && refresh) {
-        const refreshed = await refreshAccessToken()
-        if (!refreshed) return false
-
-        return await getUser(false)
-      }
-
+    } catch (err: unknown) {
+      console.error(err)
       return false
     }
-
     return true
   }
 
@@ -66,6 +70,8 @@ export const useSessionStore = defineStore('session', () => {
     } catch {
       return false
     } finally {
+      // TODO clean up tokens in cookies
+
       user.value = {}
       isAuthenticated.value = false
       isGuest.value = false
@@ -73,12 +79,8 @@ export const useSessionStore = defineStore('session', () => {
     }
   }
 
-  const isAdmin = computed(async () => {
-    if (!user) await getUser()
-
-    if (user.value?.is_admin) return true
-
-    return false
+  const isAdmin = computed(() => {
+    return user.value?.is_admin ? true : false
   })
 
   const setGuestEmail = (guestEmail: string) => {
@@ -91,15 +93,16 @@ export const useSessionStore = defineStore('session', () => {
     if (!email) return
 
     try {
-      const response = await apiClient('api/create-guest/', {
+      const data = await apiClient('api/create-guest/', {
         method: 'POST',
         body: JSON.stringify({
           guestUser: email,
         }),
       })
 
-      return response
-    } catch (error) {
+      return data
+    } catch (error: unknown) {
+      console.error(error)
       return
     }
   }
@@ -109,7 +112,7 @@ export const useSessionStore = defineStore('session', () => {
       await apiClient('api/token/refresh/', { method: 'POST' })
       return true
     } catch {
-      logout()
+      await logout()
       return false
     }
   }
