@@ -11,7 +11,7 @@ export const useUserByEmail = (
   return useApi(
     computed(() => ['user-email', toValue(email)]),
     () =>
-      apiClient(`api/users/by-email/?email=${encodeURIComponent(toValue(email))}`, {
+      apiClient<{ id: string; is_guest: boolean }>(`api/users/by-email/?email=${encodeURIComponent(toValue(email))}`, {
         method: 'GET',
       }),
     {

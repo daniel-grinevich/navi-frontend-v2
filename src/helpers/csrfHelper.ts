@@ -8,7 +8,7 @@ export const getCsrfCookie = (name = 'csrftoken') => {
 
   const cookies = cookieStr.split(';')
   for (let i = 0; i < cookies.length; i++) {
-    const cookie = cookies[i].trim()
+    const cookie = cookies[i]!.trim()
     // cookie looks like: "csrftoken=abc123"
     if (cookie.startsWith(name + '=')) {
       cookieValue = decodeURIComponent(cookie.slice(name.length + 1))

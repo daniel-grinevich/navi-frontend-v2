@@ -4,11 +4,7 @@ import { type SelectedCustomization } from '@/types/customization'
 export function usePriceCalculation() {
   // Calculate total customization modifiers
   const calculateCustomizationTotal = (customizations: SelectedCustomization[]): number => {
-    return customizations.reduce((total, group) => {
-      return total + group.options.reduce((optTotal, opt) => {
-        return optTotal + opt.priceModifier
-      }, 0)
-    }, 0)
+    return customizations.reduce((total, c) => total + c.priceModifier, 0)
   }
 
   // Calculate single item total (base + customizations) * quantity

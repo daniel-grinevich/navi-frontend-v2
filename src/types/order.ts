@@ -1,5 +1,5 @@
 import { type CartItem } from './cart'
-import { type User } from './user'
+import { type UserResponse } from './user'
 
 export type OrderStatus = 'O' | 'S' | 'D' | 'C'
 
@@ -14,7 +14,7 @@ export type Order = {
   specialInstructions?: string
   created_at: Date
   estimatedReadyTime?: Date
-  user: User
+  user: UserResponse
 }
 
 export type ServerOrder = {

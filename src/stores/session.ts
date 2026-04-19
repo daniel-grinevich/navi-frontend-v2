@@ -92,7 +92,7 @@ export const useSessionStore = defineStore('session', () => {
     if (!email) return
 
     try {
-      const data = await apiClient('api/create-guest/', {
+      const data = await apiClient<{ redirect?: string }>('api/create-guest/', {
         method: 'POST',
         body: JSON.stringify({
           guestUser: email,

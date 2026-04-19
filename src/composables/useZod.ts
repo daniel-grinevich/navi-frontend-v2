@@ -6,7 +6,7 @@ import z, { ZodObject } from 'zod'
 /*** composables ****/
 /*** types ****/
 
-export const useZod = (ref: MaybeRefOrGetter<object>, schema: ZodObject) => {
+export const useZod = (ref: MaybeRefOrGetter<object>, schema: ZodObject<any>) => {
   const schemaKeys = computed(() => Object.keys(schema.shape))
 
   const unsupportedTypeMessage = (unsupportedType: string): Record<string, string[]> => {

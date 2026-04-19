@@ -1,5 +1,5 @@
 import { computed } from 'vue'
-import type { ZodSchema } from 'zod/v3'
+import { ZodObject } from 'zod/v3'
 import { useZod } from './useZod'
 
 type AnyFn = (...args: any[]) => any
@@ -12,7 +12,7 @@ type FormState = {
   debounce?: number
 }
 
-export function useForm(payload: Map<string, any>, schema: ZodObject) {
+export function useForm(payload: Map<string, any>, schema: ZodObject<any>) {
   const initFormValues = computed(() => {
     const keyValueMap = new Map<string, FormState>()
 
@@ -34,5 +34,5 @@ export function useForm(payload: Map<string, any>, schema: ZodObject) {
 
   const validatePayload = () => {}
 
-  return { formValues }
+  return { formValues: initFormValues }
 }

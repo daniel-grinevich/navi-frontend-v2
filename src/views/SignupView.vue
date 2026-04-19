@@ -115,13 +115,9 @@ const handleSignupSubmit = async (e: Event) => {
   try {
     await mutateAsync(signupFields.value)
     try {
-      const response=await login(signupFields.value)
+      await login(signupFields.value)
       router.push({name:'menu'})
-      sessionStore.session = {
-      accessToken: response.access,
-      refreshToken: response.refresh,
-    }
-    sessionStore.getUser()
+      sessionStore.getUser()
     }
     catch (error){
       errorMessages.value.submit.push('Failed to login after creating account. Please try again.')

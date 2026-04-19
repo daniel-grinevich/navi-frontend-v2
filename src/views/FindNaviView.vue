@@ -51,7 +51,7 @@ const onlineCount = computed(() => normalizedNaviPorts.value.length)
 
 const nearestDistance = computed(() => {
   if (normalizedNaviPorts.value.length === 0) return null
-  return normalizedNaviPorts.value[0].distance
+  return normalizedNaviPorts.value[0]?.distance ?? null
 })
 
 const userCoords = computed(() => {

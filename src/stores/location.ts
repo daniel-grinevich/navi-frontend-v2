@@ -72,7 +72,7 @@ export const useLocationStore = defineStore('location', () => {
       if (!res.ok) throw new Error('geocoding service unavailable')
       const data = (await res.json()) as Array<{ display_name: string; lat: string; lon: string }>
       if (!data || data.length === 0) throw new Error('no results for that address')
-      const hit = data[0]
+      const hit = data[0]!
       homebase.value = {
         address: hit.display_name,
         latitude: parseFloat(hit.lat),
