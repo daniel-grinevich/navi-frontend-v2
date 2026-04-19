@@ -5,5 +5,6 @@ export const nonAuthRoutes = [
   'api/create-guest/',
   'api/logout/',
   'api/menu/',
+  'api/menu-items/',
   'api/menu-items/?status=A',
 ]

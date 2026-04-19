@@ -23,7 +23,7 @@ export async function apiClient<T>(endpoint: string, options: RequestInit = {}):
   if (!options.credentials) options.credentials = 'include'
 
   if (!nonAuthRoutes.includes(cleanedEndpoint) && !isAuthenticated) {
-    throw Error('Not authorized to make this request.')
+    throw Error(`Not authorized to make this request: ${cleanedEndpoint}.`)
   }
 
   let response: Response | null = null
