@@ -4,4 +4,5 @@ export const nonAuthRoutes = [
   'api/signup/',
   'api/create-guest/',
   'api/logout/',
+  'api/menu/',
 ]
