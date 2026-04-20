@@ -20,6 +20,6 @@ export type MenuItem = {
 
 export const useMenu = () => {
   return useApi<MenuItem[]>(['menu'], () =>
-    apiClient('api/menu-items/?status=A', { method: 'GET' }),
+    apiClient('api/menu-items/', { method: 'GET', queryParams: { status: 'A' } }),
   )
 }

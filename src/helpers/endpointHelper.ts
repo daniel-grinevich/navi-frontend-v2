@@ -14,9 +14,8 @@ export const cleanEndpoint = (endpoint: string) => {
   }
 
   const apiRegex = /^api/
-  if (apiRegex.test(cleanedEndpoint)) {
-    return cleanedEndpoint
-  }
+  cleanedEndpoint = cleanedEndpoint.replace(apiRegex, '')
+  cleanedEndpoint = cleanedEndpoint.replace(frontSlashRegex, '')
 
-  return 'api/' + cleanedEndpoint
+  return cleanedEndpoint
 }

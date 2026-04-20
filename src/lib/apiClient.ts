@@ -2,34 +2,41 @@ import { useSessionStore } from '@/stores/session'
 import { getCsrfCookie } from '@/helpers/csrfHelper'
 import { cleanEndpoint } from '@/helpers/endpointHelper'
 import { nonAuthRoutes } from '@/constants/constants'
+import { createQueryParams } from '@/helpers/queryParamsHelper'
 import ApiError from '@/lib/apiError'
 
 const API_BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:8000'
 const UNSAFE_METHODS = ['POST', 'PUT', 'PATCH', 'DELETE']
 
-export async function apiClient<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+type Request = RequestInit & {
+  queryParams?: Record<string, boolean | Date | string | number | null>
+}
+
+export async function apiClient<T>(endpoint: string, options: Request = {}): Promise<T> {
   const { isAuthenticated, refreshAccessToken } = useSessionStore()
 
-  const cleanedEndpoint = cleanEndpoint(endpoint)
+  debugger
 
-  if (
-    options?.method &&
-    UNSAFE_METHODS.includes(options.method) &&
-    cleanedEndpoint !== 'api/token/'
-  ) {
-    options.headers = { ...options.headers, 'X-CSRFToken': getCsrfCookie() }
-  }
-
-  if (!options.credentials) options.credentials = 'include'
+  let cleanedEndpoint = cleanEndpoint(endpoint)
 
   if (!nonAuthRoutes.includes(cleanedEndpoint) && !isAuthenticated) {
     throw Error(`Not authorized to make this request: ${cleanedEndpoint}.`)
   }
 
+  if (options.queryParams) {
+    cleanedEndpoint += createQueryParams(options?.queryParams)
+  }
+
+  if (options.method && UNSAFE_METHODS.includes(options.method) && cleanedEndpoint !== 'token/') {
+    options.headers = { ...options.headers, 'X-CSRFToken': getCsrfCookie() }
+  }
+
+  if (!options.credentials) options.credentials = 'include'
+
   let response: Response | null = null
 
   try {
-    response = await fetch(`${API_BASE_URL}/${cleanedEndpoint}`, {
+    response = await fetch(`${API_BASE_URL}/api/${cleanedEndpoint}`, {
       ...options,
       headers: {
         'Content-Type': 'application/json',
@@ -38,11 +45,11 @@ export async function apiClient<T>(endpoint: string, options: RequestInit = {}):
     })
 
     if (response.status === 401) {
-      if (cleanedEndpoint === 'api/logout/') {
+      if (cleanedEndpoint === 'logout/') {
         return { success: true, body: 'User is already unauthenticated.' } as T
       }
 
-      if (cleanedEndpoint === 'api/token/refresh/') {
+      if (cleanedEndpoint === 'token/refresh/') {
         throw Error('Refresh token is invalid or expired.')
       }
 
