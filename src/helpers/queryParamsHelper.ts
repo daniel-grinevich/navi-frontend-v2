@@ -9,5 +9,5 @@ export const createQueryParams = (params: Record<string, queryParamValue>) => {
     queryParams.append(key, String(value))
   })
 
-  return queryParams
+  return `?${queryParams.toString()}`
 }
