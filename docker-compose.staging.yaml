@@ -2,6 +2,11 @@ services:
   vue:
     build:
       context: .
+      dockerfile: compose/staging/Dockerfile
+      args:
+        VITE_ENVIRONMENT: staging
+        VITE_BASE_URL: http://staging.navitascoffee.com:31720/
+        VITE_STRIPE_PUBLISHABLE_KEY: ${VITE_STRIPE_PUBLISHABLE_KEY}
     ports:
       - 8080:80
 

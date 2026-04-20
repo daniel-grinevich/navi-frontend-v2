@@ -59,6 +59,10 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          build-args: |
+            VITE_ENVIRONMENT=staging
+            VITE_BASE_URL=http://staging.navitascoffee.com:31720/
+            VITE_STRIPE_PUBLISHABLE_KEY=${{ secrets.VITE_STRIPE_PUBLISHABLE_KEY }}
 
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v3
