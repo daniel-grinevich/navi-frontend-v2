@@ -15,8 +15,6 @@ type Request = RequestInit & {
 export async function apiClient<T>(endpoint: string, options: Request = {}): Promise<T> {
   const { isAuthenticated, refreshAccessToken } = useSessionStore()
 
-  debugger
-
   let cleanedEndpoint = cleanEndpoint(endpoint)
 
   if (!nonAuthRoutes.includes(cleanedEndpoint) && !isAuthenticated) {
