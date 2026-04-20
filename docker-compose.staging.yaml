@@ -5,7 +5,7 @@ services:
       dockerfile: compose/staging/Dockerfile
       args:
         VITE_ENVIRONMENT: staging
-        VITE_BASE_URL: https://navi-staging.tailf9a785.ts.net/
+        VITE_BASE_URL: https://navi-staging.tailf9a785.ts.net
         VITE_STRIPE_PUBLISHABLE_KEY: ${VITE_STRIPE_PUBLISHABLE_KEY}
     ports:
       - 8080:80
