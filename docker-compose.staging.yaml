@@ -1,11 +1,14 @@
+env_file:
+  - .env.staging
+
 services:
   vue:
     build:
       context: .
       dockerfile: compose/staging/Dockerfile
       args:
-        VITE_ENVIRONMENT: staging
-        VITE_BASE_URL: https://navi-staging.tailf9a785.ts.net
+        VITE_ENVIRONMENT: ${VITE_ENVIRONMENT}
+        VITE_BASE_URL: ${VITE_BASE_URL}
         VITE_STRIPE_PUBLISHABLE_KEY: ${VITE_STRIPE_PUBLISHABLE_KEY}
     ports:
       - 8080:80
