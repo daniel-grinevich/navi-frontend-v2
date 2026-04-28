@@ -1,7 +1,7 @@
 import { useSessionStore } from '@/stores/session'
 import { getCsrfCookie } from '@/helpers/csrfHelper'
 import { cleanEndpoint } from '@/helpers/endpointHelper'
-import { nonAuthRoutes } from '@/constants/constants'
+import { authRoutes } from '@/constants/constants'
 import { createQueryParams } from '@/helpers/queryParamsHelper'
 import ApiError from '@/lib/apiError'
 
@@ -17,7 +17,7 @@ export async function apiClient<T>(endpoint: string, options: Request = {}): Pro
 
   let cleanedEndpoint = cleanEndpoint(endpoint)
 
-  if (!nonAuthRoutes.includes(cleanedEndpoint) && !isAuthenticated) {
+  if (authRoutes.includes(cleanedEndpoint) && !isAuthenticated) {
     throw Error(`Not authorized to make this request: ${cleanedEndpoint}.`)
   }
 
