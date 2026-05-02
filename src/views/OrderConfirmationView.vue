@@ -46,7 +46,7 @@ const stepState = (i: number) => {
 
 <template>
   <!-- Loading -->
-  <div v-if="isLoading" class="max-w-6xl mx-auto p-6">
+  <div v-if="isLoading" class="w-full text-xs">
     <div class="border border-alt text-xs">
       <div class="px-3 py-1 border-b border-alt font-secondary text-alt">// order</div>
       <div class="px-3 py-6 text-center font-mono blink">loading...</div>
@@ -54,7 +54,7 @@ const stepState = (i: number) => {
   </div>
 
   <!-- Error -->
-  <div v-else-if="isError" class="max-w-6xl mx-auto p-6">
+  <div v-else-if="isError" class="w-full text-xs">
     <div class="border-2 border-red text-xs">
       <div class="px-3 py-1 border-b border-red bg-red text-primary font-mono">⚠ ERROR</div>
       <div class="px-3 py-4 text-center">failed to load order</div>
@@ -62,7 +62,7 @@ const stepState = (i: number) => {
   </div>
 
   <!-- Order Confirmation -->
-  <div v-else class="max-w-6xl mx-auto p-6 space-y-4">
+  <div v-else class="w-full text-xs space-y-4">
     <!-- ASCII Status Tracker -->
     <div class="border border-alt text-xs">
       <div class="px-3 py-1 border-b border-alt font-secondary text-alt">// order status</div>

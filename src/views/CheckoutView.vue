@@ -14,9 +14,11 @@ const session = useSessionStore()
 const achievements = useAchievementsStore()
 
 const paymentStep = ref<'review' | 'payment'>('review')
-const stripeElements = ref<any>(null)
+const cardNumberElement = ref<any>(null)
+const clientSecret = ref<string | null>(null)
 const paymentError = ref<string | null>(null)
 const orderId = ref<string | null>(null)
+const hasWalletPay = ref(false)
 
 const { isPending, mutateAsync } = useCreateOrder()
 const { getStripe } = useStripe()
@@ -61,12 +63,81 @@ const submitOrder = async () => {
     const stripe = await getStripe()
     if (!stripe) throw new Error('Stripe failed to load')
 
-    const elements = stripe.elements({ clientSecret: client_secret })
-    const paymentElement = elements.create('payment')
+    clientSecret.value = client_secret
+
+    const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+    const elementStyle = {
+      base: {
+        color: isDark ? '#f4f4f0' : '#1a1a1a',
+        fontFamily: "'Courier New', Courier, monospace",
+        fontSize: '12px',
+        '::placeholder': {
+          color: isDark ? '#999999' : '#666666',
+        },
+      },
+      invalid: {
+        color: '#e03c31',
+      },
+    }
+
+    const elements = stripe.elements()
+    const cardNumber = elements.create('cardNumber', { style: elementStyle })
+    const cardExpiry = elements.create('cardExpiry', { style: elementStyle })
+    const cardCvc = elements.create('cardCvc', { style: elementStyle })
+
+    const paymentRequest = stripe.paymentRequest({
+      country: 'US',
+      currency: 'usd',
+      total: {
+        label: 'NAVI Order',
+        amount: Math.round(cart.totalPrice * 100),
+      },
+      requestPayerName: true,
+      requestPayerEmail: true,
+    })
+
     paymentStep.value = 'payment'
     await nextTick()
-    paymentElement.mount('#payment-element')
-    stripeElements.value = elements
+
+    cardNumber.mount('#card-number')
+    cardExpiry.mount('#card-expiry')
+    cardCvc.mount('#card-cvc')
+    cardNumberElement.value = cardNumber
+
+    const canMakePayment = await paymentRequest.canMakePayment()
+    if (canMakePayment) {
+      hasWalletPay.value = true
+      const prButton = elements.create('paymentRequestButton', {
+        paymentRequest,
+        style: {
+          paymentRequestButton: {
+            type: 'default',
+            theme: 'dark',
+            height: '36px',
+          },
+        },
+      })
+      await nextTick()
+      prButton.mount('#wallet-pay-button')
+
+      paymentRequest.on('paymentmethod', async (ev: any) => {
+        const { error: confirmError } = await stripe.confirmCardPayment(
+          clientSecret.value!,
+          { payment_method: ev.paymentMethod.id },
+          { handleActions: false },
+        )
+
+        if (confirmError) {
+          ev.complete('fail')
+          paymentError.value = confirmError.message ?? 'Payment failed'
+        } else {
+          ev.complete('success')
+          achievements.recordOrderPlaced(cart.localCart)
+          cart.clearCart()
+          router.push({ name: 'orderConfirmation', params: { orderId: orderId.value } })
+        }
+      })
+    }
   } catch (error) {
     console.error('Order submission failed:', error)
     alert('Failed to submit order. Please try again.')
@@ -76,11 +147,12 @@ const submitOrder = async () => {
 const confirmPayment = async () => {
   paymentError.value = null
   const stripe = await getStripe()
-  if (!stripe || !stripeElements.value) return
+  if (!stripe || !cardNumberElement.value || !clientSecret.value) return
 
-  const { error } = await stripe.confirmPayment({
-    elements: stripeElements.value,
-    redirect: 'if_required',
+  const { error } = await stripe.confirmCardPayment(clientSecret.value, {
+    payment_method: {
+      card: cardNumberElement.value,
+    },
   })
 
   if (error) {
@@ -94,7 +166,7 @@ const confirmPayment = async () => {
 </script>
 
 <template>
-  <div class="max-w-6xl mx-auto p-6 space-y-4">
+  <div class="w-full text-xs space-y-4">
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
       <!-- Left Column: Order Details -->
       <div class="space-y-4">
@@ -121,16 +193,16 @@ const confirmPayment = async () => {
             <p class="mb-3">no location selected</p>
             <button
               @click="selectNaviPort"
-              class="group px-3 py-2 border border-green text-green cursor-pointer font-mono tracking-wide hover:bg-green hover:text-primary transition-colors"
+              class="navi-btn group px-3 py-2 border border-alt cursor-pointer font-mono tracking-wide hover:bg-green hover:text-primary transition-all duration-200"
             >
-              <span>▸</span> SELECT NAVIPORT
+              <span class="text-green group-hover:text-primary">▸</span> SELECT NAVIPORT
             </button>
           </div>
         </div>
 
         <!-- Order Items -->
         <div class="border border-alt text-xs">
-          <div class="px-3 py-1 border-b border-alt font-secondary text-alt">
+          <div class="px-3 py-1 border-b border-alt bg-green text-primary">
             // order items ({{ cart.itemCount }})
           </div>
           <div class="max-h-96 overflow-y-auto">
@@ -180,31 +252,55 @@ const confirmPayment = async () => {
             <button
               @click="submitOrder"
               :disabled="!hasNaviPort || isPending || cart.itemCount === 0"
-              class="group w-full px-3 py-2 bg-green text-primary border border-green cursor-pointer font-mono tracking-wide hover:bg-alt hover:text-primary hover:border-alt disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              class="navi-btn group w-full px-3 py-2 bg-green text-primary border border-green cursor-pointer font-mono tracking-wide hover:bg-alt hover:text-primary hover:border-alt disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
             >
               <span v-if="isPending" class="blink">PLACING ORDER...</span>
               <span v-else><span>▸</span> PLACE ORDER</span>
             </button>
             <button
               @click="router.push({ name: 'cart' })"
-              class="group w-full px-3 py-2 border border-alt cursor-pointer font-mono tracking-wide hover:bg-green hover:text-primary transition-colors"
+              class="navi-btn group w-full px-3 py-2 border border-alt cursor-pointer font-mono tracking-wide hover:bg-green hover:text-primary transition-all duration-200"
             >
               <span class="text-green group-hover:text-primary">▸</span> BACK TO CART
             </button>
           </div>
 
           <!-- Payment Step -->
-          <div v-else class="px-3 py-3 border-t border-alt space-y-3">
-            <div id="payment-element" class="mb-3"></div>
-            <p v-if="paymentError" class="text-red text-xs px-2 py-2 border border-red">
-              {{ paymentError }}
-            </p>
-            <button
-              @click="confirmPayment"
-              class="group w-full px-3 py-2 bg-green text-primary border border-green cursor-pointer font-mono tracking-wide hover:bg-alt hover:text-primary hover:border-alt transition-colors"
-            >
-              <span>▸</span> CONFIRM PAYMENT
-            </button>
+          <div v-else class="border-t border-alt">
+            <div class="px-3 py-1 border-b border-alt bg-green text-primary">// payment</div>
+            <div class="px-3 py-3 space-y-3">
+              <div v-if="hasWalletPay">
+                <div id="wallet-pay-button"></div>
+                <div class="flex items-center gap-3 my-3">
+                  <div class="flex-1 border-t border-alt"></div>
+                  <span class="font-secondary">or pay with card</span>
+                  <div class="flex-1 border-t border-alt"></div>
+                </div>
+              </div>
+              <div>
+                <label class="block font-secondary mb-1">card number</label>
+                <div id="card-number" class="w-full px-3 py-2 border border-alt bg-transparent focus-within:border-green transition-colors"></div>
+              </div>
+              <div class="flex gap-3">
+                <div class="flex-1">
+                  <label class="block font-secondary mb-1">expiry</label>
+                  <div id="card-expiry" class="w-full px-3 py-2 border border-alt bg-transparent focus-within:border-green transition-colors"></div>
+                </div>
+                <div class="flex-1">
+                  <label class="block font-secondary mb-1">cvc</label>
+                  <div id="card-cvc" class="w-full px-3 py-2 border border-alt bg-transparent focus-within:border-green transition-colors"></div>
+                </div>
+              </div>
+              <p v-if="paymentError" class="text-red px-2 py-2 border border-red">
+                {{ paymentError }}
+              </p>
+              <button
+                @click="confirmPayment"
+                class="navi-btn group w-full px-3 py-2 bg-green text-primary border border-green cursor-pointer font-mono tracking-wide hover:bg-alt hover:text-primary hover:border-alt transition-all duration-200"
+              >
+                <span>▸</span> CONFIRM PAYMENT
+              </button>
+            </div>
           </div>
         </div>
       </div>

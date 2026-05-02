@@ -1,11 +1,29 @@
 <script setup lang="ts">
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useOrders } from '@/composables/useOrder'
+import type { OrderStatus } from '@/types/order'
 import AsyncList from '@/components/shared/AsyncList.vue'
 
 const router = useRouter()
 
 const { isLoading, data: orders, isError } = useOrders()
+
+const statusFilter = ref<OrderStatus | 'ALL'>('ALL')
+
+const statusLabels: Record<string, string> = {
+  ALL: 'ALL',
+  O: 'OPEN',
+  C: 'DONE',
+  R: 'REFUNDED',
+}
+
+const filteredOrders = computed(() => {
+  if (!orders.value) return []
+  if (statusFilter.value === 'ALL') return orders.value
+  return orders.value.filter((o) => o.status === statusFilter.value)
+})
+
 const orderDate = (iso: Date) => {
   const date = new Date(iso)
   const formatted = date.toLocaleString(undefined, {
@@ -17,10 +35,32 @@ const orderDate = (iso: Date) => {
 </script>
 
 <template>
-  <div class="max-w-6xl mx-auto p-6 space-y-4">
-    <AsyncList :items="orders" :loading="isLoading" flex-gap="gap-4">
+  <div class="w-full text-xs space-y-4">
+    <!-- Header -->
+    <div class="border border-alt">
+      <div class="px-3 py-1 bg-green text-primary">// orders</div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="border border-alt flex flex-wrap">
+      <button
+        v-for="(label, key) in statusLabels"
+        :key="key"
+        @click="statusFilter = key"
+        :class="[
+          'px-3 py-2 border-r border-alt cursor-pointer font-mono tracking-wide transition-colors',
+          statusFilter === key
+            ? 'bg-green text-primary'
+            : 'hover:bg-green hover:text-primary',
+        ]"
+      >
+        {{ label }}
+      </button>
+    </div>
+
+    <AsyncList :items="filteredOrders" :loading="isLoading" flex-gap="gap-4">
       <template #item="order">
-        <div class="border border-alt border-l-[0.5rem] border-l-green text-xs">
+        <div class="navi-btn border border-alt border-l-[0.5rem] border-l-green text-xs transition-all duration-200 cursor-pointer">
           <div class="px-3 py-1 border-b border-alt font-secondary text-alt">// order</div>
           <div class="px-3 py-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
             <div class="flex-1">
@@ -31,7 +71,7 @@ const orderDate = (iso: Date) => {
               status: <span class="text-green">{{ order.status }}</span>
             </div>
             <button
-              class="px-3 py-2 bg-green text-primary border border-green cursor-pointer font-mono tracking-wide hover:bg-alt hover:text-primary hover:border-alt transition-colors"
+              class="navi-btn px-3 py-2 bg-green text-primary border border-green cursor-pointer font-mono tracking-wide hover:bg-alt hover:text-primary hover:border-alt transition-all duration-200"
               @click="
                 router.push({
                   name: 'orderConfirmation',

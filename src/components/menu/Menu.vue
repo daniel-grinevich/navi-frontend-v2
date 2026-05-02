@@ -30,12 +30,15 @@ const groupedMenuItems = computed(() => {
 
 <template>
   <div v-if="isLoading" class="w-full text-xs border border-alt">
+    <div class="px-3 py-1 border-b border-alt text-primary bg-green">// menu</div>
     <div class="px-3 py-2 font-secondary">loading menu...</div>
   </div>
   <div v-else-if="isError" class="w-full text-xs border border-alt">
+    <div class="px-3 py-1 border-b border-alt text-primary bg-green">// menu</div>
     <div class="px-3 py-2 font-secondary">error loading menu.</div>
   </div>
   <div v-else class="w-full text-xs border border-alt">
+    <div class="px-3 py-1 border-b border-alt text-primary bg-green">// menu</div>
     <div
       v-for="(items, category, index) in groupedMenuItems"
       :key="category"

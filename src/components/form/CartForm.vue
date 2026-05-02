@@ -30,6 +30,8 @@ const form = useForm({
     session.setGuestEmail(value.guestEmail)
   },
 })
+
+defineExpose({ submit: () => form.handleSubmit() })
 </script>
 
 <template>
@@ -65,7 +67,10 @@ const form = useForm({
               state.meta.errors.length ? 'border-red' : 'border-alt',
             ]"
           />
-          <p v-if="state.meta.errors.length" class="text-red text-xs mt-3 px-2 py-2 border border-red">
+          <p
+            v-if="state.meta.errors.length"
+            class="text-red text-xs mt-3 px-2 py-2 border border-red"
+          >
             {{ state.meta.errors[0] }}
           </p>
         </div>
@@ -76,7 +81,8 @@ const form = useForm({
         type="submit"
         class="group px-3 py-2 border border-alt cursor-pointer font-mono tracking-wide hover:bg-green hover:text-primary transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
       >
-        <span class="text-green group-hover:text-primary">▸</span> {{ prefillEmail ? 'UPDATE EMAIL' : 'CONTINUE AS GUEST' }}
+        <span class="text-green group-hover:text-primary">▸</span>
+        {{ prefillEmail ? 'UPDATE EMAIL' : 'CONTINUE AS GUEST' }}
       </button>
       <button
         v-if="prefillEmail"

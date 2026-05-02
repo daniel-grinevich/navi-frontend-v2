@@ -124,7 +124,7 @@ onUnmounted(() => {
   <div class="w-full text-xs border border-alt">
     <div class="flex flex-col md:flex-row min-h-[75vh]">
       <div class="md:w-1/2 border-b md:border-b-0 md:border-r border-alt flex flex-col">
-        <div class="px-3 py-1 border-b border-alt bg-green">//</div>
+        <div class="px-3 py-1 border-b border-alt text-primary bg-green">// home</div>
 
         <div class="flex-1 flex flex-col items-center justify-center p-6 overflow-hidden">
           <div ref="naviBlock" class="text-green whitespace-pre leading-none select-none">
@@ -153,22 +153,22 @@ onUnmounted(() => {
           <div class="flex flex-col justify-center p-4 gap-2">
             <router-link
               to="/menu"
-              class="group px-3 py-3 border border-alt text-alt hover:bg-green hover:text-primary transition-colors cursor-pointer"
+              class="navi-btn group px-3 py-3 border border-alt text-alt hover:bg-green hover:text-primary hover:border-green transition-all duration-200 cursor-pointer"
             >
               <div class="flex items-center gap-3">
                 <span class="text-green group-hover:text-primary">▸</span>
-                <span class="tracking-wide">START ORDER</span>
+                <span class="tracking-wide font-mono font-bold">START ORDER</span>
                 <span class="ml-auto">browse menu &amp; build your drink</span>
               </div>
             </router-link>
 
             <router-link
               to="/find-navi"
-              class="group px-3 py-3 border border-alt text-alt hover:bg-green hover:text-primary transition-colors cursor-pointer"
+              class="navi-btn group px-3 py-3 border border-alt text-alt hover:bg-green hover:text-primary hover:border-green transition-all duration-200 cursor-pointer"
             >
               <div class="flex items-center gap-3">
                 <span class="text-green group-hover:text-primary">▸</span>
-                <span class="tracking-wide">FIND NAVIPORT</span>
+                <span class="tracking-wide font-mono font-bold">FIND NAVIPORT</span>
                 <span class="ml-auto">pickup spots near you</span>
               </div>
             </router-link>
@@ -176,11 +176,11 @@ onUnmounted(() => {
             <router-link
               v-if="!session.isAuthenticated"
               to="/signup"
-              class="group px-3 py-3 border border-alt text-alt hover:bg-green hover:text-primary transition-colors cursor-pointer"
+              class="navi-btn group px-3 py-3 border border-alt text-alt hover:bg-green hover:text-primary hover:border-green transition-all duration-200 cursor-pointer"
             >
               <div class="flex items-center gap-3">
                 <span class="text-green group-hover:text-primary">▸</span>
-                <span class="tracking-wide">SIGN UP</span>
+                <span class="tracking-wide font-mono font-bold">SIGN UP</span>
                 <span class="ml-auto">save favorites &amp; track orders</span>
               </div>
             </router-link>
@@ -188,11 +188,11 @@ onUnmounted(() => {
             <router-link
               v-if="session.isAuthenticated"
               to="/orders"
-              class="group px-3 py-3 border border-alt text-alt hover:bg-green hover:text-primary transition-colors cursor-pointer"
+              class="navi-btn group px-3 py-3 border border-alt text-alt hover:bg-green hover:text-primary hover:border-green transition-all duration-200 cursor-pointer"
             >
               <div class="flex items-center gap-3">
                 <span class="text-green group-hover:text-primary">▸</span>
-                <span class="tracking-wide">MY ORDERS</span>
+                <span class="tracking-wide font-mono font-bold">MY ORDERS</span>
                 <span class="ml-auto">view full order history</span>
               </div>
             </router-link>

@@ -12,11 +12,22 @@ export const useCreateOrder = () => {
 }
 
 export const useOrder = (orderId: string) => {
-  return useApi<Order>(['order', orderId], () =>
-    apiClient(`api/orders/${orderId}/`, { method: 'GET' }),
+  return useApi<Order>(
+    ['order', orderId],
+    () => apiClient(`api/orders/${orderId}/`, { method: 'GET' }),
+    {
+      refetchInterval: (query) => {
+        const status = query.state.data?.status
+        return status === 'C' ? false : 15000
+      },
+    },
   )
 }
 
 export const useOrders = () => {
-  return useApi<Order[]>(['orders'], () => apiClient('api/orders/', { method: 'GET' }))
+  return useApi<Order[]>(
+    ['orders'],
+    () => apiClient('api/orders/', { method: 'GET' }),
+    { refetchInterval: 15000 },
+  )
 }

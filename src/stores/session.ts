@@ -20,8 +20,6 @@ export const useSessionStore = defineStore('session', () => {
   let initPromise: Promise<void> | null = null
 
   const initAuth = () => {
-    if (initPromise) return initPromise
-
     initPromise = (async () => {
       const result = await getUser()
       if (result && !isGuest.value && Object.keys(user.value).length > 0) {
@@ -102,7 +100,7 @@ export const useSessionStore = defineStore('session', () => {
       return data
     } catch (error: unknown) {
       console.log(error)
-      return
+      throw error
     }
   }
 

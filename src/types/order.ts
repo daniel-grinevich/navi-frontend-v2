@@ -1,7 +1,7 @@
 import { type CartItem } from './cart'
 import { type UserResponse } from './user'
 
-export type OrderStatus = 'O' | 'S' | 'D' | 'C'
+export type OrderStatus = 'O' | 'S' | 'D' | 'C' | 'R'
 
 export type Order = {
   id?: string

@@ -14,11 +14,15 @@ const router = useRouter()
 const cart = useShoppingCart()
 const session = useSessionStore()
 const isEditingEmail = ref(false)
+const cartFormRef = ref<InstanceType<typeof CartForm> | null>(null)
 
 const submitCart = () => {
-  if (session.isAuthenticated || session.isGuest) {
-    router.push({ name: 'checkout' })
+  if (!session.isAuthenticated && !session.isGuest) {
+    cartFormRef.value?.submit()
+    return
   }
+
+  router.push({ name: 'checkout' })
 }
 
 const continueShopping = () => {
@@ -42,16 +46,17 @@ const continueShopping = () => {
     <!-- Filled Cart -->
     <div v-else>
       <!-- Guest Email -->
-      <div v-if="!session.isAuthenticated && (!session.isGuest || isEditingEmail)" class="border border-alt mb-4">
-        <CartForm
-          :prefill-email="session.user.guestEmail || ''"
-          @cancel="isEditingEmail = false"
-        />
+      <div
+        v-if="!session.isAuthenticated && (!session.isGuest || isEditingEmail)"
+        class="border border-alt mb-4"
+      >
+        <CartForm ref="cartFormRef" :prefill-email="session.user.guestEmail || ''" @cancel="isEditingEmail = false" />
       </div>
       <div v-else-if="session.isGuest && !isEditingEmail" class="border border-alt mb-4 text-xs">
         <div class="px-3 py-2 flex items-center justify-between">
           <span>
-            <span class="text-green">▸</span> guest: <span class="font-mono">{{ session.user.guestEmail }}</span>
+            <span class="text-green">▸</span> guest:
+            <span class="font-mono">{{ session.user.guestEmail }}</span>
           </span>
           <button
             @click="isEditingEmail = true"
@@ -76,7 +81,9 @@ const continueShopping = () => {
         <!-- Right Column: Summary -->
         <div class="lg:col-span-1">
           <div class="border border-alt lg:sticky lg:top-4">
-            <div class="px-3 py-1 border-b border-alt font-secondary text-alt">// order summary</div>
+            <div class="px-3 py-1 border-b border-alt font-secondary text-alt">
+              // order summary
+            </div>
             <div class="px-3 py-2 flex justify-between">
               <span>subtotal ({{ cart.itemCount }} item{{ cart.itemCount > 1 ? 's' : '' }})</span>
               <span class="font-mono">${{ cart.subtotal.toFixed(2) }}</span>
@@ -91,7 +98,9 @@ const continueShopping = () => {
             </div>
             <div class="px-3 py-3 border-t border-alt space-y-2">
               <NaviButton variant="filled" full-width @click="submitCart">CHECKOUT</NaviButton>
-              <NaviButton variant="ghost" full-width @click="continueShopping">CONTINUE SHOPPING</NaviButton>
+              <NaviButton variant="ghost" full-width @click="continueShopping"
+                >CONTINUE SHOPPING</NaviButton
+              >
             </div>
           </div>
         </div>

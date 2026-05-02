@@ -8,7 +8,7 @@ const props = defineProps<{
   item: CartItem
 }>()
 
-const cart = useShoppingCart()
+const cartStore = useShoppingCart()
 const router = useRouter()
 
 const itemSubtotal = computed(() => {
@@ -17,13 +17,11 @@ const itemSubtotal = computed(() => {
 
 const updateQuantity = (newQuantity: number) => {
   if (newQuantity < 1) return
-  cart.updateCartItemQuantity(props.item.cartItemId, newQuantity)
+  cartStore.updateCartItemQuantity(props.item.cartItemId, newQuantity)
 }
 
 const removeItem = () => {
-  if (confirm(`Remove "${props.item.menuItemName}" from your cart?`)) {
-    cart.removeCartItem(props.item.cartItemId)
-  }
+  cartStore.removeCartItem(props.item.cartItemId)
 }
 
 const edit = () => {
