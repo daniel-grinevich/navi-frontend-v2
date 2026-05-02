@@ -206,5 +206,96 @@ onUnmounted(() => {
         </div>
       </div>
     </div>
+
+  </div>
+
+  <!-- Step 1 -->
+  <div class="w-full text-xs border border-alt mt-10">
+    <div class="px-3 py-1 border-b border-alt text-primary bg-green">// step 01</div>
+    <div class="flex flex-col md:flex-row min-h-[30vh]">
+      <div class="md:w-1/3 flex items-center justify-center py-10 md:border-r border-b md:border-b-0 border-alt">
+        <span class="text-green font-mono text-5xl">01</span>
+      </div>
+      <div class="md:w-2/3 flex flex-col justify-center px-8 py-10">
+        <p class="font-mono font-bold text-sm">BROWSE THE MENU</p>
+        <p class="font-secondary mt-3 leading-relaxed">explore drinks, customize every detail — size, milk, flavor, extras. make it yours.</p>
+        <div class="mt-6">
+          <router-link
+            to="/menu"
+            class="navi-btn inline-block px-4 py-2 border border-alt font-mono tracking-wide hover:bg-green hover:text-primary hover:border-green transition-all duration-200 cursor-pointer"
+          >
+            <span class="text-green">▸</span> VIEW MENU
+          </router-link>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 2 -->
+  <div class="w-full text-xs border border-alt mt-10">
+    <div class="px-3 py-1 border-b border-alt text-primary bg-green">// step 02</div>
+    <div class="flex flex-col md:flex-row min-h-[30vh]">
+      <div class="md:w-2/3 flex flex-col justify-center px-8 py-10 md:border-r border-b md:border-b-0 border-alt">
+        <p class="font-mono font-bold text-sm">PLACE YOUR ORDER</p>
+        <p class="font-secondary mt-3 leading-relaxed">no account needed. checkout as a guest or create one to track orders and earn achievements. pay with card, Apple Pay, or Google Pay.</p>
+      </div>
+      <div class="md:w-1/3 flex items-center justify-center py-10">
+        <span class="text-green font-mono text-5xl">02</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 3 -->
+  <div class="w-full text-xs border border-alt mt-10">
+    <div class="px-3 py-1 border-b border-alt text-primary bg-green">// step 03</div>
+    <div class="flex flex-col md:flex-row min-h-[30vh]">
+      <div class="md:w-1/3 flex items-center justify-center py-10 md:border-r border-b md:border-b-0 border-alt">
+        <span class="text-green font-mono text-5xl">03</span>
+      </div>
+      <div class="md:w-2/3 flex flex-col justify-center px-8 py-10">
+        <p class="font-mono font-bold text-sm">PICK UP AT NAVIPORT</p>
+        <p class="font-secondary mt-3 leading-relaxed">grab your order from the nearest NaviPort. no lines, no waiting. track your order status live — it updates automatically.</p>
+        <div class="mt-6">
+          <router-link
+            to="/find-navi"
+            class="navi-btn inline-block px-4 py-2 border border-alt font-mono tracking-wide hover:bg-green hover:text-primary hover:border-green transition-all duration-200 cursor-pointer"
+          >
+            <span class="text-green">▸</span> FIND A NAVIPORT
+          </router-link>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- About + Stats -->
+  <div class="w-full text-xs border border-alt mt-10 mb-10">
+    <div class="px-3 py-1 border-b border-alt text-primary bg-green">// about navi</div>
+
+    <div class="flex flex-col md:flex-row min-h-[30vh]">
+      <div class="md:w-1/2 flex flex-col justify-center px-8 py-10 md:border-r border-b md:border-b-0 border-alt">
+        <p class="font-mono text-sm leading-relaxed">NAVI was built on a simple idea: great drinks shouldn't come with long lines.</p>
+        <p class="font-secondary mt-4 leading-relaxed">we're a network of automated pickup points — <span class="text-green font-mono">NaviPorts</span> — designed to get your order to you fast, fresh, and exactly how you like it.</p>
+        <p class="mt-6 font-mono text-green">no storefronts. no queues. just good drinks.</p>
+      </div>
+
+      <div class="md:w-1/2 grid grid-cols-2">
+        <div class="px-4 py-8 border-r border-b border-alt flex flex-col items-center justify-center">
+          <p class="text-green font-mono text-3xl">12</p>
+          <p class="font-secondary mt-2">NaviPorts</p>
+        </div>
+        <div class="px-4 py-8 border-b border-alt flex flex-col items-center justify-center">
+          <p class="text-green font-mono text-3xl">2k+</p>
+          <p class="font-secondary mt-2">orders served</p>
+        </div>
+        <div class="px-4 py-8 border-r border-alt flex flex-col items-center justify-center">
+          <p class="text-green font-mono text-3xl">&lt;5m</p>
+          <p class="font-secondary mt-2">avg wait time</p>
+        </div>
+        <div class="px-4 py-8 flex flex-col items-center justify-center">
+          <p class="text-green font-mono text-3xl">24/7</p>
+          <p class="font-secondary mt-2">always open</p>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
