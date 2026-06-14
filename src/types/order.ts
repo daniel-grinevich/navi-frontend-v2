@@ -10,7 +10,7 @@ export type Order = {
   subtotal: number
   tax: number
   total: number
-  status: OrderStatus
+  order_status: OrderStatus
   specialInstructions?: string
   created_at: Date
   estimatedReadyTime?: Date

@@ -16,9 +16,9 @@ export const useOrder = (orderId: string) => {
     ['order', orderId],
     () => apiClient(`api/orders/${orderId}/`, { method: 'GET' }),
     {
-      refetchInterval: (query) => {
-        const status = query.state.data?.status
-        return status === 'C' ? false : 15000
+      refetchInterval: (query: { state: { data: Order | undefined } }) => {
+        const status = query.state.data?.order_status
+        return status === 'D' || status === 'C' ? false : 60000
       },
     },
   )
