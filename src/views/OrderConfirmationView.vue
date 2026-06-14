@@ -3,6 +3,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { computed, toValue } from 'vue'
 import Qrcode from '@/components/shared/Qrcode.vue'
 import { useOrder } from '@/composables/useOrder'
+import { useOrderWebSocket } from '@/composables/useOrderWebSocket'
 import { useSessionStore } from '../stores/session'
 import { apiClient } from '@/lib/apiClient'
 
@@ -11,6 +12,7 @@ const route = useRoute()
 
 const orderId = computed(() => route.params.orderId as string)
 const { isLoading, data: order, isError } = useOrder(orderId.value)
+const { machineError } = useOrderWebSocket(orderId.value)
 
 const sessionStore = useSessionStore()
 
@@ -34,7 +36,7 @@ const stepLabels: Record<string, string> = {
 
 const stepIndex = computed(() => {
   if (!order.value) return 0
-  return steps.indexOf(order.value.status)
+  return steps.indexOf(order.value.order_status)
 })
 
 const stepState = (i: number) => {
@@ -63,6 +65,12 @@ const stepState = (i: number) => {
 
   <!-- Order Confirmation -->
   <div v-else class="w-full text-xs space-y-4">
+    <!-- Machine Error -->
+    <div v-if="machineError" class="border border-alt text-xs">
+      <div class="px-3 py-1 border-b border-alt font-secondary text-alt">// machine error</div>
+      <div class="px-3 py-3 font-mono">{{ machineError }}</div>
+      <div class="px-3 py-2 border-t border-alt text-alt">your qr code is still valid — please try again or visit another machine</div>
+    </div>
     <!-- ASCII Status Tracker -->
     <div class="border border-alt text-xs">
       <div class="px-3 py-1 border-b border-alt font-secondary text-alt">// order status</div>
@@ -114,12 +122,12 @@ const stepState = (i: number) => {
         </div>
         <div class="px-3 py-2 flex justify-between border-t border-alt">
           <span>status</span>
-          <span class="font-mono text-green">{{ stepLabels[order?.status ?? 'O'] }}</span>
+          <span class="font-mono text-green">{{ stepLabels[order?.order_status ?? 'O'] }}</span>
         </div>
       </div>
 
       <!-- QR Code -->
-      <div v-if="order?.id && order.status === 'O'" class="border border-alt text-xs">
+      <div v-if="order?.id && order.order_status === 'O'" class="border border-alt text-xs">
         <div class="px-3 py-1 border-b border-alt font-secondary text-alt">// qr code</div>
         <div class="px-3 py-4 flex justify-center">
           <Qrcode :value="'{{order.id}}'" :size="200" />

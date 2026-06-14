@@ -7,13 +7,15 @@ import AsyncList from '@/components/shared/AsyncList.vue'
 
 const router = useRouter()
 
-const { isLoading, data: orders, isError } = useOrders()
+const { isLoading, data: orders } = useOrders()
 
 const statusFilter = ref<OrderStatus | 'ALL'>('ALL')
 
-const statusLabels: Record<string, string> = {
+const statusLabels: Record<OrderStatus | 'ALL', string> = {
   ALL: 'ALL',
   O: 'OPEN',
+  S: 'SHIPPED',
+  D: 'DISPATCH',
   C: 'DONE',
   R: 'REFUNDED',
 }
@@ -21,7 +23,7 @@ const statusLabels: Record<string, string> = {
 const filteredOrders = computed(() => {
   if (!orders.value) return []
   if (statusFilter.value === 'ALL') return orders.value
-  return orders.value.filter((o) => o.status === statusFilter.value)
+  return orders.value.filter((o) => o.order_status === statusFilter.value)
 })
 
 const orderDate = (iso: Date) => {
@@ -68,7 +70,7 @@ const orderDate = (iso: Date) => {
               <p class="mt-1">{{ orderDate(order.created_at) }}</p>
             </div>
             <div class="font-mono">
-              status: <span class="text-green">{{ order.status }}</span>
+              status: <span class="text-green">{{ order.order_status }}</span>
             </div>
             <button
               class="navi-btn px-3 py-2 bg-green text-primary border border-green cursor-pointer font-mono tracking-wide hover:bg-alt hover:text-primary hover:border-alt transition-all duration-200"
