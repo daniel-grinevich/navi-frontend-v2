@@ -2,10 +2,12 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { useQueryClient } from '@tanstack/vue-query'
 import type { Order } from '@/types/order'
 
-const WS_BASE_URL = (import.meta.env.VITE_BASE_URL || 'http://localhost:8000').replace(
-  /^http/,
-  'ws',
-)
+// When VITE_BASE_URL is explicitly empty (proxy mode), connect same-origin to
+// the dev server (ws://localhost:5173/ws/...) and let the proxy forward to
+// staging. `new WebSocket` needs an absolute URL, so fall back to the current
+// origin rather than a bare relative path.
+const httpBase = import.meta.env.VITE_BASE_URL ?? 'http://localhost:8000'
+const WS_BASE_URL = (httpBase || window.location.origin).replace(/^http/, 'ws')
 
 export function useOrderWebSocket(orderId: string) {
   const queryClient = useQueryClient()
