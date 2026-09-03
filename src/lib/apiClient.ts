@@ -14,7 +14,11 @@ type Request = RequestInit & {
   queryParams?: Record<string, boolean | Date | string | number | null>
 }
 
-export async function apiClient<T>(endpoint: string, options: Request = {}): Promise<T> {
+export async function apiClient<T>(
+  endpoint: string,
+  options: Request = {},
+  retried = false,
+): Promise<T> {
   const { isAuthenticated, refreshAccessToken } = useSessionStore()
 
   let cleanedEndpoint = cleanEndpoint(endpoint)
@@ -53,11 +57,14 @@ export async function apiClient<T>(endpoint: string, options: Request = {}): Pro
         throw Error('Refresh token is invalid or expired.')
       }
 
+      // Guard against an infinite refresh loop: only attempt one refresh+retry.
+      if (retried) throw Error('Still unauthorized after refreshing the access token.')
+
       const refreshResponse: boolean = await refreshAccessToken()
 
       if (!refreshResponse) throw Error('Could not use refresh token to authenticate user.')
 
-      return apiClient(cleanedEndpoint, options)
+      return apiClient(cleanedEndpoint, options, true)
     }
 
     if (!response.ok) {

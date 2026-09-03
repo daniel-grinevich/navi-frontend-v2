@@ -31,11 +31,8 @@ export const useUserSignup = () => {
 }
 
 export const useUserLogin = () => {
-  return useApiWrite<
-    { access: string; refresh: string },
-    Error,
-    { email: string; password: string }
-  >(
+  // The login endpoint sets httpOnly auth cookies and returns an empty body.
+  return useApiWrite<void, Error, { email: string; password: string }>(
     async (userData) =>
       await apiClient('api/token/', {
         method: 'POST',
