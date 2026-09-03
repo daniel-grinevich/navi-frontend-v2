@@ -5,6 +5,7 @@ export type UserResponse = {
   stripe_customer_id: string
   date_joined: Date
   is_guest: boolean
+  is_admin: boolean
 }
 
 export type Session = {

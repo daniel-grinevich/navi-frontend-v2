@@ -46,6 +46,7 @@ export const useSessionStore = defineStore('session', () => {
           email: data.email,
           name: data.name,
           isGuest: data.is_guest,
+          is_admin: data.is_admin,
           dateJoined: data.date_joined,
           stripeCustomerId: data.stripe_customer_id,
         }
@@ -67,8 +68,8 @@ export const useSessionStore = defineStore('session', () => {
     } catch {
       return false
     } finally {
-      // TODO clean up tokens in cookies
-
+      // Auth cookies are httpOnly and are cleared server-side by the logout
+      // endpoint (delete_token_cookies); nothing to clear from JS here.
       user.value = {}
       isAuthenticated.value = false
       isGuest.value = false
@@ -104,14 +105,27 @@ export const useSessionStore = defineStore('session', () => {
     }
   }
 
+  // Single-flight the refresh: with rotating + blacklisted refresh tokens, two
+  // concurrent refreshes would blacklist each other and force a logout. Share
+  // one in-flight promise so parallel 401s all await the same refresh.
+  let refreshPromise: Promise<boolean> | null = null
+
   const refreshAccessToken = async () => {
-    try {
-      await apiClient('api/token/refresh/', { method: 'POST' })
-      return true
-    } catch {
-      await logout()
-      return false
-    }
+    if (refreshPromise) return refreshPromise
+
+    refreshPromise = (async () => {
+      try {
+        await apiClient('api/token/refresh/', { method: 'POST' })
+        return true
+      } catch {
+        await logout()
+        return false
+      } finally {
+        refreshPromise = null
+      }
+    })()
+
+    return refreshPromise
   }
 
   return {

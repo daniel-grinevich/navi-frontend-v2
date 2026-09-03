@@ -29,29 +29,34 @@ const { zodValueorError } = useZod(loginFields, LoginSchema)
 
 const { mutateAsync } = useUserLogin()
 
-const handleLoginSubmit = async (e: Event) => {
+const handleLoginSubmit = async () => {
   loading.value = true
   loginErrorMessage.value = ''
 
-  try {
-    if (!zodValueorError.value.success && zodValueorError.value.error) {
-      loginErrorMessage.value = Object.values(zodValueorError.value.error).join(',')
-      throw Error('Schema was not validated')
-    }
+  if (!zodValueorError.value.success && zodValueorError.value.error) {
+    loginErrorMessage.value = Object.values(zodValueorError.value.error).join(',')
+    loading.value = false
+    return
+  }
 
+  try {
     await mutateAsync(loginFields.value)
   } catch (error) {
     console.log('Login Failed:', error)
-  } finally {
-    sessionStore.initAuth()
+    loginErrorMessage.value = 'Invalid email or password.'
     loading.value = false
+    return
+  }
 
-    const canGoBack = window.history.state?.back !== null
-    if (canGoBack) {
-      router.go(-1)
-    } else {
-      router.push({ name: 'menu' })
-    }
+  // Only reached on a successful login — never redirect a failed attempt.
+  await sessionStore.initAuth()
+  loading.value = false
+
+  const canGoBack = window.history.state?.back !== null
+  if (canGoBack) {
+    router.go(-1)
+  } else {
+    router.push({ name: 'menu' })
   }
 }
 </script>
