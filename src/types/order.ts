@@ -3,6 +3,14 @@ import { type UserResponse } from './user'
 
 export type OrderStatus = 'O' | 'S' | 'D' | 'C' | 'R'
 
+// Standard DRF PageNumberPagination envelope.
+export type PaginatedResponse<T> = {
+  count: number
+  next: string | null
+  previous: string | null
+  results: T[]
+}
+
 export type Order = {
   id?: string
   naviPortId: string | number
@@ -10,6 +18,7 @@ export type Order = {
   subtotal: number
   tax: number
   total: number
+  price?: string | number
   order_status: OrderStatus
   specialInstructions?: string
   created_at: Date
