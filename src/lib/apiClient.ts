@@ -5,7 +5,9 @@ import { authRoutes } from '@/constants/constants'
 import { createQueryParams } from '@/helpers/queryParamsHelper'
 import ApiError from '@/lib/apiError'
 
-const API_BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:8000'
+// `??` (not `||`) so an explicitly-empty VITE_BASE_URL stays empty, making
+// requests relative (`/api/...`) and letting the dev-server proxy handle them.
+const API_BASE_URL = import.meta.env.VITE_BASE_URL ?? 'http://localhost:8000'
 const UNSAFE_METHODS = ['POST', 'PUT', 'PATCH', 'DELETE']
 
 type Request = RequestInit & {
