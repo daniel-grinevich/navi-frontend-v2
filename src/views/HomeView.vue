@@ -5,9 +5,51 @@ import { useSessionStore } from '@/stores/session'
 import { useShoppingCart } from '@/stores/shoppingCart'
 import HealthBar from '@/components/home/HealthBar.vue'
 import AchievementsRow from '@/components/home/AchievementsRow.vue'
+import { useAchievementsSync } from '@/composables/useAchievements'
 
 const session = useSessionStore()
 const cart = useShoppingCart()
+
+// Hydrate achievements from the backend (definitions + per-user progress).
+useAchievementsSync()
+
+const steps = [
+  {
+    n: '01',
+    title: 'BROWSE THE MENU',
+    desc: 'explore drinks and customize every detail — size, milk, flavor, extras. make it yours.',
+    to: '/menu',
+    cta: 'VIEW MENU',
+  },
+  {
+    n: '02',
+    title: 'PLACE YOUR ORDER',
+    desc: 'checkout as a guest or make an account to track orders and earn achievements.',
+    to: null,
+    cta: null,
+  },
+  {
+    n: '03',
+    title: 'PICK UP AT NAVIPORT',
+    desc: 'grab your order from the nearest NaviPort. no lines, no waiting — status updates live.',
+    to: '/find-navi',
+    cta: 'FIND A NAVIPORT',
+  },
+]
+
+const features = [
+  { glyph: '⚡', title: 'NO LINES', desc: 'skip the queue. order ahead, grab and go.' },
+  { glyph: '◉', title: 'LIVE TRACKING', desc: 'watch your order status update in real time.' },
+  { glyph: '⬡', title: 'GUEST CHECKOUT', desc: 'no account required. order in seconds.' },
+  { glyph: '✦', title: 'PAY ANY WAY', desc: 'card, Apple Pay, or Google Pay.' },
+]
+
+const stats = [
+  { value: '12', label: 'NaviPorts' },
+  { value: '2k+', label: 'orders served' },
+  { value: '<5m', label: 'avg wait time' },
+  { value: '24/7', label: 'always open' },
+]
 
 // Animation refs
 const logoLines = ref<HTMLElement[]>([])
@@ -209,93 +251,106 @@ onUnmounted(() => {
 
   </div>
 
-  <!-- Step 1 -->
+  <!-- How it works -->
   <div class="w-full text-xs border border-alt mt-10">
-    <div class="px-3 py-1 border-b border-alt text-primary bg-green">// step 01</div>
-    <div class="flex flex-col md:flex-row min-h-[30vh]">
-      <div class="md:w-1/3 flex items-center justify-center py-10 md:border-r border-b md:border-b-0 border-alt">
-        <span class="text-green font-mono text-5xl">01</span>
-      </div>
-      <div class="md:w-2/3 flex flex-col justify-center px-8 py-10">
-        <p class="font-mono font-bold text-sm">BROWSE THE MENU</p>
-        <p class="font-secondary mt-3 leading-relaxed">explore drinks, customize every detail — size, milk, flavor, extras. make it yours.</p>
-        <div class="mt-6">
-          <router-link
-            to="/menu"
-            class="navi-btn inline-block px-4 py-2 border border-alt font-mono tracking-wide hover:bg-green hover:text-primary hover:border-green transition-all duration-200 cursor-pointer"
-          >
-            <span class="text-green">▸</span> VIEW MENU
-          </router-link>
+    <div class="px-3 py-1 border-b border-alt text-primary bg-green flex items-center justify-between">
+      <span>// how_it_works</span>
+      <span class="hidden sm:inline opacity-70">3 steps to caffeine</span>
+    </div>
+
+    <div class="grid md:grid-cols-3">
+      <div
+        v-for="(step, i) in steps"
+        :key="step.n"
+        class="flex flex-col gap-4 p-6 border-alt border-b md:border-b-0"
+        :class="i < steps.length - 1 ? 'md:border-r' : ''"
+      >
+        <div class="flex items-baseline gap-3">
+          <span class="text-green font-mono text-4xl leading-none">{{ step.n }}</span>
+          <span class="font-secondary tracking-[0.3em]">step</span>
         </div>
+        <p class="font-mono font-bold text-sm tracking-wide">{{ step.title }}</p>
+        <p class="font-secondary leading-relaxed flex-1">{{ step.desc }}</p>
+        <router-link
+          v-if="step.to"
+          :to="step.to"
+          class="navi-btn inline-block px-3 py-2 border border-alt font-mono tracking-wide hover:bg-green hover:text-primary hover:border-green transition-all duration-200 cursor-pointer w-fit"
+        >
+          <span class="text-green group-hover:text-primary">▸</span> {{ step.cta }}
+        </router-link>
       </div>
     </div>
   </div>
 
-  <!-- Step 2 -->
+  <!-- Why Navi -->
   <div class="w-full text-xs border border-alt mt-10">
-    <div class="px-3 py-1 border-b border-alt text-primary bg-green">// step 02</div>
-    <div class="flex flex-col md:flex-row min-h-[30vh]">
-      <div class="md:w-2/3 flex flex-col justify-center px-8 py-10 md:border-r border-b md:border-b-0 border-alt">
-        <p class="font-mono font-bold text-sm">PLACE YOUR ORDER</p>
-        <p class="font-secondary mt-3 leading-relaxed">no account needed. checkout as a guest or create one to track orders and earn achievements. pay with card, Apple Pay, or Google Pay.</p>
-      </div>
-      <div class="md:w-1/3 flex items-center justify-center py-10">
-        <span class="text-green font-mono text-5xl">02</span>
-      </div>
-    </div>
-  </div>
+    <div class="px-3 py-1 border-b border-alt text-primary bg-green">// why_navi</div>
 
-  <!-- Step 3 -->
-  <div class="w-full text-xs border border-alt mt-10">
-    <div class="px-3 py-1 border-b border-alt text-primary bg-green">// step 03</div>
-    <div class="flex flex-col md:flex-row min-h-[30vh]">
-      <div class="md:w-1/3 flex items-center justify-center py-10 md:border-r border-b md:border-b-0 border-alt">
-        <span class="text-green font-mono text-5xl">03</span>
-      </div>
-      <div class="md:w-2/3 flex flex-col justify-center px-8 py-10">
-        <p class="font-mono font-bold text-sm">PICK UP AT NAVIPORT</p>
-        <p class="font-secondary mt-3 leading-relaxed">grab your order from the nearest NaviPort. no lines, no waiting. track your order status live — it updates automatically.</p>
-        <div class="mt-6">
-          <router-link
-            to="/find-navi"
-            class="navi-btn inline-block px-4 py-2 border border-alt font-mono tracking-wide hover:bg-green hover:text-primary hover:border-green transition-all duration-200 cursor-pointer"
-          >
-            <span class="text-green">▸</span> FIND A NAVIPORT
-          </router-link>
-        </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+      <div
+        v-for="(f, i) in features"
+        :key="f.title"
+        class="group flex flex-col gap-3 p-6 border-alt border-b sm:border-b lg:border-b-0"
+        :class="[
+          i < features.length - 1 ? 'lg:border-r' : '',
+          i % 2 === 0 ? 'sm:border-r' : '',
+        ]"
+      >
+        <span
+          class="text-green text-2xl leading-none transition-transform duration-200 group-hover:scale-125 origin-left"
+        >
+          {{ f.glyph }}
+        </span>
+        <p class="font-mono font-bold tracking-wide">{{ f.title }}</p>
+        <p class="font-secondary leading-relaxed">{{ f.desc }}</p>
       </div>
     </div>
   </div>
 
   <!-- About + Stats -->
-  <div class="w-full text-xs border border-alt mt-10 mb-10">
-    <div class="px-3 py-1 border-b border-alt text-primary bg-green">// about navi</div>
+  <div class="w-full text-xs border border-alt mt-10">
+    <div class="px-3 py-1 border-b border-alt text-primary bg-green">// about_navi</div>
 
-    <div class="flex flex-col md:flex-row min-h-[30vh]">
-      <div class="md:w-1/2 flex flex-col justify-center px-8 py-10 md:border-r border-b md:border-b-0 border-alt">
-        <p class="font-mono text-sm leading-relaxed">NAVI was built on a simple idea: great drinks shouldn't come with long lines.</p>
-        <p class="font-secondary mt-4 leading-relaxed">we're a network of automated pickup points — <span class="text-green font-mono">NaviPorts</span> — designed to get your order to you fast, fresh, and exactly how you like it.</p>
-        <p class="mt-6 font-mono text-green">no storefronts. no queues. just good drinks.</p>
+    <div class="flex flex-col md:flex-row">
+      <div class="md:w-1/2 flex flex-col justify-center gap-4 px-8 py-10 md:border-r border-b md:border-b-0 border-alt">
+        <p class="font-mono text-sm leading-relaxed">
+          great drinks shouldn't come with long lines.
+        </p>
+        <p class="font-secondary leading-relaxed">
+          NAVI is a network of automated pickup points —
+          <span class="text-green font-mono">NaviPorts</span> — built to get your order to you
+          fast, fresh, and exactly how you like it.
+        </p>
+        <p class="font-mono text-green">no storefronts. no queues. just good drinks.</p>
       </div>
 
       <div class="md:w-1/2 grid grid-cols-2">
-        <div class="px-4 py-8 border-r border-b border-alt flex flex-col items-center justify-center">
-          <p class="text-green font-mono text-3xl">12</p>
-          <p class="font-secondary mt-2">NaviPorts</p>
-        </div>
-        <div class="px-4 py-8 border-b border-alt flex flex-col items-center justify-center">
-          <p class="text-green font-mono text-3xl">2k+</p>
-          <p class="font-secondary mt-2">orders served</p>
-        </div>
-        <div class="px-4 py-8 border-r border-alt flex flex-col items-center justify-center">
-          <p class="text-green font-mono text-3xl">&lt;5m</p>
-          <p class="font-secondary mt-2">avg wait time</p>
-        </div>
-        <div class="px-4 py-8 flex flex-col items-center justify-center">
-          <p class="text-green font-mono text-3xl">24/7</p>
-          <p class="font-secondary mt-2">always open</p>
+        <div
+          v-for="(s, i) in stats"
+          :key="s.label"
+          class="flex flex-col items-center justify-center gap-2 px-4 py-10 border-alt"
+          :class="[i % 2 === 0 ? 'border-r' : '', i < 2 ? 'border-b' : '']"
+        >
+          <p class="text-green font-mono text-3xl">{{ s.value }}</p>
+          <p class="font-secondary">{{ s.label }}</p>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- Closing CTA -->
+  <div class="w-full text-xs border border-green bg-green text-primary mt-10 mb-10">
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-4 px-8 py-8">
+      <div class="flex flex-col gap-1 text-center sm:text-left">
+        <p class="font-mono font-bold text-sm tracking-wide">READY WHEN YOU ARE</p>
+        <p class="opacity-80">your next drink is a few taps away.</p>
+      </div>
+      <router-link
+        to="/menu"
+        class="navi-btn inline-block px-5 py-3 border border-primary bg-primary text-alt font-mono font-bold tracking-wide hover:bg-transparent hover:text-primary hover:border-primary transition-all duration-200 cursor-pointer whitespace-nowrap"
+      >
+        ▸ START ORDER
+      </router-link>
     </div>
   </div>
 </template>

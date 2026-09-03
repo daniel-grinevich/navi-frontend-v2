@@ -61,7 +61,7 @@ export const useSessionStore = defineStore('session', () => {
     return true
   }
 
-  const logout = async () => {
+  const logout = async (redirect = true) => {
     try {
       await apiClient('api/logout/', { method: 'POST' })
       return true
@@ -73,7 +73,11 @@ export const useSessionStore = defineStore('session', () => {
       user.value = {}
       isAuthenticated.value = false
       isGuest.value = false
-      router.push('/')
+      // Only navigate for an explicit, user-initiated logout. When logout runs
+      // as cleanup after a failed token refresh (a background 401), redirecting
+      // would yank the user off whatever page they're on — e.g. bouncing them
+      // to home mid-way through the login or signup form.
+      if (redirect) router.push('/')
     }
   }
 
@@ -118,7 +122,9 @@ export const useSessionStore = defineStore('session', () => {
         await apiClient('api/token/refresh/', { method: 'POST' })
         return true
       } catch {
-        await logout()
+        // Clear stale session state but don't navigate — this runs from a
+        // background 401 and the caller (or route guard) decides where to go.
+        await logout(false)
         return false
       } finally {
         refreshPromise = null

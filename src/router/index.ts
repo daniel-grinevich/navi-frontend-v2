@@ -60,11 +60,23 @@ const router = createRouter({
       name: 'orders',
       component: () => import('../views/OrdersView.vue'),
     },
+    {
+      path: '/settings',
+      name: 'settings',
+      component: () => import('../views/SettingsView.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/admin/notifications',
+      name: 'adminNotifications',
+      component: () => import('../views/admin/AdminNotificationsView.vue'),
+      meta: { requiresAuth: true, requiresAdmin: true },
+    },
   ],
 })
 
 router.beforeEach(async (to) => {
-  if (to.meta.requiresAuth) {
+  if (to.meta.requiresAuth || to.meta.requiresAdmin) {
     const session = useSessionStore()
 
     if (!session.isInitialized) {
@@ -73,6 +85,10 @@ router.beforeEach(async (to) => {
 
     if (!session.isAuthenticated && !session.isGuest) {
       return { name: 'cart', query: { reason: 'auth-required' } }
+    }
+
+    if (to.meta.requiresAdmin && !session.isAdmin) {
+      return { name: 'home' }
     }
   }
 })

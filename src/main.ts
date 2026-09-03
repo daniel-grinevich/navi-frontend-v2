@@ -8,6 +8,8 @@ import router from './router'
 
 import { VueQueryPlugin } from '@tanstack/vue-query'
 
+import { initTheme } from './composables/useTheme'
+
 const vueQueryPluginOptions = {
   queryClientConfig: {
     defaultOptions: {
@@ -29,6 +31,8 @@ const vueQueryPluginOptions = {
 }
 
 import '@stripe/stripe-js'
+
+initTheme()
 
 const app = createApp(App)
 
