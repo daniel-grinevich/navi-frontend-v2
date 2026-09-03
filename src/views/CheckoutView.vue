@@ -6,6 +6,7 @@ import { useSessionStore } from '@/stores/session'
 import { useAchievementsStore } from '@/stores/achievements'
 import { useCreateOrder } from '@/composables/useOrder'
 import { useStripe } from '@/composables/useStripe'
+import { getApiErrorMessage } from '@/lib/errorParser'
 import { nextTick } from 'vue'
 
 const router = useRouter()
@@ -36,13 +37,15 @@ const selectNaviPort = () => {
 }
 
 const submitOrder = async () => {
+  paymentError.value = null
+
   if (!cart.selectedNaviPort) {
-    alert('Please select a NaviPort location first')
+    paymentError.value = 'Please select a NaviPort location first'
     return
   }
 
   if (cart.itemCount === 0) {
-    alert('Your cart is empty')
+    paymentError.value = 'Your cart is empty'
     return
   }
 
@@ -140,7 +143,7 @@ const submitOrder = async () => {
     }
   } catch (error) {
     console.error('Order submission failed:', error)
-    alert('Failed to submit order. Please try again.')
+    paymentError.value = getApiErrorMessage(error)
   }
 }
 
@@ -249,6 +252,9 @@ const confirmPayment = async () => {
 
           <!-- Review Step -->
           <div v-if="paymentStep === 'review'" class="px-3 py-3 border-t border-alt space-y-3">
+            <p v-if="paymentError" class="text-red px-2 py-2 border border-red">
+              {{ paymentError }}
+            </p>
             <button
               @click="submitOrder"
               :disabled="!hasNaviPort || isPending || cart.itemCount === 0"
