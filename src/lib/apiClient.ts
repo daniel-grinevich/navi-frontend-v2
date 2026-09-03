@@ -53,18 +53,21 @@ export async function apiClient<T>(
         return { success: true, body: 'User is already unauthenticated.' } as T
       }
 
-      if (cleanedEndpoint === 'token/refresh/') {
-        throw Error('Refresh token is invalid or expired.')
+      // A 401 from the login or refresh endpoints is terminal: `token/` means
+      // bad credentials (there's no session to refresh) and `token/refresh/`
+      // means the refresh token itself is dead. In both cases fall through to
+      // the shared error handling below so the caller sees the real error
+      // instead of triggering a refresh -> logout -> redirect-to-home chain.
+      if (cleanedEndpoint !== 'token/' && cleanedEndpoint !== 'token/refresh/') {
+        // Guard against an infinite refresh loop: only attempt one refresh+retry.
+        if (retried) throw Error('Still unauthorized after refreshing the access token.')
+
+        const refreshResponse: boolean = await refreshAccessToken()
+
+        if (!refreshResponse) throw Error('Could not use refresh token to authenticate user.')
+
+        return apiClient(cleanedEndpoint, options, true)
       }
-
-      // Guard against an infinite refresh loop: only attempt one refresh+retry.
-      if (retried) throw Error('Still unauthorized after refreshing the access token.')
-
-      const refreshResponse: boolean = await refreshAccessToken()
-
-      if (!refreshResponse) throw Error('Could not use refresh token to authenticate user.')
-
-      return apiClient(cleanedEndpoint, options, true)
     }
 
     if (!response.ok) {

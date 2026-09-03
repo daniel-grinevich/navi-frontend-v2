@@ -1,7 +1,11 @@
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import { useStorage } from '@vueuse/core'
 import { type CartItem } from '@/types/cart'
+import type {
+  AchievementDefinition,
+  AchievementProgressRow,
+} from '@/types/achievements'
 
 export type AchievementMetric = 'orders' | 'uniqueDrinks' | 'customizations'
 export type AchievementIcon = 'coffee' | 'star' | 'crown' | 'bean' | 'heart'
@@ -58,6 +62,24 @@ export const ACHIEVEMENTS: readonly Achievement[] = [
   },
 ] as const
 
+// Backend achievement metric strings → the store's local metric names.
+const METRIC_FROM_API: Record<string, AchievementMetric> = {
+  orders: 'orders',
+  unique_drinks: 'uniqueDrinks',
+  customizations: 'customizations',
+}
+
+const ICON_NAMES: readonly AchievementIcon[] = ['coffee', 'star', 'crown', 'bean', 'heart']
+
+const toAchievement = (d: AchievementDefinition): Achievement => ({
+  id: d.id,
+  label: d.label,
+  desc: d.desc,
+  target: d.target,
+  metric: METRIC_FROM_API[d.metric] ?? 'orders',
+  icon: ICON_NAMES.includes(d.icon as AchievementIcon) ? (d.icon as AchievementIcon) : 'star',
+})
+
 export const useAchievementsStore = defineStore('achievements', () => {
   const ordersPlaced = useStorage<number>('achievements-orders-placed', 0, localStorage)
   const uniqueDrinkIds = useStorage<string[]>('achievements-unique-drinks', [], localStorage)
@@ -66,6 +88,29 @@ export const useAchievementsStore = defineStore('achievements', () => {
     0,
     localStorage,
   )
+
+  // Server overlay: when populated (authenticated users), it takes precedence
+  // over the local counters below, which remain the guest / offline fallback.
+  const serverDefinitions = ref<Achievement[] | null>(null)
+  const serverProgress = ref<Record<string, AchievementProgressRow>>({})
+
+  const setServerDefinitions = (defs: AchievementDefinition[]) => {
+    serverDefinitions.value = defs.length ? defs.map(toAchievement) : null
+  }
+
+  const setServerProgress = (rows: AchievementProgressRow[]) => {
+    const next: Record<string, AchievementProgressRow> = {}
+    for (const row of rows) next[row.id] = row
+    serverProgress.value = next
+  }
+
+  const clearServerProgress = () => {
+    serverProgress.value = {}
+  }
+
+  // The definitions to render: server-provided when available, else the local
+  // seed set (which mirrors the backend's seeded slugs).
+  const list = computed<readonly Achievement[]>(() => serverDefinitions.value ?? ACHIEVEMENTS)
 
   const metricValue = (metric: AchievementMetric): number => {
     switch (metric) {
@@ -79,23 +124,29 @@ export const useAchievementsStore = defineStore('achievements', () => {
   }
 
   const progressFor = (achievement: Achievement) => {
+    const row = serverProgress.value[achievement.id]
+    if (row) return { current: Math.min(row.current, row.target), target: row.target }
+
     const current = Math.min(metricValue(achievement.metric), achievement.target)
     return { current, target: achievement.target }
   }
 
-  const isUnlocked = (achievement: Achievement) =>
-    metricValue(achievement.metric) >= achievement.target
+  const isUnlocked = (achievement: Achievement) => {
+    const row = serverProgress.value[achievement.id]
+    if (row) return row.unlocked
+    return metricValue(achievement.metric) >= achievement.target
+  }
 
   const unlocked = computed(() => {
     const set = new Set<string>()
-    for (const a of ACHIEVEMENTS) {
+    for (const a of list.value) {
       if (isUnlocked(a)) set.add(a.id)
     }
     return set
   })
 
   const nextAchievement = computed<Achievement | null>(() => {
-    for (const a of ACHIEVEMENTS) {
+    for (const a of list.value) {
       if (!isUnlocked(a)) return a
     }
     return null
@@ -135,12 +186,16 @@ export const useAchievementsStore = defineStore('achievements', () => {
     ordersPlaced,
     uniqueDrinkIds,
     customizationsUsed,
+    list,
     unlocked,
     nextAchievement,
     nextProgress,
     progressFor,
     isUnlocked,
     recordOrderPlaced,
+    setServerDefinitions,
+    setServerProgress,
+    clearServerProgress,
     reset,
   }
 })

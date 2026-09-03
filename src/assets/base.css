@@ -40,6 +40,20 @@
   --box-shadow-hard: 4px 4px 0px currentColor;
 }
 
+/* --- THEME SWITCHING ---
+   All theme colors above resolve via light-dark(), which follows `color-scheme`.
+   Default is `light dark` (follow the OS); an explicit data-theme on <html> —
+   set by useTheme — forces one mode so users can toggle live. */
+:root {
+  color-scheme: light dark;
+}
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+:root[data-theme='dark'] {
+  color-scheme: dark;
+}
+
 /* --- GLOBAL RESETS --- */
 *,
 *::before,
@@ -49,7 +63,7 @@
 }
 
 body {
-  color-scheme: light dark;
+  /* color-scheme is inherited from :root so the theme toggle controls it. */
   min-height: 100vh;
   color: var(--color-alt);
   background: var(--color-primary);

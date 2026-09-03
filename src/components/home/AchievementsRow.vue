@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ACHIEVEMENTS, useAchievementsStore } from '@/stores/achievements'
+import { useAchievementsStore } from '@/stores/achievements'
 import PixelIcon from './PixelIcon.vue'
 
 const achievements = useAchievementsStore()
@@ -9,7 +9,7 @@ const achievements = useAchievementsStore()
   <div class="border-t border-alt">
     <div class="px-3 py-3 flex flex-wrap gap-4 justify-around">
       <div
-        v-for="a in ACHIEVEMENTS"
+        v-for="a in achievements.list"
         :key="a.id"
         class="flex flex-col items-center gap-1 w-16"
         :title="a.desc"

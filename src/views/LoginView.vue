@@ -1,64 +1,58 @@
 <script setup lang="ts">
 /*** libraries ****/
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
+import { useForm } from '@tanstack/vue-form'
 /*** components ****/
-import TinyLoadingSpinner from '@/components/shared/TinyLoadingSpinner.vue'
+import AuthProviders from '@/components/shared/AuthProviders.vue'
 /*** stores ***/
 import { useSessionStore } from '@/stores/session'
 /*** composables ****/
 import { useUserLogin } from '@/composables/useUser'
-import { useZod } from '@/composables/useZod'
-/*** types ****/
+/*** schemas ****/
 import { LoginSchema } from '@/schemas/user/LoginSchema'
 
 const sessionStore = useSessionStore()
 const router = useRouter()
 const route = useRoute()
 
-const email = ref('')
-const password = ref('')
-const loading = ref(false)
+const { mutateAsync: login } = useUserLogin()
+
+// Form-level error (bad credentials / network), shown above the button.
 const loginErrorMessage = ref('')
 
-const loginFields = computed(() => {
-  return { email: email.value, password: password.value }
-})
-
-const { zodValueorError } = useZod(loginFields, LoginSchema)
-
-const { mutateAsync } = useUserLogin()
-
-const handleLoginSubmit = async () => {
-  loading.value = true
-  loginErrorMessage.value = ''
-
-  if (!zodValueorError.value.success && zodValueorError.value.error) {
-    loginErrorMessage.value = Object.values(zodValueorError.value.error).join(',')
-    loading.value = false
-    return
-  }
-
-  try {
-    await mutateAsync(loginFields.value)
-  } catch (error) {
-    console.log('Login Failed:', error)
-    loginErrorMessage.value = 'Invalid email or password.'
-    loading.value = false
-    return
-  }
-
-  // Only reached on a successful login — never redirect a failed attempt.
-  await sessionStore.initAuth()
-  loading.value = false
-
-  const canGoBack = window.history.state?.back !== null
-  if (canGoBack) {
-    router.go(-1)
-  } else {
-    router.push({ name: 'menu' })
-  }
+const validateEmail = (value: string) => {
+  const result = LoginSchema.shape.email.safeParse(value)
+  return result.success ? undefined : result.error.issues[0]?.message
 }
+
+const form = useForm({
+  defaultValues: {
+    email: '',
+    password: '',
+  },
+  onSubmit: async ({ value }) => {
+    loginErrorMessage.value = ''
+
+    // Build the payload explicitly from validated form state.
+    try {
+      await login({ email: value.email, password: value.password })
+    } catch {
+      loginErrorMessage.value =
+        "We couldn't sign you in. Check your email and password — or sign up below if you don't have an account yet."
+      return
+    }
+
+    await sessionStore.initAuth()
+
+    const canGoBack = window.history.state?.back !== null
+    if (canGoBack) {
+      router.go(-1)
+    } else {
+      router.push({ name: 'menu' })
+    }
+  },
+})
 </script>
 
 <template>
@@ -111,51 +105,90 @@ const handleLoginSubmit = async () => {
 
         <div class="flex-1 flex flex-col justify-center p-6">
           <form
-            @submit.prevent="handleLoginSubmit"
+            @submit.prevent.stop="form.handleSubmit()"
             class="flex flex-col gap-3 max-w-sm mx-auto w-full"
           >
-            <div class="flex flex-col gap-0.5">
-              <label for="email" class="block text-xs border border-alt max-w-fit p-1">
-                email:
-              </label>
-              <input
-                id="email"
-                v-model="email"
-                type="email"
-                required
-                placeholder="you@example.com"
-                autocomplete="email"
-                class="w-full px-4 py-2 border border-alt outline-0 focus:border-green"
-              />
-            </div>
-            <div class="flex flex-col gap-0.5">
-              <label for="password" class="block text-xs border border-alt max-w-fit p-1">
-                password:
-              </label>
-              <input
-                id="password"
-                v-model="password"
-                type="password"
-                required
-                placeholder="••••••••"
-                autocomplete="current-password"
-                class="w-full px-4 py-2 border border-alt outline-0 focus:border-green"
-              />
-            </div>
+            <!-- email -->
+            <form.Field
+              name="email"
+              :validators="{
+                onBlur: ({ value }: { value: string }) => validateEmail(value),
+                onSubmit: ({ value }: { value: string }) => validateEmail(value),
+              }"
+            >
+              <template #default="{ field, state }">
+                <div class="flex flex-col gap-0.5">
+                  <label :for="field.name" class="block text-xs border border-alt max-w-fit p-1">
+                    email:
+                  </label>
+                  <input
+                    :id="field.name"
+                    :value="field.state.value"
+                    @input="(e: Event) => field.handleChange((e.target as HTMLInputElement).value)"
+                    @change="(e: Event) => field.handleChange((e.target as HTMLInputElement).value)"
+                    @blur="field.handleBlur"
+                    type="email"
+                    placeholder="you@example.com"
+                    autocomplete="email"
+                    class="w-full px-4 py-2 border border-alt outline-0 focus:border-green"
+                  />
+                  <div class="text-red h-5 mt-0.5 text-xs">
+                    {{ state.meta.errors[0] }}
+                  </div>
+                </div>
+              </template>
+            </form.Field>
+
+            <!-- password -->
+            <form.Field
+              name="password"
+              :validators="{
+                onSubmit: ({ value }: { value: string }) =>
+                  value ? undefined : 'Password is required',
+              }"
+            >
+              <template #default="{ field, state }">
+                <div class="flex flex-col gap-0.5">
+                  <label :for="field.name" class="block text-xs border border-alt max-w-fit p-1">
+                    password:
+                  </label>
+                  <input
+                    :id="field.name"
+                    :value="field.state.value"
+                    @input="(e: Event) => field.handleChange((e.target as HTMLInputElement).value)"
+                    @change="(e: Event) => field.handleChange((e.target as HTMLInputElement).value)"
+                    @blur="field.handleBlur"
+                    type="password"
+                    placeholder="••••••••"
+                    autocomplete="current-password"
+                    class="w-full px-4 py-2 border border-alt outline-0 focus:border-green"
+                  />
+                  <div class="text-red h-5 mt-0.5 text-xs">
+                    {{ state.meta.errors[0] }}
+                  </div>
+                </div>
+              </template>
+            </form.Field>
 
             <div v-if="loginErrorMessage" class="p-2 border border-red text-red text-xs">
               {{ loginErrorMessage }}
             </div>
 
-            <button
-              type="submit"
-              :disabled="loading"
-              class="w-full py-2 px-4 bg-green text-white border border-green cursor-pointer font-mono tracking-wide text-xs hover:bg-alt hover:text-primary hover:border-alt transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-2"
-            >
-              <span v-if="loading"><TinyLoadingSpinner /> SIGN IN</span>
-              <span v-else>▸ SIGN IN</span>
-            </button>
+            <form.Subscribe>
+              <template #default="{ canSubmit, isSubmitting }">
+                <button
+                  type="submit"
+                  :disabled="!canSubmit"
+                  class="w-full py-2 px-4 bg-green text-white border border-green cursor-pointer font-mono tracking-wide text-xs hover:bg-alt hover:text-primary hover:border-alt transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+                >
+                  <span v-if="isSubmitting">creating session... SIGN IN</span>
+                  <span v-else>▸ SIGN IN</span>
+                </button>
+              </template>
+            </form.Subscribe>
           </form>
+
+          <AuthProviders class="mt-4" next="/menu" verb="Continue" />
 
           <p class="text-center text-xs mt-6">
             don't have an account?
