@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - production
+      - development
+  push:
+    branches:
+      - production
+      - development
+
+concurrency:
+  group: frontend-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.27.0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Type-check
+        run: pnpm run type-check
+
+      - name: Build
+        env:
+          VITE_ENVIRONMENT: production
+          VITE_BASE_URL: https://api.navitascoffee.com
+          VITE_OAUTH_ENABLED: 'false'
+          VITE_STRIPE_PUBLISHABLE_KEY: pk_test_ci_placeholder
+        run: pnpm run build
