@@ -71,6 +71,14 @@ onClickOutside(userMenuRef, () => {
       </router-link>
 
       <router-link
+        v-if="session.isAdmin"
+        to="/admin/orders"
+        class="no-underline px-3 py-1 border-r border-alt hidden md:flex items-center hover:bg-green hover:text-primary transition-colors"
+      >
+        ALL ORDERS
+      </router-link>
+
+      <router-link
         to="/cart"
         class="group no-underline px-3 py-1 border-r border-alt hidden md:flex items-center gap-2 hover:bg-green hover:text-primary transition-colors"
       >

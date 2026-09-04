@@ -59,6 +59,7 @@ const router = createRouter({
       path: '/orders',
       name: 'orders',
       component: () => import('../views/OrdersView.vue'),
+      meta: { requiresAuth: true },
     },
     {
       path: '/settings',
@@ -70,6 +71,12 @@ const router = createRouter({
       path: '/admin/notifications',
       name: 'adminNotifications',
       component: () => import('../views/admin/AdminNotificationsView.vue'),
+      meta: { requiresAuth: true, requiresAdmin: true },
+    },
+    {
+      path: '/admin/orders',
+      name: 'adminOrders',
+      component: () => import('../views/admin/AdminOrdersView.vue'),
       meta: { requiresAuth: true, requiresAdmin: true },
     },
   ],

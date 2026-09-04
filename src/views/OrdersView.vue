@@ -4,12 +4,18 @@ import { useRouter } from 'vue-router'
 import { useOrders } from '@/composables/useOrder'
 import type { OrderStatus } from '@/types/order'
 import AsyncList from '@/components/shared/AsyncList.vue'
+import Pagination from '@/components/shared/Pagination.vue'
 
 const router = useRouter()
 
-const { isLoading, data: orders } = useOrders()
-
+const page = ref(1)
 const statusFilter = ref<OrderStatus | 'ALL'>('ALL')
+
+const params = computed(() => ({ page: page.value, status: statusFilter.value }))
+const { isLoading, data } = useOrders(params)
+
+const orders = computed(() => data.value?.results ?? [])
+const count = computed(() => data.value?.count ?? 0)
 
 const statusLabels: Record<OrderStatus | 'ALL', string> = {
   ALL: 'ALL',
@@ -20,19 +26,15 @@ const statusLabels: Record<OrderStatus | 'ALL', string> = {
   R: 'REFUNDED',
 }
 
-const filteredOrders = computed(() => {
-  if (!orders.value) return []
-  if (statusFilter.value === 'ALL') return orders.value
-  return orders.value.filter((o) => o.order_status === statusFilter.value)
-})
+// Filtering is server-side now; changing it resets to the first page.
+const setStatus = (key: OrderStatus | 'ALL') => {
+  statusFilter.value = key
+  page.value = 1
+}
 
 const orderDate = (iso: Date) => {
   const date = new Date(iso)
-  const formatted = date.toLocaleString(undefined, {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  })
-  return formatted
+  return date.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
 }
 </script>
 
@@ -48,7 +50,7 @@ const orderDate = (iso: Date) => {
       <button
         v-for="(label, key) in statusLabels"
         :key="key"
-        @click="statusFilter = key"
+        @click="setStatus(key)"
         :class="[
           'px-3 py-2 border-r border-alt cursor-pointer font-mono tracking-wide transition-colors',
           statusFilter === key
@@ -60,7 +62,7 @@ const orderDate = (iso: Date) => {
       </button>
     </div>
 
-    <AsyncList :items="filteredOrders" :loading="isLoading" flex-gap="gap-4">
+    <AsyncList :items="orders" :loading="isLoading" flex-gap="gap-4" no-data-msg="No orders yet.">
       <template #item="order">
         <div class="navi-btn border border-alt border-l-[0.5rem] border-l-green text-xs transition-all duration-200 cursor-pointer">
           <div class="px-3 py-1 border-b border-alt font-secondary text-alt">// order</div>
@@ -88,5 +90,7 @@ const orderDate = (iso: Date) => {
         </div>
       </template>
     </AsyncList>
+
+    <Pagination :page="page" :count="count" @update:page="page = $event" />
   </div>
 </template>
