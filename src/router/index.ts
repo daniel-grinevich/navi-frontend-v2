@@ -79,6 +79,13 @@ const router = createRouter({
       component: () => import('../views/admin/AdminOrdersView.vue'),
       meta: { requiresAuth: true, requiresAdmin: true },
     },
+    {
+      path: '/admin/orders/:orderId',
+      name: 'adminOrderDetail',
+      component: () => import('../views/admin/AdminOrderDetailView.vue'),
+      props: true,
+      meta: { requiresAuth: true, requiresAdmin: true },
+    },
   ],
 })
 

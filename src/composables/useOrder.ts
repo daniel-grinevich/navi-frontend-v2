@@ -1,4 +1,5 @@
 import { computed, toValue, type MaybeRefOrGetter } from 'vue'
+import { useQueryClient } from '@tanstack/vue-query'
 import { apiClient } from '@/lib/apiClient'
 import { useApi, useApiWrite } from './useApi'
 import type {
@@ -60,5 +61,60 @@ export const useAdminOrders = (params: MaybeRefOrGetter<OrderListParams>) => {
         queryParams: orderQueryParams(toValue(params)),
       }),
     { refetchInterval: 15000 },
+  )
+}
+
+// Admin-only: a single order for any user. Backed by /api/admin/orders/{id}/,
+// which requires staff and 403s otherwise. Mirrors useOrder's refetch-until-
+// terminal behaviour so an admin watching an in-progress order stays live.
+export const useAdminOrder = (orderId: string) => {
+  return useApi<Order>(
+    ['admin-order', orderId],
+    () => apiClient(`api/admin/orders/${orderId}/`, { method: 'GET' }),
+    {
+      refetchInterval: (query: { state: { data: Order | undefined } }) => {
+        const status = query.state.data?.order_status
+        return status === 'D' || status === 'C' ? false : 15000
+      },
+    },
+  )
+}
+
+// Admin-only: move an order to a new status. Refreshes both the all-orders list
+// and the single-order cache so the table and detail view reflect the change.
+export const useUpdateOrderStatus = () => {
+  const queryClient = useQueryClient()
+
+  return useApiWrite<Order, Error, { orderId: string; order_status: OrderStatus }>(
+    ({ orderId, order_status }) =>
+      apiClient(`api/admin/orders/${orderId}/`, {
+        method: 'PATCH',
+        body: JSON.stringify({ order_status }),
+      }),
+    {
+      onSuccess: (_data: Order, variables: { orderId: string; order_status: OrderStatus }) => {
+        queryClient.invalidateQueries({ queryKey: ['admin-orders'] })
+        queryClient.invalidateQueries({ queryKey: ['admin-order', variables.orderId] })
+      },
+    },
+  )
+}
+
+// Admin-only: dispatch an order to a NaviPort machine.
+export const useDispatchOrder = () => {
+  const queryClient = useQueryClient()
+
+  return useApiWrite<Order, Error, { orderId: string; naviportId: string | number }>(
+    ({ orderId, naviportId }) =>
+      apiClient(`api/orders/${orderId}/dispatch/`, {
+        method: 'POST',
+        body: JSON.stringify({ orderId, naviportId }),
+      }),
+    {
+      onSuccess: (_data: Order, variables: { orderId: string; naviportId: string | number }) => {
+        queryClient.invalidateQueries({ queryKey: ['admin-orders'] })
+        queryClient.invalidateQueries({ queryKey: ['admin-order', variables.orderId] })
+      },
+    },
   )
 }
