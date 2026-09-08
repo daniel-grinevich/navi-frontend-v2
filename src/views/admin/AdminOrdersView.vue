@@ -81,14 +81,14 @@ const orderDate = (iso: Date) => {
           <tr v-for="order in orders" :key="order.id" class="border-b border-alt last:border-b-0">
             <td class="px-3 py-2">#{{ order.id }}</td>
             <td class="px-3 py-2">{{ order.user?.email ?? '—' }}</td>
-            <td class="px-3 py-2 text-green">{{ order.order_status }}</td>
+            <td class="px-3 py-2 text-green">{{ statusLabels[order.order_status] }}</td>
             <td class="px-3 py-2">{{ orderDate(order.created_at) }}</td>
             <td class="px-3 py-2">{{ order.price ?? '—' }}</td>
             <td class="px-3 py-2">
               <button
                 type="button"
                 class="cursor-pointer text-green hover:underline"
-                @click="router.push({ name: 'orderConfirmation', params: { orderId: order.id } })"
+                @click="router.push({ name: 'adminOrderDetail', params: { orderId: order.id } })"
               >
                 ▸ VIEW
               </button>
