@@ -68,30 +68,34 @@ const router = createRouter({
       meta: { requiresAuth: true },
     },
     {
-      path: '/admin/notifications',
-      name: 'adminNotifications',
-      component: () => import('../views/admin/AdminNotificationsView.vue'),
+      path: '/admin',
+      component: () => import('../views/admin/AdminLayout.vue'),
       meta: { requiresAuth: true, requiresAdmin: true },
-    },
-    {
-      path: '/admin/orders',
-      name: 'adminOrders',
-      component: () => import('../views/admin/AdminOrdersView.vue'),
-      meta: { requiresAuth: true, requiresAdmin: true },
-    },
-    {
-      // Static segment must precede the :orderId route so "new" isn't captured.
-      path: '/admin/orders/new',
-      name: 'adminCreateOrder',
-      component: () => import('../views/admin/AdminCreateOrderView.vue'),
-      meta: { requiresAuth: true, requiresAdmin: true },
-    },
-    {
-      path: '/admin/orders/:orderId',
-      name: 'adminOrderDetail',
-      component: () => import('../views/admin/AdminOrderDetailView.vue'),
-      props: true,
-      meta: { requiresAuth: true, requiresAdmin: true },
+      children: [
+        { path: '', redirect: { name: 'adminOrders' } },
+        {
+          path: 'orders',
+          name: 'adminOrders',
+          component: () => import('../views/admin/AdminOrdersView.vue'),
+        },
+        {
+          // Static segment must precede the :orderId route so "new" isn't captured.
+          path: 'orders/new',
+          name: 'adminCreateOrder',
+          component: () => import('../views/admin/AdminCreateOrderView.vue'),
+        },
+        {
+          path: 'orders/:orderId',
+          name: 'adminOrderDetail',
+          component: () => import('../views/admin/AdminOrderDetailView.vue'),
+          props: true,
+        },
+        {
+          path: 'notifications',
+          name: 'adminNotifications',
+          component: () => import('../views/admin/AdminNotificationsView.vue'),
+        },
+      ],
     },
   ],
 })

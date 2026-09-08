@@ -40,15 +40,8 @@ const orderDate = (iso: Date) => {
 <template>
   <div class="w-full text-xs space-y-4">
     <!-- Header -->
-    <div class="border border-alt flex items-center justify-between">
+    <div class="border border-alt">
       <div class="px-3 py-1 bg-green text-primary">// admin · all orders</div>
-      <button
-        type="button"
-        class="px-3 py-1 cursor-pointer text-green hover:underline font-mono"
-        @click="router.push({ name: 'adminCreateOrder' })"
-      >
-        ▸ NEW ORDER
-      </button>
     </div>
 
     <!-- Filter Bar -->
