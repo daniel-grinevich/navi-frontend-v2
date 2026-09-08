@@ -80,6 +80,13 @@ const router = createRouter({
       meta: { requiresAuth: true, requiresAdmin: true },
     },
     {
+      // Static segment must precede the :orderId route so "new" isn't captured.
+      path: '/admin/orders/new',
+      name: 'adminCreateOrder',
+      component: () => import('../views/admin/AdminCreateOrderView.vue'),
+      meta: { requiresAuth: true, requiresAdmin: true },
+    },
+    {
       path: '/admin/orders/:orderId',
       name: 'adminOrderDetail',
       component: () => import('../views/admin/AdminOrderDetailView.vue'),

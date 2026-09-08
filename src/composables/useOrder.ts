@@ -27,6 +27,26 @@ export const useCreateOrder = () => {
   })
 }
 
+// Admin manual-order payload: an order plus optional customer identity. The
+// backend attaches to an existing user when customer_email matches, otherwise
+// records a guest walk-in. Still returns a Stripe client_secret to capture card.
+export type AdminServerOrder = ServerOrder & {
+  customer_email?: string
+  guest_name?: string
+  guest_contact?: string
+}
+
+// Admin-only: create an order on a customer's behalf. Backed by
+// /api/admin/orders/, which requires staff and 403s otherwise.
+export const useAdminCreateOrder = () => {
+  return useApiWrite<OrderSubmissionResponse, Error, AdminServerOrder>(async (orderData) => {
+    return await apiClient('api/admin/orders/', {
+      method: 'POST',
+      body: JSON.stringify(orderData),
+    })
+  })
+}
+
 export const useOrder = (orderId: string) => {
   return useApi<Order>(
     ['order', orderId],

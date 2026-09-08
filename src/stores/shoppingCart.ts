@@ -2,47 +2,25 @@ import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import { useStorage } from '@vueuse/core'
 import { type CartItem } from '@/types/cart'
+import { toServerItems, calculateItemTotal, cartSubtotal, cartTax } from '@/lib/orderItems'
 
 export const useShoppingCart = defineStore('shopping-cart', () => {
   const localCart = useStorage<CartItem[]>('shopping-cart', [], localStorage)
   const selectedNaviPort = ref<number | null>(null)
 
-  const serverCart = computed(() => {
-    return localCart.value.map((item) => ({
-      menu_item: item.menuItemId,
-      quantity: item.quantity,
-      unit_price: item.basePrice.toFixed(2),
-      customizations: item.customizations.map((c) => ({
-        customization: c.optionId,
-        quantity: 1,
-        unit_price: c.priceModifier.toFixed(2),
-      })),
-    }))
-  })
+  const serverCart = computed(() => toServerItems(localCart.value))
 
   const itemCount = computed(() => {
     return localCart.value.reduce((acc, item) => acc + item.quantity, 0)
   })
 
-  const subtotal = computed(() => {
-    return localCart.value.reduce((acc, item) => acc + item.totalPrice, 0)
-  })
+  const subtotal = computed(() => cartSubtotal(localCart.value))
 
-  const tax = computed(() => {
-    return subtotal.value * 0.08
-  })
+  const tax = computed(() => cartTax(subtotal.value))
 
   const totalPrice = computed(() => {
     return subtotal.value + tax.value
   })
-
-  const calculateItemTotal = (item: Omit<CartItem, 'cartItemId' | 'totalPrice'>): number => {
-    const customizationTotal = item.customizations.reduce((acc, custom) => {
-      return acc + custom.priceModifier
-    }, 0)
-
-    return (item.basePrice + customizationTotal) * item.quantity
-  }
 
   const addCartItem = (item: Omit<CartItem, 'cartItemId' | 'totalPrice'>) => {
     const cartItemId = crypto.randomUUID()
