@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router'
 import { useMenu, type MenuItem } from '@/composables/useMenu'
 import { useAdminCreateOrder, type AdminServerOrder } from '@/composables/useOrder'
 import { useCardPayment } from '@/composables/useCardPayment'
-import { toServerItems, calculateItemTotal, cartSubtotal, cartTax } from '@/lib/orderItems'
+import { toServerItems, calculateItemTotal, cartSubtotal } from '@/lib/orderItems'
 import { getApiErrorMessage } from '@/lib/errorParser'
 import type { CartItem } from '@/types/cart'
 import LoadingSpinnerTwo from '@/components/shared/LoadingSpinnerTwo.vue'
@@ -32,8 +32,10 @@ const createdOrderId = ref<string | null>(null)
 const isConfirming = ref(false)
 
 const subtotal = computed(() => cartSubtotal(orderItems.value))
-const tax = computed(() => cartTax(subtotal.value))
-const total = computed(() => subtotal.value + tax.value)
+// Tax is computed server-side from the NaviPort when the order is created, so
+// it's only known after placeOrder returns.
+const orderTax = ref<number | null>(null)
+const orderTotal = ref<number | null>(null)
 
 const addItem = (m: MenuItem) => {
   const existing = orderItems.value.find(
@@ -93,6 +95,8 @@ const placeOrder = async () => {
     const { client_secret, order } = await createOrder(payload)
     createdOrderId.value = order.id ?? null
     if (!createdOrderId.value) throw new Error('Cannot continue payment without an order id.')
+    orderTax.value = Number(order.tax)
+    orderTotal.value = Number(order.total)
     clientSecret.value = client_secret
     step.value = 'payment'
     await nextTick()
@@ -251,13 +255,17 @@ const confirmPayment = async () => {
             <span>subtotal</span>
             <span class="font-mono">${{ subtotal.toFixed(2) }}</span>
           </div>
-          <div class="px-3 py-2 flex justify-between border-t border-alt">
-            <span>tax (8%)</span>
-            <span class="font-mono">${{ tax.toFixed(2) }}</span>
+          <div
+            class="px-3 py-2 flex justify-between border-t border-alt"
+            :class="{ 'text-alt': orderTax === null }"
+          >
+            <span>tax</span>
+            <span v-if="orderTax !== null" class="font-mono">${{ orderTax.toFixed(2) }}</span>
+            <span v-else class="font-secondary">calculated on submit</span>
           </div>
           <div class="px-3 py-2 flex justify-between border-t border-alt">
             <span>total</span>
-            <span class="font-mono">${{ total.toFixed(2) }}</span>
+            <span class="font-mono">${{ (orderTotal ?? subtotal).toFixed(2) }}</span>
           </div>
           <div class="px-3 py-3 border-t border-alt space-y-3">
             <p v-if="formError" class="text-red px-2 py-2 border border-red">{{ formError }}</p>
@@ -311,7 +319,7 @@ const confirmPayment = async () => {
             class="w-full px-3 py-2 bg-green text-primary border border-green cursor-pointer font-mono tracking-wide hover:bg-alt hover:text-primary hover:border-alt disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             <span v-if="isConfirming" class="blink">CONFIRMING...</span>
-            <span v-else>▸ CONFIRM PAYMENT (${{ total.toFixed(2) }})</span>
+            <span v-else>▸ CONFIRM PAYMENT (${{ (orderTotal ?? subtotal).toFixed(2) }})</span>
           </button>
         </div>
       </div>

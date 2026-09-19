@@ -1,4 +1,3 @@
-import { type CartItem } from '@/types/cart'
 import { type SelectedCustomization } from '@/types/customization'
 
 export function usePriceCalculation() {
@@ -17,15 +16,6 @@ export function usePriceCalculation() {
     return (basePrice + customizationTotal) * quantity
   }
 
-  // Calculate cart totals
-  const calculateCartTotals = (items: CartItem[], taxRate: number = 0.08) => {
-    const subtotal = items.reduce((acc, item) => acc + item.totalPrice, 0)
-    const tax = subtotal * taxRate
-    const total = subtotal + tax
-
-    return { subtotal, tax, total }
-  }
-
   // Format price to 2 decimal places
   const formatPrice = (price: number): string => {
     return price.toFixed(2)
@@ -39,7 +29,6 @@ export function usePriceCalculation() {
   return {
     calculateCustomizationTotal,
     calculateItemTotal,
-    calculateCartTotals,
     formatPrice,
     formatCurrency,
   }

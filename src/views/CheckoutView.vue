@@ -20,6 +20,10 @@ const clientSecret = ref<string | null>(null)
 const paymentError = ref<string | null>(null)
 const orderId = ref<string | null>(null)
 const hasWalletPay = ref(false)
+// Tax is computed server-side from the pickup NaviPort, so it's only known once
+// the order is created. Until then the summary shows subtotal + a placeholder.
+const orderTax = ref<number | null>(null)
+const orderTotal = ref<number | null>(null)
 
 const { isPending, mutateAsync } = useCreateOrder()
 const { getStripe } = useStripe()
@@ -58,6 +62,8 @@ const submitOrder = async () => {
     const { client_secret, order } = await mutateAsync(orderData)
 
     orderId.value = order.id || null
+    orderTax.value = Number(order.tax)
+    orderTotal.value = Number(order.total)
 
     if (orderId.value === null) {
       throw new Error('Cannot continue payment without order id')
@@ -93,7 +99,7 @@ const submitOrder = async () => {
       currency: 'usd',
       total: {
         label: 'NAVI Order',
-        amount: Math.round(cart.totalPrice * 100),
+        amount: Math.round((orderTotal.value ?? cart.subtotal) * 100),
       },
       requestPayerName: true,
       requestPayerEmail: true,
@@ -241,13 +247,14 @@ const confirmPayment = async () => {
             <span>subtotal</span>
             <span class="font-mono">${{ cart.subtotal.toFixed(2) }}</span>
           </div>
-          <div class="px-3 py-2 flex justify-between">
-            <span>tax (8%)</span>
-            <span class="font-mono">${{ cart.tax.toFixed(2) }}</span>
+          <div class="px-3 py-2 flex justify-between" :class="{ 'text-alt': orderTax === null }">
+            <span>tax</span>
+            <span v-if="orderTax !== null" class="font-mono">${{ orderTax.toFixed(2) }}</span>
+            <span v-else class="font-secondary">calculated at checkout</span>
           </div>
           <div class="px-3 py-2 flex justify-between border-t border-alt">
             <span>total</span>
-            <span class="font-mono">${{ cart.totalPrice.toFixed(2) }}</span>
+            <span class="font-mono">${{ (orderTotal ?? cart.subtotal).toFixed(2) }}</span>
           </div>
 
           <!-- Review Step -->
