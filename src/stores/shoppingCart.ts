@@ -2,7 +2,7 @@ import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import { useStorage } from '@vueuse/core'
 import { type CartItem } from '@/types/cart'
-import { toServerItems, calculateItemTotal, cartSubtotal, cartTax } from '@/lib/orderItems'
+import { toServerItems, calculateItemTotal, cartSubtotal } from '@/lib/orderItems'
 
 export const useShoppingCart = defineStore('shopping-cart', () => {
   const localCart = useStorage<CartItem[]>('shopping-cart', [], localStorage)
@@ -14,13 +14,10 @@ export const useShoppingCart = defineStore('shopping-cart', () => {
     return localCart.value.reduce((acc, item) => acc + item.quantity, 0)
   })
 
+  // Tax is jurisdiction-based and computed server-side from the pickup
+  // NaviPort when the order is created, so the cart only knows the pre-tax
+  // subtotal. The authoritative tax/total come back on the order response.
   const subtotal = computed(() => cartSubtotal(localCart.value))
-
-  const tax = computed(() => cartTax(subtotal.value))
-
-  const totalPrice = computed(() => {
-    return subtotal.value + tax.value
-  })
 
   const addCartItem = (item: Omit<CartItem, 'cartItemId' | 'totalPrice'>) => {
     const cartItemId = crypto.randomUUID()
@@ -76,8 +73,6 @@ export const useShoppingCart = defineStore('shopping-cart', () => {
     selectedNaviPort,
     itemCount,
     subtotal,
-    tax,
-    totalPrice,
     addCartItem,
     removeCartItem,
     updateCartItem,

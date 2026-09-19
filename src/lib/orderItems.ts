@@ -1,8 +1,6 @@
 import type { CartItem } from '@/types/cart'
 import type { ServerOrder } from '@/types/order'
 
-export const TAX_RATE = 0.08
-
 // (basePrice + sum of customization modifiers) * quantity.
 export const calculateItemTotal = (
   item: Pick<CartItem, 'basePrice' | 'customizations' | 'quantity'>,
@@ -28,5 +26,3 @@ export const toServerItems = (items: CartItem[]): ServerOrder['items'] =>
 
 export const cartSubtotal = (items: CartItem[]): number =>
   items.reduce((acc, item) => acc + item.totalPrice, 0)
-
-export const cartTax = (subtotal: number): number => subtotal * TAX_RATE

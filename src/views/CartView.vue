@@ -88,13 +88,13 @@ const continueShopping = () => {
               <span>subtotal ({{ cart.itemCount }} item{{ cart.itemCount > 1 ? 's' : '' }})</span>
               <span class="font-mono">${{ cart.subtotal.toFixed(2) }}</span>
             </div>
-            <div class="px-3 py-2 flex justify-between">
-              <span>tax (8%)</span>
-              <span class="font-mono">${{ cart.tax.toFixed(2) }}</span>
+            <div class="px-3 py-2 flex justify-between text-alt">
+              <span>tax</span>
+              <span class="font-secondary">calculated at checkout</span>
             </div>
             <div class="px-3 py-2 flex justify-between border-t border-dashed border-alt">
-              <span class="font-bold">total</span>
-              <span class="font-mono font-bold">${{ cart.totalPrice.toFixed(2) }}</span>
+              <span class="font-bold">subtotal</span>
+              <span class="font-mono font-bold">${{ cart.subtotal.toFixed(2) }}</span>
             </div>
             <div class="px-3 py-3 border-t border-alt space-y-2">
               <NaviButton variant="filled" full-width @click="submitCart">CHECKOUT</NaviButton>
