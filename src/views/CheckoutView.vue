@@ -19,11 +19,9 @@ const cardNumberElement = ref<any>(null)
 const clientSecret = ref<string | null>(null)
 const paymentError = ref<string | null>(null)
 const orderId = ref<string | null>(null)
-const hasWalletPay = ref(false)
-// Tax is computed server-side from the pickup NaviPort, so it's only known once
-// the order is created. Until then the summary shows subtotal + a placeholder.
-const orderTax = ref<number | null>(null)
-const orderTotal = ref<number | null>(null)
+// The card is saved at checkout; the actual charge (subtotal + tax for the
+// pickup NaviPort) happens when the order is scanned at the machine. So the
+// exact tax/total aren't known here.
 
 const { isPending, mutateAsync } = useCreateOrder()
 const { getStripe } = useStripe()
@@ -62,8 +60,6 @@ const submitOrder = async () => {
     const { client_secret, order } = await mutateAsync(orderData)
 
     orderId.value = order.id || null
-    orderTax.value = Number(order.tax)
-    orderTotal.value = Number(order.total)
 
     if (orderId.value === null) {
       throw new Error('Cannot continue payment without order id')
@@ -94,17 +90,6 @@ const submitOrder = async () => {
     const cardExpiry = elements.create('cardExpiry', { style: elementStyle })
     const cardCvc = elements.create('cardCvc', { style: elementStyle })
 
-    const paymentRequest = stripe.paymentRequest({
-      country: 'US',
-      currency: 'usd',
-      total: {
-        label: 'NAVI Order',
-        amount: Math.round((orderTotal.value ?? cart.subtotal) * 100),
-      },
-      requestPayerName: true,
-      requestPayerEmail: true,
-    })
-
     paymentStep.value = 'payment'
     await nextTick()
 
@@ -112,41 +97,6 @@ const submitOrder = async () => {
     cardExpiry.mount('#card-expiry')
     cardCvc.mount('#card-cvc')
     cardNumberElement.value = cardNumber
-
-    const canMakePayment = await paymentRequest.canMakePayment()
-    if (canMakePayment) {
-      hasWalletPay.value = true
-      const prButton = elements.create('paymentRequestButton', {
-        paymentRequest,
-        style: {
-          paymentRequestButton: {
-            type: 'default',
-            theme: 'dark',
-            height: '36px',
-          },
-        },
-      })
-      await nextTick()
-      prButton.mount('#wallet-pay-button')
-
-      paymentRequest.on('paymentmethod', async (ev: any) => {
-        const { error: confirmError } = await stripe.confirmCardPayment(
-          clientSecret.value!,
-          { payment_method: ev.paymentMethod.id },
-          { handleActions: false },
-        )
-
-        if (confirmError) {
-          ev.complete('fail')
-          paymentError.value = confirmError.message ?? 'Payment failed'
-        } else {
-          ev.complete('success')
-          achievements.recordOrderPlaced(cart.localCart)
-          cart.clearCart()
-          router.push({ name: 'orderConfirmation', params: { orderId: orderId.value } })
-        }
-      })
-    }
   } catch (error) {
     console.error('Order submission failed:', error)
     paymentError.value = getApiErrorMessage(error)
@@ -158,14 +108,15 @@ const confirmPayment = async () => {
   const stripe = await getStripe()
   if (!stripe || !cardNumberElement.value || !clientSecret.value) return
 
-  const { error } = await stripe.confirmCardPayment(clientSecret.value, {
+  // Save the card (SetupIntent); the order is charged at pickup, not now.
+  const { error } = await stripe.confirmCardSetup(clientSecret.value, {
     payment_method: {
       card: cardNumberElement.value,
     },
   })
 
   if (error) {
-    paymentError.value = error.message ?? 'Payment failed'
+    paymentError.value = error.message ?? 'Could not save your card'
   } else {
     achievements.recordOrderPlaced(cart.localCart)
     cart.clearCart()
@@ -247,14 +198,12 @@ const confirmPayment = async () => {
             <span>subtotal</span>
             <span class="font-mono">${{ cart.subtotal.toFixed(2) }}</span>
           </div>
-          <div class="px-3 py-2 flex justify-between" :class="{ 'text-alt': orderTax === null }">
+          <div class="px-3 py-2 flex justify-between text-alt">
             <span>tax</span>
-            <span v-if="orderTax !== null" class="font-mono">${{ orderTax.toFixed(2) }}</span>
-            <span v-else class="font-secondary">calculated at checkout</span>
+            <span class="font-secondary">calculated at pickup</span>
           </div>
-          <div class="px-3 py-2 flex justify-between border-t border-alt">
-            <span>total</span>
-            <span class="font-mono">${{ (orderTotal ?? cart.subtotal).toFixed(2) }}</span>
+          <div class="px-3 py-2 flex justify-between border-t border-alt text-alt">
+            <span class="font-secondary">card saved now, charged at pickup</span>
           </div>
 
           <!-- Review Step -->
@@ -282,14 +231,9 @@ const confirmPayment = async () => {
           <div v-else class="border-t border-alt">
             <div class="px-3 py-1 border-b border-alt bg-green text-primary">// payment</div>
             <div class="px-3 py-3 space-y-3">
-              <div v-if="hasWalletPay">
-                <div id="wallet-pay-button"></div>
-                <div class="flex items-center gap-3 my-3">
-                  <div class="flex-1 border-t border-alt"></div>
-                  <span class="font-secondary">or pay with card</span>
-                  <div class="flex-1 border-t border-alt"></div>
-                </div>
-              </div>
+              <p class="font-secondary text-alt">
+                your card is saved securely now and charged when you pick up.
+              </p>
               <div>
                 <label class="block font-secondary mb-1">card number</label>
                 <div id="card-number" class="w-full px-3 py-2 border border-alt bg-transparent focus-within:border-green transition-colors"></div>
@@ -311,7 +255,7 @@ const confirmPayment = async () => {
                 @click="confirmPayment"
                 class="navi-btn group w-full px-3 py-2 bg-green text-primary border border-green cursor-pointer font-mono tracking-wide hover:bg-alt hover:text-primary hover:border-alt transition-all duration-200"
               >
-                <span>▸</span> CONFIRM PAYMENT
+                <span>▸</span> SAVE CARD &amp; PLACE ORDER
               </button>
             </div>
           </div>

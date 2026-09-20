@@ -13,7 +13,7 @@ const router = useRouter()
 
 const { isLoading: menuLoading, data: menu } = useMenu()
 const { mutateAsync: createOrder, isPending } = useAdminCreateOrder()
-const { mountCardFields, confirmCard } = useCardPayment()
+const { mountCardFields, confirmSetup } = useCardPayment()
 
 const step = ref<'build' | 'payment'>('build')
 
@@ -32,10 +32,8 @@ const createdOrderId = ref<string | null>(null)
 const isConfirming = ref(false)
 
 const subtotal = computed(() => cartSubtotal(orderItems.value))
-// Tax is computed server-side from the NaviPort when the order is created, so
-// it's only known after placeOrder returns.
-const orderTax = ref<number | null>(null)
-const orderTotal = ref<number | null>(null)
+// The card is saved when the order is placed; tax is computed and charged when
+// the order is dispatched/scanned, so it isn't known here.
 
 const addItem = (m: MenuItem) => {
   const existing = orderItems.value.find(
@@ -95,8 +93,6 @@ const placeOrder = async () => {
     const { client_secret, order } = await createOrder(payload)
     createdOrderId.value = order.id ?? null
     if (!createdOrderId.value) throw new Error('Cannot continue payment without an order id.')
-    orderTax.value = Number(order.tax)
-    orderTotal.value = Number(order.total)
     clientSecret.value = client_secret
     step.value = 'payment'
     await nextTick()
@@ -110,10 +106,10 @@ const confirmPayment = async () => {
   paymentError.value = null
   if (!clientSecret.value) return
   isConfirming.value = true
-  const { error } = await confirmCard(clientSecret.value)
+  const { error } = await confirmSetup(clientSecret.value)
   isConfirming.value = false
   if (error) {
-    paymentError.value = error.message ?? 'Payment failed'
+    paymentError.value = error.message ?? 'Could not save card'
     return
   }
   router.push({ name: 'adminOrderDetail', params: { orderId: createdOrderId.value } })
@@ -255,17 +251,12 @@ const confirmPayment = async () => {
             <span>subtotal</span>
             <span class="font-mono">${{ subtotal.toFixed(2) }}</span>
           </div>
-          <div
-            class="px-3 py-2 flex justify-between border-t border-alt"
-            :class="{ 'text-alt': orderTax === null }"
-          >
+          <div class="px-3 py-2 flex justify-between border-t border-alt text-alt">
             <span>tax</span>
-            <span v-if="orderTax !== null" class="font-mono">${{ orderTax.toFixed(2) }}</span>
-            <span v-else class="font-secondary">calculated on submit</span>
+            <span class="font-secondary">calculated at pickup</span>
           </div>
-          <div class="px-3 py-2 flex justify-between border-t border-alt">
-            <span>total</span>
-            <span class="font-mono">${{ (orderTotal ?? subtotal).toFixed(2) }}</span>
+          <div class="px-3 py-2 flex justify-between border-t border-alt text-alt">
+            <span class="font-secondary">card saved now, charged at pickup</span>
           </div>
           <div class="px-3 py-3 border-t border-alt space-y-3">
             <p v-if="formError" class="text-red px-2 py-2 border border-red">{{ formError }}</p>
@@ -319,7 +310,7 @@ const confirmPayment = async () => {
             class="w-full px-3 py-2 bg-green text-primary border border-green cursor-pointer font-mono tracking-wide hover:bg-alt hover:text-primary hover:border-alt disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             <span v-if="isConfirming" class="blink">CONFIRMING...</span>
-            <span v-else>▸ CONFIRM PAYMENT (${{ (orderTotal ?? subtotal).toFixed(2) }})</span>
+            <span v-else>▸ SAVE CARD &amp; PLACE ORDER</span>
           </button>
         </div>
       </div>
