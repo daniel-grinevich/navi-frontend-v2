@@ -3,7 +3,7 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import gsap from 'gsap'
 
 const props = defineProps({
-  styles: { type: Object, default: { height: '10rem', width: '10rem' } },
+  styles: { type: Object, default: () => ({ height: '10rem', width: '10rem' }) },
 })
 
 const spinnerRef = ref<HTMLOrSVGElement | null>(null)

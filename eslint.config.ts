@@ -18,5 +18,18 @@ export default defineConfigWithVueTs(
 
   pluginVue.configs['flat/essential'],
   vueTsConfigs.recommended,
+
+  {
+    name: 'app/legacy-single-word-components',
+    rules: {
+      // Existing components predating the lint check; new components should still
+      // use multi-word names (avoids clashes with HTML tags like <menu>/<address>).
+      'vue/multi-word-component-names': [
+        'error',
+        { ignores: ['Menu', 'Address', 'Card', 'Pagination', 'Qrcode'] },
+      ],
+    },
+  },
+
   skipFormatting,
 )

@@ -6,7 +6,7 @@ import type { UseQueryOptions } from '@tanstack/vue-query'
 export const useUserByEmail = (
   email: MaybeRefOrGetter<string>,
   enable_fetch: MaybeRefOrGetter<boolean> = true,
-  options?: Omit<UseQueryOptions<any, Error>, 'queryKey' | 'queryFn' | 'enabled'>,
+  options?: Omit<UseQueryOptions<{ id: string; is_guest: boolean }, Error>, 'queryKey' | 'queryFn' | 'enabled'>,
 ) => {
   return useApi(
     computed(() => ['user-email', toValue(email)]),

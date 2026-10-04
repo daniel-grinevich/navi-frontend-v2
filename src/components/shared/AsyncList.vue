@@ -6,7 +6,7 @@ import LoadingSpinnerTwo from '@/components/shared/LoadingSpinnerTwo.vue'
 /*** composables ****/
 /*** types ****/
 
-const props = withDefaults(
+withDefaults(
   defineProps<{
     items?: T[]
     ready?: boolean

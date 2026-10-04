@@ -51,12 +51,13 @@ export const useZod = (ref: MaybeRefOrGetter<object>, schema: ZodObject) => {
     })
   }
 
-  const validateWithSchema = (item: Record<any, any>) => {
-    const result: Record<any, any> = {}
+  const validateWithSchema = (item: object) => {
+    const fields = item as Record<string, unknown>
+    const result: Record<string, unknown> = {}
 
     for (const schemaKey of schemaKeys.value as string[]) {
-      if (schemaKey in item) {
-        result[schemaKey] = item[schemaKey]
+      if (schemaKey in fields) {
+        result[schemaKey] = fields[schemaKey]
       }
     }
 
@@ -70,7 +71,7 @@ export const useZod = (ref: MaybeRefOrGetter<object>, schema: ZodObject) => {
   }
 
   const handleZodErrors = (zodError: z.core.$ZodIssue[]) => {
-    const errorMessages: Record<string, any> = {}
+    const errorMessages: Record<string, string[]> = {}
     zodError.forEach((error) => {
       const errorIndex = error.path.length === 1 ? 0 : error.path.length - 1
       const key = String(error.path[errorIndex] ?? 'Form')
