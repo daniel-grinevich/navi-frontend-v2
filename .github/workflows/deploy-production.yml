@@ -42,6 +42,17 @@ jobs:
             type=semver,pattern={{version}}
             type=raw,value=prod-latest
 
+      # Vite bakes this into the bundle at build time; an empty value builds fine
+      # but breaks Stripe checkout at runtime, so refuse to build without it.
+      - name: Check Stripe publishable key is set
+        env:
+          KEY: ${{ secrets.VITE_STRIPE_PUBLISHABLE_KEY_PRODUCTION }}
+        run: |
+          if [ -z "$KEY" ]; then
+            echo "::error::Repository secret VITE_STRIPE_PUBLISHABLE_KEY_PRODUCTION is not set (prod Stripe publishable key, pk_...)."
+            exit 1
+          fi
+
       - name: Build and push Docker image
         id: push
         uses: docker/build-push-action@v6
@@ -57,7 +68,7 @@ jobs:
             VITE_ENVIRONMENT=production
             VITE_BASE_URL=https://api.navitascoffee.com
             VITE_OAUTH_ENABLED=false
-            VITE_STRIPE_PUBLISHABLE_KEY=${{ secrets.VITE_STRIPE_PUBLISHABLE_KEY }}
+            VITE_STRIPE_PUBLISHABLE_KEY=${{ secrets.VITE_STRIPE_PUBLISHABLE_KEY_PRODUCTION }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 

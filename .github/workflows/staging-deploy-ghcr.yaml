@@ -46,6 +46,17 @@ jobs:
             type=raw,value=staging-latest
             type=raw,value=staging-${{ steps.sha.outputs.short-sha }}
 
+      # Vite bakes this into the bundle at build time; an empty value builds fine
+      # but breaks Stripe checkout at runtime, so refuse to build without it.
+      - name: Check Stripe publishable key is set
+        env:
+          KEY: ${{ secrets.VITE_STRIPE_PUBLISHABLE_KEY_STAGING }}
+        run: |
+          if [ -z "$KEY" ]; then
+            echo "::error::Repository secret VITE_STRIPE_PUBLISHABLE_KEY_STAGING is not set (staging Stripe publishable key, pk_test_...)."
+            exit 1
+          fi
+
       - name: Build and push Docker image
         id: push
         uses: docker/build-push-action@v6
@@ -62,7 +73,7 @@ jobs:
           build-args: |
             VITE_ENVIRONMENT=staging
             VITE_BASE_URL=https://navi-staging.tailf9a785.ts.net
-            VITE_STRIPE_PUBLISHABLE_KEY=${{ secrets.VITE_STRIPE_PUBLISHABLE_KEY }}
+            VITE_STRIPE_PUBLISHABLE_KEY=${{ secrets.VITE_STRIPE_PUBLISHABLE_KEY_STAGING }}
 
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v3
