@@ -12,6 +12,8 @@ env:
 jobs:
   build-and-push-image:
     runs-on: ubuntu-24.04-arm
+    # Secrets come from the GitHub Environment "staging" (Settings -> Environments).
+    environment: staging
     permissions:
       contents: read
       packages: write
@@ -50,10 +52,10 @@ jobs:
       # but breaks Stripe checkout at runtime, so refuse to build without it.
       - name: Check Stripe publishable key is set
         env:
-          KEY: ${{ secrets.VITE_STRIPE_PUBLISHABLE_KEY_STAGING }}
+          KEY: ${{ secrets.VITE_STRIPE_PUBLISHABLE_KEY }}
         run: |
           if [ -z "$KEY" ]; then
-            echo "::error::Repository secret VITE_STRIPE_PUBLISHABLE_KEY_STAGING is not set (staging Stripe publishable key, pk_test_...)."
+            echo "::error::Secret VITE_STRIPE_PUBLISHABLE_KEY is not set in the GitHub Environment 'staging' (staging Stripe publishable key, pk_test_...)."
             exit 1
           fi
 
@@ -73,7 +75,7 @@ jobs:
           build-args: |
             VITE_ENVIRONMENT=staging
             VITE_BASE_URL=https://navi-staging.tailf9a785.ts.net
-            VITE_STRIPE_PUBLISHABLE_KEY=${{ secrets.VITE_STRIPE_PUBLISHABLE_KEY_STAGING }}
+            VITE_STRIPE_PUBLISHABLE_KEY=${{ secrets.VITE_STRIPE_PUBLISHABLE_KEY }}
 
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v3

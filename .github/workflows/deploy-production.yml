@@ -12,6 +12,8 @@ env:
 jobs:
   build-and-push-image:
     runs-on: ubuntu-24.04-arm
+    # Secrets come from the GitHub Environment "production" (Settings -> Environments).
+    environment: production
     permissions:
       contents: read
       packages: write
@@ -46,10 +48,10 @@ jobs:
       # but breaks Stripe checkout at runtime, so refuse to build without it.
       - name: Check Stripe publishable key is set
         env:
-          KEY: ${{ secrets.VITE_STRIPE_PUBLISHABLE_KEY_PRODUCTION }}
+          KEY: ${{ secrets.VITE_STRIPE_PUBLISHABLE_KEY }}
         run: |
           if [ -z "$KEY" ]; then
-            echo "::error::Repository secret VITE_STRIPE_PUBLISHABLE_KEY_PRODUCTION is not set (prod Stripe publishable key, pk_...)."
+            echo "::error::Secret VITE_STRIPE_PUBLISHABLE_KEY is not set in the GitHub Environment 'production' (prod Stripe publishable key, pk_...)."
             exit 1
           fi
 
@@ -68,7 +70,7 @@ jobs:
             VITE_ENVIRONMENT=production
             VITE_BASE_URL=https://api.navitascoffee.com
             VITE_OAUTH_ENABLED=false
-            VITE_STRIPE_PUBLISHABLE_KEY=${{ secrets.VITE_STRIPE_PUBLISHABLE_KEY_PRODUCTION }}
+            VITE_STRIPE_PUBLISHABLE_KEY=${{ secrets.VITE_STRIPE_PUBLISHABLE_KEY }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
