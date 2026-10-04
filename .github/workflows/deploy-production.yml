@@ -12,6 +12,8 @@ env:
 jobs:
   build-and-push-image:
     runs-on: ubuntu-24.04-arm
+    # Secrets come from the GitHub Environment "production" (Settings -> Environments).
+    environment: production
     permissions:
       contents: read
       packages: write
@@ -41,6 +43,17 @@ jobs:
           tags: |
             type=semver,pattern={{version}}
             type=raw,value=prod-latest
+
+      # Vite bakes this into the bundle at build time; an empty value builds fine
+      # but breaks Stripe checkout at runtime, so refuse to build without it.
+      - name: Check Stripe publishable key is set
+        env:
+          KEY: ${{ secrets.VITE_STRIPE_PUBLISHABLE_KEY }}
+        run: |
+          if [ -z "$KEY" ]; then
+            echo "::error::Secret VITE_STRIPE_PUBLISHABLE_KEY is not set in the GitHub Environment 'production' (prod Stripe publishable key, pk_...)."
+            exit 1
+          fi
 
       - name: Build and push Docker image
         id: push
