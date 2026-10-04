@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { ref } from 'vue'
 import QrcodeVue from 'qrcode.vue'
 import type { Level, RenderAs, GradientType, ImageSettings } from 'qrcode.vue'
 
-const props = withDefaults(
+withDefaults(
   defineProps<{
     value: string
     size?:number

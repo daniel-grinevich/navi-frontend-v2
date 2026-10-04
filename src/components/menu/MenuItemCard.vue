@@ -1,6 +1,5 @@
 <script setup lang="ts">
 /*** libraries ****/
-import { computed } from 'vue'
 /*** components ****/
 /*** stores ***/
 /*** composables ****/
@@ -36,7 +35,6 @@ const onMenuItemClick = () => {
   router.push({ name: 'menuItemDetail', params: { id: props.slug } })
 }
 
-const isOffline = computed(() => props.status !== 'available')
 </script>
 
 <template>

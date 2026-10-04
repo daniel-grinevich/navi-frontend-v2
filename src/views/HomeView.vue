@@ -2,13 +2,11 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import gsap from 'gsap'
 import { useSessionStore } from '@/stores/session'
-import { useShoppingCart } from '@/stores/shoppingCart'
 import HealthBar from '@/components/home/HealthBar.vue'
 import AchievementsRow from '@/components/home/AchievementsRow.vue'
 import { useAchievementsSync } from '@/composables/useAchievements'
 
 const session = useSessionStore()
-const cart = useShoppingCart()
 
 // Hydrate achievements from the backend (definitions + per-user progress).
 useAchievementsSync()
@@ -58,12 +56,12 @@ const tagline = ref<HTMLElement | null>(null)
 const naviBlock = ref<HTMLElement | null>(null)
 const coffeeBlock = ref<HTMLElement | null>(null)
 
-const setLogoLine = (el: any) => {
-  if (el) logoLines.value.push(el)
+const setLogoLine = (el: unknown) => {
+  if (el instanceof HTMLElement) logoLines.value.push(el)
 }
 
-const setCoffeeLine = (el: any) => {
-  if (el) coffeeLines.value.push(el)
+const setCoffeeLine = (el: unknown) => {
+  if (el instanceof HTMLElement) coffeeLines.value.push(el)
 }
 
 // prettier-ignore

@@ -2,20 +2,19 @@
 import { ref, computed, onBeforeMount } from 'vue'
 import { useRouter } from 'vue-router'
 import { useShoppingCart } from '@/stores/shoppingCart'
-import { useSessionStore } from '@/stores/session'
 import { useAchievementsStore } from '@/stores/achievements'
 import { useCreateOrder } from '@/composables/useOrder'
 import { useStripe } from '@/composables/useStripe'
 import { getApiErrorMessage } from '@/lib/errorParser'
 import { nextTick } from 'vue'
+import type { PaymentRequestPaymentMethodEvent, StripeCardNumberElement } from '@stripe/stripe-js'
 
 const router = useRouter()
 const cart = useShoppingCart()
-const session = useSessionStore()
 const achievements = useAchievementsStore()
 
 const paymentStep = ref<'review' | 'payment'>('review')
-const cardNumberElement = ref<any>(null)
+const cardNumberElement = ref<StripeCardNumberElement | null>(null)
 const clientSecret = ref<string | null>(null)
 const paymentError = ref<string | null>(null)
 const orderId = ref<string | null>(null)
@@ -129,7 +128,7 @@ const submitOrder = async () => {
       await nextTick()
       prButton.mount('#wallet-pay-button')
 
-      paymentRequest.on('paymentmethod', async (ev: any) => {
+      paymentRequest.on('paymentmethod', async (ev: PaymentRequestPaymentMethodEvent) => {
         const { error: confirmError } = await stripe.confirmCardPayment(
           clientSecret.value!,
           { payment_method: ev.paymentMethod.id },

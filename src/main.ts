@@ -14,7 +14,7 @@ const vueQueryPluginOptions = {
   queryClientConfig: {
     defaultOptions: {
       queries: {
-        retry: (failureCount: number, error: any) => {
+        retry: (failureCount: number, error: Error & { response?: { status?: number } }) => {
           if (import.meta.env.VITE_ENVIRONMENT === 'dev') {
             return false
           }

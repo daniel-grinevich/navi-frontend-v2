@@ -35,6 +35,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # Check only (no --fix like `pnpm lint`), so CI fails instead of rewriting files.
+      - name: Lint
+        run: pnpm exec eslint .
+
       - name: Type-check
         run: pnpm run type-check
 
