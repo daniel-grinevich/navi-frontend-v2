@@ -69,7 +69,7 @@ jobs:
           build-args: |
             VITE_ENVIRONMENT=production
             VITE_BASE_URL=https://api.navitascoffee.com
-            VITE_OAUTH_ENABLED=false
+            VITE_OAUTH_ENABLED=true
             VITE_STRIPE_PUBLISHABLE_KEY=${{ secrets.VITE_STRIPE_PUBLISHABLE_KEY }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
