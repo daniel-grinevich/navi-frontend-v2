@@ -4,6 +4,9 @@ on:
   push:
     tags:
       - 'v[0-9]+.[0-9]+.[0-9]+'
+      # Already excluded (filters match the whole tag name); explicit so staging
+      # tags (v1.4.0-staging) can never deploy production.
+      - '!v*-staging*'
 
 env:
   REGISTRY: ghcr.io

@@ -1,9 +1,11 @@
 name: Deploy staging to GHCR
 
+# Staging releases only from a deliberate version tag, e.g. v1.4.0-staging or
+# v1.4.0-staging.2. See "Releasing" in README.md.
 on:
   push:
     tags:
-      - 'staging'
+      - 'v[0-9]+.[0-9]+.[0-9]+-staging*'
 
 env:
   REGISTRY: ghcr.io
@@ -24,6 +26,17 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      # Only merged code can be released: the tagged commit must be on production.
+      - name: Check tagged commit is on production
+        run: |
+          git fetch origin +refs/heads/production:refs/remotes/origin/production
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/production; then
+            echo "::error::Tag $GITHUB_REF_NAME ($GITHUB_SHA) is not reachable from origin/production. Tag a commit that has been merged to production."
+            exit 1
+          fi
 
       - name: Get short SHA
         id: sha
@@ -47,6 +60,7 @@ jobs:
           tags: |
             type=raw,value=staging-latest
             type=raw,value=staging-${{ steps.sha.outputs.short-sha }}
+            type=ref,event=tag
 
       # Vite bakes this into the bundle at build time; an empty value builds fine
       # but breaks Stripe checkout at runtime, so refuse to build without it.
