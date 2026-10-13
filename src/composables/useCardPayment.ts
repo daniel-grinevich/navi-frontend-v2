@@ -1,7 +1,8 @@
 import { useStripe } from './useStripe'
 
-// Shared Stripe card capture: mount the split card fields, then confirm a
-// PaymentIntent against them. Extracted so the admin manual-order flow and
+// Shared Stripe card capture: mount the split card fields, then confirm the
+// order's SetupIntent against them (the backend charges the saved card
+// off-session when the order is scanned/dispatched). Extracted so the admin manual-order flow and
 // (eventually) customer checkout can share one implementation.
 export const useCardPayment = () => {
   const { getStripe } = useStripe()
@@ -50,7 +51,7 @@ export const useCardPayment = () => {
     if (!stripe || !cardElement) {
       return { error: { message: 'Card form is not ready.' } }
     }
-    return stripe.confirmCardPayment(clientSecret, {
+    return stripe.confirmCardSetup(clientSecret, {
       payment_method: { card: cardElement },
     })
   }

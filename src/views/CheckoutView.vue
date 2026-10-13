@@ -129,7 +129,10 @@ const submitOrder = async () => {
       prButton.mount('#wallet-pay-button')
 
       paymentRequest.on('paymentmethod', async (ev: PaymentRequestPaymentMethodEvent) => {
-        const { error: confirmError } = await stripe.confirmCardPayment(
+        // The order's client secret is a SetupIntent: we save the wallet card
+        // now and the backend charges it off-session when the order is scanned.
+        // Close the wallet sheet first, then let Stripe run any 3DS step.
+        const { setupIntent, error: confirmError } = await stripe.confirmCardSetup(
           clientSecret.value!,
           { payment_method: ev.paymentMethod.id },
           { handleActions: false },
@@ -138,12 +141,21 @@ const submitOrder = async () => {
         if (confirmError) {
           ev.complete('fail')
           paymentError.value = confirmError.message ?? 'Payment failed'
-        } else {
-          ev.complete('success')
-          achievements.recordOrderPlaced(cart.localCart)
-          cart.clearCart()
-          router.push({ name: 'orderConfirmation', params: { orderId: orderId.value } })
+          return
         }
+        ev.complete('success')
+
+        if (setupIntent.status === 'requires_action') {
+          const { error: actionError } = await stripe.confirmCardSetup(clientSecret.value!)
+          if (actionError) {
+            paymentError.value = actionError.message ?? 'Payment failed'
+            return
+          }
+        }
+
+        achievements.recordOrderPlaced(cart.localCart)
+        cart.clearCart()
+        router.push({ name: 'orderConfirmation', params: { orderId: orderId.value } })
       })
     }
   } catch (error) {
@@ -157,7 +169,9 @@ const confirmPayment = async () => {
   const stripe = await getStripe()
   if (!stripe || !cardNumberElement.value || !clientSecret.value) return
 
-  const { error } = await stripe.confirmCardPayment(clientSecret.value, {
+  // SetupIntent, not PaymentIntent: the card is saved here and charged
+  // off-session by the backend when the machine scans the order's QR.
+  const { error } = await stripe.confirmCardSetup(clientSecret.value, {
     payment_method: {
       card: cardNumberElement.value,
     },

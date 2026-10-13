@@ -101,6 +101,19 @@ const router = createRouter({
       meta: { requiresAuth: true, requiresAdmin: true },
     },
     {
+      path: '/admin/devices',
+      name: 'adminDevices',
+      component: () => import('../views/admin/AdminDevicesView.vue'),
+      meta: { requiresAuth: true, requiresAdmin: true },
+    },
+    {
+      path: '/admin/devices/:deviceId',
+      name: 'adminDeviceDetail',
+      component: () => import('../views/admin/AdminDeviceDetailView.vue'),
+      props: true,
+      meta: { requiresAuth: true, requiresAdmin: true },
+    },
+    {
       path: '/admin/ports/:slug/sticker',
       name: 'adminPortSticker',
       component: () => import('../views/admin/AdminPortStickerView.vue'),

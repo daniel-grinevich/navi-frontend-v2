@@ -46,3 +46,31 @@ pnpm build
 ```sh
 pnpm lint
 ```
+
+## Releasing
+
+Deploys only happen from version tags on commits already merged to `production`.
+Pushing to a branch never deploys.
+
+**Staging** — tag `vX.Y.Z-staging` (or `vX.Y.Z-staging.N` for another build of the
+same version) on `origin/production`:
+
+```sh
+git fetch origin
+git tag v1.4.0-staging origin/production
+git push origin v1.4.0-staging
+```
+
+This runs `.github/workflows/staging-deploy-ghcr.yaml`, which fails unless the tagged
+commit is reachable from `origin/production`. It pushes the image as `staging-latest`,
+`staging-<short-sha>` and `v1.4.0-staging`, and points rainbow-road `navi/staging`
+at `staging-<short-sha>`.
+
+**Production** — tag `vX.Y.Z` (no suffix) the same way:
+
+```sh
+git tag v1.4.0 origin/production
+git push origin v1.4.0
+```
+
+This runs `.github/workflows/deploy-production.yml`. Staging tags never match it.

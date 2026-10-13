@@ -34,3 +34,20 @@ export type EmailTemplateInput = {
   body: string
   link: string
 }
+
+export type NotificationChannel = 'email' | 'sms'
+
+export type NotificationCategory = 'account' | 'order_updates' | 'marketing' | 'rewards'
+
+// Global kill switches layered above user preferences.
+export type NotificationSettings = {
+  channels: Record<NotificationChannel, boolean>
+  categories: Record<NotificationCategory, boolean>
+  updated_at: string
+  updated_by: string | null
+}
+
+export type NotificationSettingsPatch = {
+  channels?: Partial<Record<NotificationChannel, boolean>>
+  categories?: Partial<Record<NotificationCategory, boolean>>
+}

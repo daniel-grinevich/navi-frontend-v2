@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAdminOrder, useUpdateOrderStatus, useDispatchOrder } from '@/composables/useOrder'
+import { useAdminOrder, useDispatchOrder } from '@/composables/useOrder'
 import { getApiErrorMessage } from '@/lib/errorParser'
-import type { OrderStatus } from '@/types/order'
+import { ORDER_STATUS_LABELS as statusLabels } from '@/lib/orderStatus'
 import LoadingSpinnerTwo from '@/components/shared/LoadingSpinnerTwo.vue'
 
 const props = defineProps<{ orderId: string }>()
@@ -12,37 +12,17 @@ const router = useRouter()
 
 const { isLoading, isError, data: order } = useAdminOrder(props.orderId)
 
-const statusLabels: Record<OrderStatus, string> = {
-  O: 'OPEN',
-  S: 'SHIPPED',
-  D: 'DISPATCH',
-  C: 'DONE',
-  R: 'REFUNDED',
-}
-const statuses = Object.keys(statusLabels) as OrderStatus[]
-
 const actionError = ref<string | null>(null)
 
-const { mutateAsync: updateStatus, isPending: isUpdating } = useUpdateOrderStatus()
 const { mutateAsync: dispatch, isPending: isDispatching } = useDispatchOrder()
 
-const busy = computed(() => isUpdating.value || isDispatching.value)
-
-const changeStatus = async (status: OrderStatus) => {
-  if (busy.value || order.value?.order_status === status) return
-  actionError.value = null
-  try {
-    await updateStatus({ orderId: props.orderId, order_status: status })
-  } catch (error) {
-    actionError.value = getApiErrorMessage(error)
-  }
-}
+const busy = computed(() => isDispatching.value)
 
 const dispatchOrder = async () => {
-  if (busy.value || !order.value) return
+  if (busy.value || !order.value?.navi_port) return
   actionError.value = null
   try {
-    await dispatch({ orderId: props.orderId, naviportId: order.value.naviPortId })
+    await dispatch({ orderId: props.orderId, naviportId: order.value.navi_port })
   } catch (error) {
     actionError.value = getApiErrorMessage(error)
   }
@@ -90,7 +70,7 @@ const orderDate = (iso?: Date) => {
           </div>
           <div class="px-3 py-2 flex justify-between border-t border-alt">
             <span>naviport</span>
-            <span class="font-mono">#{{ order.naviPortId }}</span>
+            <span class="font-mono">{{ order.navi_port ?? '—' }}</span>
           </div>
           <div class="px-3 py-2 flex justify-between border-t border-alt">
             <span>placed</span>
@@ -145,32 +125,17 @@ const orderDate = (iso?: Date) => {
         </div>
       </div>
 
-      <!-- Status Controls -->
-      <div class="border border-alt">
-        <div class="px-3 py-1 border-b border-alt font-secondary text-alt">// set status</div>
-        <div class="flex flex-wrap">
-          <button
-            v-for="status in statuses"
-            :key="status"
-            type="button"
-            :disabled="busy || order.order_status === status"
-            @click="changeStatus(status)"
-            :class="[
-              'px-3 py-2 border-r border-alt font-mono tracking-wide transition-colors disabled:cursor-not-allowed',
-              order.order_status === status
-                ? 'bg-green text-primary'
-                : 'cursor-pointer hover:bg-green hover:text-primary disabled:opacity-50',
-            ]"
-          >
-            {{ statusLabels[status] }}
-          </button>
-        </div>
-      </div>
+      <!-- Status Controls: removed. The backend has no admin endpoint to set an
+           arbitrary status (/api/admin/orders/ is read-only, PATCH 405s); status
+           moves via the machine flow or DISPATCH below. -->
+      <p class="px-3 py-2 border border-alt text-alt">
+        manual status changes are not available — the backend has no endpoint for them.
+      </p>
 
       <!-- Dispatch -->
       <button
         type="button"
-        :disabled="busy"
+        :disabled="busy || !order.navi_port"
         @click="dispatchOrder"
         class="w-full px-3 py-2 border border-red text-red cursor-pointer font-mono tracking-wide hover:bg-red hover:text-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
