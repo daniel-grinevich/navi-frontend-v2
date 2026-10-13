@@ -6,7 +6,7 @@ import {
   useIntersectionObserver,
   usePreferredReducedMotion,
 } from '@vueuse/core'
-import { blank, dissolve, pad, ranks, size, type Screen } from './hero/ascii'
+import { blank, dissolve, pad, rng, size, type Screen } from './hero/ascii'
 import { logoArt, scenes, type EnterKind, type ExitKind, type SceneCtx } from './hero/scenes'
 
 /* The stage is sized for the largest scene so the hero never jumps. */
@@ -51,7 +51,7 @@ async function play(index: number) {
   const fit = (s: Screen) => pad(s, w, h)
   const art = fit(scene.art)
 
-  lines.value = art
+  lines.value = scene.enter === 'burst' ? blank(w, h) : art
   caption.value = scene.caption
   await nextTick()
 
@@ -85,42 +85,38 @@ async function play(index: number) {
   }
 
   const enter: Record<EnterKind, () => void> = {
-    // snappy: the whole block snaps on with a small overshoot
-    pop: () => {
-      t.fromTo(artNode, { opacity: 0 }, { opacity: 1, duration: 0.06, ease: 'none' })
-      t.fromTo(artNode, { scale: 0.75 }, { scale: 1, duration: 0.22, ease: 'back.out(2.5)' }, '<')
+    // Springs open out of the squashed loading bar while the blocks snap
+    // on, top rows first, so NAVI lands a beat before COFFEE.
+    burst: () => {
+      const r = rng(index + 1)
+      const rank = Array.from({ length: w * h }, (_, i) => r() * 0.55 + (Math.floor(i / w) / h) * 0.45)
+      const empty = blank(w, h)
+      const o = { p: 0 }
+      t.to(o, { p: 1, duration: 0.45, ease: 'power1.out', onUpdate: () => show(dissolve(empty, art, o.p, rank)) })
+      t.fromTo(
+        artNode,
+        { scaleY: 0.04, scaleX: 0.7 },
+        { scaleY: 1, scaleX: 1, duration: 0.55, ease: 'back.out(1.7)' },
+        '<',
+      )
     },
     fade: () => {
-      t.fromTo(artNode, { opacity: 0 }, { opacity: 1, duration: 1.4, ease: EASE })
+      t.fromTo(artNode, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 1.4, ease: EASE })
     },
   }
 
   const exit: Record<ExitKind, () => void> = {
-    // quick, so NAVI → COFFEE reads as one snappy beat
-    fade: () => t.to([artNode, capNode], { opacity: 0, duration: 0.3, ease: 'power1.in' }),
-    dissolve: () => {
-      const rank = ranks(w, h, index + 1)
-      const empty = blank(w, h)
-      let from = art
-      const o = { p: 0 }
-      t.to(o, {
-        p: 1,
-        duration: 1.6,
-        ease: EASE,
-        onStart: () => {
-          from = lines.value.slice()
-        },
-        onUpdate: () => show(dissolve(from, empty, o.p, rank)),
-      })
-      t.to(capNode, { opacity: 0, duration: 1, ease: EASE }, '<')
-    },
+    // the finished bar collapses into a bright line the logo bursts out of
+    squash: () => t.to(artNode, { scaleY: 0.04, duration: 0.3, ease: 'power3.in' }),
+    lift: () =>
+      t.to([artNode, capNode], { y: -16, opacity: 0, duration: 0.8, ease: 'power2.in' }),
   }
 
   enter[scene.enter]()
   t.addLabel('shown')
   if (scene.caption) {
-    const snappy = scene.enter === 'pop'
-    t.to(capNode, { opacity: 1, duration: snappy ? 0.5 : 1.4, ease: EASE }, snappy ? 'shown' : 'shown-=0.2')
+    const snappy = scene.enter === 'burst'
+    t.to(capNode, { opacity: 1, duration: snappy ? 0.6 : 1.4, ease: EASE }, snappy ? 'shown-=0.1' : 'shown-=0.2')
   }
   scene.play?.(ctx)
 
@@ -183,7 +179,8 @@ onBeforeUnmount(() => {
    JetBrains Mono's advance is 0.6em, so --cols chars need --cols × 0.6em. */
 .hero-stage {
   font-size: min(1em, calc(100cqi / (var(--cols) + 2) / 0.6));
-  height: calc(var(--rows) * 1em);
+  /* one spare row so the burst overshoot never clips */
+  height: calc((var(--rows) + 1) * 1em);
   display: flex;
   align-items: center;
   justify-content: center;

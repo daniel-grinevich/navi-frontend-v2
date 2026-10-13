@@ -47,12 +47,6 @@ export function grid(w: number, h: number) {
   }
 }
 
-/** Per-cell rank in [0,1) for a w×h screen; same seed → same order. */
-export function ranks(w: number, h: number, seed = 1): number[] {
-  const r = rng(seed)
-  return Array.from({ length: w * h }, () => r())
-}
-
 function mapChars(s: Screen, fn: (ch: string, i: number) => string, w: number): Screen {
   return s.map((line, y) => [...line].map((ch, x) => fn(ch, y * w + x)).join(''))
 }

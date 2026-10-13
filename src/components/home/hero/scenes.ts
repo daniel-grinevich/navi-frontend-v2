@@ -9,8 +9,8 @@ import { grid, type Screen } from './ascii'
  * HeroAnimation.vue owns the timeline and turns these into tweens.
  * ------------------------------------------------------------------ */
 
-export type EnterKind = 'pop' | 'fade'
-export type ExitKind = 'fade' | 'dissolve'
+export type EnterKind = 'burst' | 'fade'
+export type ExitKind = 'squash' | 'lift'
 
 export interface SceneCtx {
   tl: gsap.core.Timeline
@@ -107,18 +107,24 @@ function progress(p: number): Screen {
 
 /* ---------- the sequence ---------- */
 
+// NAVI centred over COFFEE, popped in together
+const brandArt: Screen = [
+  ...logoArt.map((l) => ' '.repeat((coffeeArt[0]!.length - l.length) / 2) + l),
+  '',
+  ...coffeeArt,
+]
+
 export const scenes: Scene[] = [
   {
     id: 'progress',
     art: progress(0),
     caption: '',
     enter: 'fade',
-    exit: 'dissolve',
-    hold: 1.2,
+    exit: 'squash',
+    hold: 0.5,
     play: (ctx) => ctx.text(6, (p) => progress(Math.round(p * 26) / 26), 'sine.inOut'),
   },
-  { id: 'logo', art: logoArt, caption: '', enter: 'pop', exit: 'fade', hold: 1.6 },
-  { id: 'coffee', art: coffeeArt, caption: 'coffee, your way', enter: 'pop', exit: 'fade', hold: 1.8 },
+  { id: 'brand', art: brandArt, caption: 'coffee, your way', enter: 'burst', exit: 'lift', hold: 3 },
   {
     id: 'steam',
     art: steamCup(0),
