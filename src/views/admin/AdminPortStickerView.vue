@@ -111,26 +111,22 @@ const print = () => window.print()
     margin: 0;
   }
 
+  /* Drop everything that isn't the sticker or one of its ancestors, and strip
+     the ancestors' spacing, so the sticker alone fills the page. */
+  html.printing-port-sticker body *:not(.sticker, .sticker *, :has(.sticker)) {
+    display: none !important;
+  }
+
   html.printing-port-sticker,
-  html.printing-port-sticker body {
+  html.printing-port-sticker *:has(.sticker) {
     background: #ffffff !important;
     margin: 0 !important;
     padding: 0 !important;
-  }
-
-  html.printing-port-sticker body * {
-    visibility: hidden;
-  }
-
-  html.printing-port-sticker .sticker,
-  html.printing-port-sticker .sticker * {
-    visibility: visible;
+    max-width: none !important;
   }
 
   html.printing-port-sticker .sticker {
-    position: fixed;
-    top: 0;
-    left: 0;
+    margin: 0 !important;
     border: none;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
