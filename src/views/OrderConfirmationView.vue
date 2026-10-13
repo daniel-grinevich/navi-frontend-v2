@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useRouter, useRoute } from 'vue-router'
 import { computed, ref } from 'vue'
+import { vPixelFill } from '@/directives/pixelFill'
 import Qrcode from '@/components/shared/Qrcode.vue'
 import { useOrder, useDispatchOrder } from '@/composables/useOrder'
 import { useOrderWebSocket } from '@/composables/useOrderWebSocket'
@@ -177,13 +178,15 @@ const stepStateText = { done: 'completed', active: 'current', pending: 'upcoming
     <div class="flex gap-4 flex-col sm:flex-row text-xs">
       <button
         @click="router.push({ name: 'menu' })"
-        class="group flex-1 px-3 py-2 bg-green text-primary border border-green cursor-pointer font-mono tracking-wide hover:bg-alt hover:text-primary hover:border-alt transition-colors"
+        v-pixel-fill="{ color: 'var(--color-alt)' }"
+        class="group flex-1 px-3 py-2 bg-green text-primary border border-green cursor-pointer font-mono tracking-wide transition-colors"
       >
         <span>▸</span> ORDER MORE
       </button>
       <button
         @click="router.push({ name: 'home' })"
-        class="group flex-1 px-3 py-2 border border-alt cursor-pointer font-mono tracking-wide hover:bg-green hover:text-primary transition-colors"
+        v-pixel-fill
+        class="group flex-1 px-3 py-2 border border-alt cursor-pointer font-mono tracking-wide transition-colors"
       >
         <span class="text-green group-hover:text-primary">▸</span> BACK TO HOME
       </button>

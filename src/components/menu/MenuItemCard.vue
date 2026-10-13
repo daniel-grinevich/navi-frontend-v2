@@ -5,6 +5,7 @@
 /*** composables ****/
 /*** types ****/
 import { useRouter } from 'vue-router'
+import { vPixelFill } from '@/directives/pixelFill'
 
 const props = withDefaults(
   defineProps<{
@@ -39,6 +40,7 @@ const onMenuItemClick = () => {
 
 <template>
   <div
+    v-pixel-fill
     class="card w-56 h-36 shrink-0 border border-alt p-3 cursor-pointer transition-colors flex flex-col"
     @click="onMenuItemClick"
   >
