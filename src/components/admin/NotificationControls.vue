@@ -114,7 +114,7 @@ const updatedLine = computed(() => {
       </div>
 
       <div class="border border-alt">
-        <h2 class="px-3 py-2 border-b border-alt tracking-wide">// CHANNELS</h2>
+        <h2 class="px-3 py-2 border-b border-alt bg-strip tracking-wide">// CHANNELS</h2>
         <ul class="divide-y divide-alt">
           <li v-for="c in channelMeta" :key="c.id" class="p-3 flex items-center justify-between gap-4">
             <div class="min-w-0">
@@ -131,7 +131,7 @@ const updatedLine = computed(() => {
       </div>
 
       <div class="border border-alt">
-        <h2 class="px-3 py-2 border-b border-alt tracking-wide">// CATEGORIES</h2>
+        <h2 class="px-3 py-2 border-b border-alt bg-strip tracking-wide">// CATEGORIES</h2>
         <ul class="divide-y divide-alt">
           <li
             v-for="c in categoryMeta"

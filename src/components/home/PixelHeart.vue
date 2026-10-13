@@ -31,7 +31,7 @@ const pixels = HEART.flatMap((row, y) =>
     :height="Math.round((size * 8) / 9)"
     viewBox="0 0 9 8"
     shape-rendering="crispEdges"
-    :style="{ opacity: filled ? 1 : 0.2 }"
+    :style="{ opacity: filled ? 1 : 0.4 }"
     aria-hidden="true"
   >
     <rect

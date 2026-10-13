@@ -77,7 +77,7 @@ const progressLabel = computed(() => {
 <template>
   <div>
     <div class="px-3 py-2 flex items-center justify-between gap-2">
-      <span class="font-primary tracking-wide text-sm font-bold">{{ group.name }}</span>
+      <span class="font-primary text-sm font-bold">{{ group.name }}</span>
       <span class="font-mono text-xs transition-colors" :class="minMet && selectedCustomizations.size > 0 ? 'text-green' : 'font-primary'">
         {{ progressBar }} {{ progressLabel }}
       </span>
@@ -88,7 +88,7 @@ const progressLabel = computed(() => {
         :key="option.id"
         class="px-3 py-1 border border-alt cursor-pointer transition-colors"
         :class="[
-          isSelected(option.id) ? 'bg-green text-white' : 'font-primary hover:bg-green hover:text-white',
+          isSelected(option.id) ? 'bg-green text-primary' : 'font-primary hover:bg-green hover:text-primary',
         ]"
         type="button"
         @click="handleCustomizationClick(option.id)"

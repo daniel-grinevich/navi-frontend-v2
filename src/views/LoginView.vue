@@ -60,7 +60,7 @@ const form = useForm({
     <div class="flex flex-col md:flex-row min-h-[75vh]">
       <!-- Left: ASCII Art -->
       <div class="md:w-1/2 border-b md:border-b-0 md:border-r border-alt flex flex-col">
-        <div class="px-3 py-1 border-b border-alt font-secondary text-alt">//</div>
+        <div class="px-3 py-1 border-b border-alt bg-strip font-secondary text-alt">//</div>
 
         <div class="flex-1 flex flex-col items-center justify-center p-6 overflow-hidden">
           <div class="text-green whitespace-pre leading-none select-none text-[8px] md:text-[10px]">
@@ -94,7 +94,7 @@ const form = useForm({
 
       <!-- Right: Login Form -->
       <div class="md:w-1/2 flex flex-col">
-        <div class="px-3 py-1 border-b border-alt bg-green text-white">// sign in</div>
+        <div class="px-3 py-1 border-b border-alt bg-green text-primary">// sign in</div>
 
         <div
           v-if="route.query.reason === 'auth-required'"
@@ -179,7 +179,7 @@ const form = useForm({
                 <button
                   type="submit"
                   :disabled="!canSubmit"
-                  class="w-full py-2 px-4 bg-green text-white border border-green cursor-pointer font-mono tracking-wide text-xs hover:bg-alt hover:text-primary hover:border-alt transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+                  class="w-full py-2 px-4 bg-green text-primary border border-green cursor-pointer font-mono tracking-wide text-xs hover:bg-alt hover:text-primary hover:border-alt transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-2"
                 >
                   <span v-if="isSubmitting">creating session... SIGN IN</span>
                   <span v-else>▸ SIGN IN</span>

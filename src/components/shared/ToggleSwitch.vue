@@ -13,7 +13,7 @@ defineEmits<{
   <button
     type="button"
     :disabled="disabled"
-    class="inline-flex items-center gap-2 font-mono text-sm border border-alt px-2 py-1 cursor-pointer transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+    class="inline-flex shrink-0 items-center gap-2 whitespace-nowrap font-mono text-sm border border-alt px-2 py-1 cursor-pointer transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
     :class="
       modelValue
         ? 'bg-green text-primary border-green'

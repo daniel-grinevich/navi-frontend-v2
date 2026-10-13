@@ -150,7 +150,7 @@ const confirmRotate = () => {
 
     <!-- Add device -->
     <form v-if="showAddForm" class="border border-alt" @submit.prevent="submitAdd">
-      <div class="px-3 py-1 border-b border-alt">// new device</div>
+      <div class="px-3 py-1 border-b border-alt bg-strip">// new device</div>
       <div class="p-3 grid grid-cols-1 md:grid-cols-2 gap-3">
         <label class="flex flex-col gap-1">
           <span>name</span>

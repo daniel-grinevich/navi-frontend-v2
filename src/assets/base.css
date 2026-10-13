@@ -6,8 +6,18 @@
   --color-bone: #f4f4f0;
   --color-bone-dark: #efe8d8;
   --color-ink: #1a1a1a;
-  --color-ink-soft: #666666;
-  --color-green: #008060;
+  --color-ink-soft: #5e5e5e; /* 5.5:1 on paper */
+
+  /* Light-mode surfaces and body text: a little softer than bone/ink to cut
+     glare (body text 12:1 on paper). Bone stays the dark-mode text colour. */
+  --color-paper: #eeece6;
+  --color-paper-dark: #e6e2d8;
+  --color-ink-body: #2b2b2b;
+  /* Green is nudged per theme so text-green and text-on-green both clear
+     WCAG AA (light #007a5c 4.5:1 on paper, dark #009b74 4.9:1 on #1a1a1a). */
+  --color-green-light: #007a5c;
+  --color-green-dark: #009b74;
+  --color-green: light-dark(var(--color-green-light), var(--color-green-dark));
   --color-red: #e03c31;
   --color-blue: #2e5cff;
 
@@ -15,17 +25,42 @@
   --color-dark-bg: #1a1a1a;
   --color-dark-bg-soft: #282828;
   --color-dark-text: #f4f4f0;
-  --color-dark-text-soft: #999999;
+  --color-dark-text-soft: #b8b8b2; /* 8.7:1 on #1a1a1a */
 
-  --color-primary: light-dark(var(--color-bone), var(--color-dark-bg));
-  --color-secondary: light-dark(var(--color-bone-dark), var(--color-dark-bg-soft));
-  --color-alt: light-dark(var(--color-dark-bg), var(--color-bone));
+  --color-primary: light-dark(var(--color-paper), var(--color-dark-bg));
+  --color-secondary: light-dark(var(--color-paper-dark), var(--color-dark-bg-soft));
+  --color-alt: light-dark(var(--color-ink-body), var(--color-bone));
   --color-muted: light-dark(var(--color-ink-soft), var(--color-dark-text-soft));
 
-  --font-family-tech: 'Courier New', Courier, monospace;
+  /* Windows: framed panels (anything ruled with border-alt) are slightly
+     lighter "windows" on the page, framed in ink, and the '// label' strips
+     are green title bars. In dark mode these collapse to the plain dark
+     palette (one background, bone rules). */
+  --color-window: #f6f5f1;
+  --color-surface: light-dark(var(--color-window), var(--color-dark-bg));
+  --color-strip: light-dark(var(--color-green-light), var(--color-dark-bg));
+  --color-rule: light-dark(var(--color-ink), var(--color-bone));
+
+  /* Tailwind reads --background-color-* / --border-color-* before --color-*,
+     so bg-primary and border-alt can differ from text-primary / text-alt. */
+  --background-color-primary: var(--color-surface);
+  --border-color-alt: var(--color-rule);
+
+  /* JetBrains Mono: sturdier strokes than Courier New at small sizes, same
+     0.6em advance so columns and ascii art keep their widths. */
+  --font-family-tech: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --font-mono: var(--font-family-tech);
+
+  /* Readability floor: Tailwind's text-xs is 12px by default; meta text
+     stays at 14px or above. */
+  --text-xs: 0.875rem;
+  --text-xs--line-height: 1.5;
+  --text-sm: 0.9375rem;
+  --text-sm--line-height: 1.55;
+  --tracking-wide: 0.06em;
 
   /* Fluid Typography - scales with viewport */
-  --font-size-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+  --font-size-xs: clamp(0.875rem, 0.85rem + 0.125vw, 0.9375rem);
   --font-size-sm: clamp(0.875rem, 0.825rem + 0.25vw, 1rem);
   --font-size-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
   --font-size-lg: clamp(1.125rem, 1.05rem + 0.375vw, 1.25rem);
@@ -72,7 +107,7 @@ body {
     background-color 0.3s;
   line-height: 1.6;
   font-family: var(--font-family-tech);
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-base);
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -92,11 +127,11 @@ body {
 
   /* --- BORDERS --- */
   .border-dash {
-    border: 2px dashed var(--color-alt);
+    border: 2px dashed var(--color-rule);
   }
 
   .border-solid {
-    border: 1px solid var(--color-alt);
+    border: 1px solid var(--color-rule);
   }
 
   .shadow-stamp {
@@ -120,6 +155,12 @@ body {
       opacity: 0;
     }
   }
+
+  @media (prefers-reduced-motion: reduce) {
+    .blink {
+      animation: none;
+    }
+  }
 }
 
 /* ==============================================
@@ -127,8 +168,24 @@ body {
    ============================================== */
 
 @layer components {
+  /* Every framed block (anything ruled with border-alt: sections, the nav
+     bar, buttons, cards, inputs) is a panel: it sits on the surface colour
+     with body text, rather than directly on the page. Component layer, so a
+     bg-* / text-* utility on the same element still wins. */
+  .border-alt {
+    background-color: var(--color-surface);
+    color: var(--color-alt);
+  }
+
+  /* '// label' strips are title bars: in light mode their text (text-alt or
+     font-secondary) turns bone on the green, 4.8:1. Dark mode keeps both. */
+  .bg-strip {
+    --color-alt: var(--color-bone);
+    --color-muted: light-dark(var(--color-bone), var(--color-dark-text-soft));
+  }
+
   .card {
-    border: 1px var(--color-alt);
+    border: 1px var(--color-rule);
     @apply p-4 cursor-pointer;
     @apply transition-transform duration-200;
     @apply w-full max-w-sm;
@@ -137,7 +194,7 @@ body {
   .card:hover,
   .navi-btn:hover:not(:disabled) {
     @apply -translate-x-0.5 -translate-y-0.5;
-    box-shadow: 0.3rem 0.3rem 0px var(--color-alt);
+    box-shadow: 0.3rem 0.3rem 0px var(--color-rule);
   }
 
   .nav-bar {
@@ -173,6 +230,6 @@ body {
 
   .ascii-border {
     @apply border-2 border-dashed;
-    border-color: var(--color-alt);
+    border-color: var(--color-rule);
   }
 }

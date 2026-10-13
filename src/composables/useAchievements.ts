@@ -1,58 +1,86 @@
-import { watch } from 'vue'
+import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import { apiClient } from '@/lib/apiClient'
 import { useApi } from './useApi'
 import { useSessionStore } from '@/stores/session'
-import { useAchievementsStore } from '@/stores/achievements'
-import type {
-  AchievementDefinition,
-  AchievementProgressRow,
-} from '@/types/achievements'
+import { ACHIEVEMENT_PROGRESS_FIXTURE, lockedProgress } from '@/fixtures/achievementProgress'
+import type { AchievementProgress, AchievementProgressResponse } from '@/types/achievements'
+
+export const ACHIEVEMENT_PROGRESS_KEY = ['achievements', 'progress'] as const
+
+// Backend icon slugs → the PixelIcon sprites we have.
+export type BadgeSprite = 'coffee' | 'star' | 'crown' | 'bean' | 'heart'
+const SPRITES: Record<string, BadgeSprite> = {
+  coffee: 'coffee',
+  star: 'star',
+  heart: 'heart',
+  crown: 'crown',
+  bean: 'bean',
+  sparkles: 'star',
+  sliders: 'bean',
+  compass: 'bean',
+  wallet: 'crown',
+}
+export const badgeSprite = (icon: string): BadgeSprite => SPRITES[icon] ?? 'star'
+
+export const isEarned = (a: AchievementProgress) => a.level > 0
+export const isMaxed = (a: AchievementProgress) => a.level >= a.max_level
+
+// Progress towards the next level as current/target; maxed badges read as full.
+export const badgeProgress = (a: AchievementProgress) => {
+  const target = a.next_threshold ?? a.levels[a.levels.length - 1]?.threshold ?? a.current_value
+  const current = Math.min(a.current_value, target)
+  return { current, target, fraction: target > 0 ? current / target : 1 }
+}
 
 /**
- * Hydrates the achievements store from the backend: the public definitions
- * endpoint plus (for authenticated users) their server-computed progress.
- * Guests get no progress call, so the store falls back to its local tracking.
- * Call once from a component that shows achievements (e.g. HomeView).
+ * Achievement progress for the signed-in user (GET /api/my/achievements/progress/).
+ * Signed-out visitors get the locked catalog; in dev, a failed request falls
+ * back to the contract fixture so the UI can still be worked on.
  */
-export const useAchievementsSync = () => {
+export const useAchievementProgress = () => {
   const session = useSessionStore()
   const { isAuthenticated } = storeToRefs(session)
-  const store = useAchievementsStore()
 
-  const definitions = useApi<AchievementDefinition[]>(['achievements'], () =>
-    apiClient<AchievementDefinition[]>('api/achievements/', { method: 'GET' }),
-  )
-
-  const progress = useApi<AchievementProgressRow[]>(
-    ['achievements', 'progress'],
-    () =>
-      apiClient<AchievementProgressRow[]>('api/achievements/progress/', {
-        method: 'GET',
-      }),
+  const query = useApi<AchievementProgressResponse>(
+    ACHIEVEMENT_PROGRESS_KEY,
+    () => apiClient<AchievementProgressResponse>('api/my/achievements/progress/', { method: 'GET' }),
     { enabled: isAuthenticated },
   )
 
-  watch(
-    definitions.data,
-    (defs) => {
-      if (defs) store.setServerDefinitions(defs)
-    },
-    { immediate: true },
-  )
+  const isFixture = computed(() => !query.data.value && query.isError.value && import.meta.env.DEV)
+  const isGuest = computed(() => !isAuthenticated.value)
 
-  watch(
-    progress.data,
-    (rows) => {
-      if (rows) store.setServerProgress(rows)
-    },
-    { immediate: true },
-  )
-
-  // When the user logs out, drop server progress back to local tracking.
-  watch(isAuthenticated, (authed) => {
-    if (!authed) store.clearServerProgress()
+  const progress = computed<AchievementProgressResponse | null>(() => {
+    if (isGuest.value) return lockedProgress()
+    if (query.data.value) return query.data.value
+    if (isFixture.value) return ACHIEVEMENT_PROGRESS_FIXTURE
+    return null
   })
 
-  return { definitions, progress }
+  const summary = computed(() => progress.value?.summary ?? null)
+  const badges = computed(() => progress.value?.results ?? [])
+
+  // The badge closest to its next level: what the NEXT ▸ line points at.
+  const nextBadge = computed<AchievementProgress | null>(() => {
+    let best: AchievementProgress | null = null
+    let bestFraction = -1
+    for (const b of badges.value) {
+      if (isMaxed(b)) continue
+      const { fraction } = badgeProgress(b)
+      if (fraction > bestFraction) {
+        best = b
+        bestFraction = fraction
+      }
+    }
+    return best
+  })
+
+  return {
+    ...query,
+    isFixture,
+    summary,
+    badges,
+    nextBadge,
+  }
 }

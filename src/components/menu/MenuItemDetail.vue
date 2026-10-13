@@ -167,7 +167,7 @@ const onAddToCartClick = () => {
       </div>
       <div class="px-3 py-3">
         <div class="flex items-center justify-between">
-          <span class="tracking-wide font-mono text-sm">{{ menuItem.name }}</span>
+          <span class="font-mono text-sm">{{ menuItem.name }}</span>
           <span class="font-mono">${{ menuItem.price }}</span>
         </div>
         <p v-if="menuItem.description" class="mt-2 font-secondary text-alt">
@@ -212,7 +212,7 @@ const onAddToCartClick = () => {
     <!-- customizations -->
     <div v-if="!hasCustomizations" class="text-alt font-mono">No customizations exist.</div>
     <div v-else class="border border-alt mt-4">
-      <div class="px-3 py-1 border-b border-alt font-secondary text-alt">// customize</div>
+      <div class="px-3 py-1 border-b border-alt bg-strip font-secondary text-alt">// customize</div>
       <div class="divide-y divide-alt">
         <CustomizationGroup
           v-for="group in customizationGroups"
