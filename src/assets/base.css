@@ -6,19 +6,15 @@
   --color-bone: #f4f4f0;
   --color-bone-dark: #efe8d8;
   --color-ink: #1a1a1a;
+  --color-ink-soft: #5e5e5e; /* 5.5:1 on paper */
 
-  /* Light mode is a "green page": a pine background with off-white panels
-     framed by deep-green rules. Contrast: body text 14.2:1 and muted 6.6:1 on
-     the surface, bone on the page 5.9:1, bone on deep-green bands 11:1. */
-  --color-pine: #0f6b52;
-  --color-pine-deep: #0b3d30;
-  --color-surface-light: #fbfaf6;
-  --color-strip-light: #e4ece8;
-  --color-ink-body: #1f2a26;
-  --color-ink-soft: #4f5d57;
-
-  /* Accent green for text, icons and bars inside panels: light #007a5c
-     (5.1:1 on the surface), dark #009b74 (4.9:1 on #1a1a1a). */
+  /* Light-mode surfaces and body text: a little softer than bone/ink to cut
+     glare (body text 12:1 on paper). Bone stays the dark-mode text colour. */
+  --color-paper: #eeece6;
+  --color-paper-dark: #e6e2d8;
+  --color-ink-body: #2b2b2b;
+  /* Green is nudged per theme so text-green and text-on-green both clear
+     WCAG AA (light #007a5c 4.5:1 on paper, dark #009b74 4.9:1 on #1a1a1a). */
   --color-green-light: #007a5c;
   --color-green-dark: #009b74;
   --color-green: light-dark(var(--color-green-light), var(--color-green-dark));
@@ -31,26 +27,26 @@
   --color-dark-text: #f4f4f0;
   --color-dark-text-soft: #b8b8b2; /* 8.7:1 on #1a1a1a */
 
-  /* Semantic roles. In dark mode page, surface and strip are all the same
-     #1a1a1a, so dark mode renders exactly as before. */
-  --color-page: light-dark(var(--color-pine), var(--color-dark-bg));
-  --color-surface: light-dark(var(--color-surface-light), var(--color-dark-bg));
-  --color-strip: light-dark(var(--color-strip-light), var(--color-dark-bg));
-  --color-rule: light-dark(var(--color-pine-deep), var(--color-bone));
-  --color-band: light-dark(var(--color-pine-deep), var(--color-green-dark));
-  /* Text sitting directly on the page (outside any panel). */
-  --color-on-page: var(--color-bone);
-
-  /* text-primary: text on fills and bands (and directly on the page). */
-  --color-primary: light-dark(var(--color-bone), var(--color-dark-bg));
-  --color-secondary: light-dark(var(--color-strip-light), var(--color-dark-bg-soft));
-  /* text-alt: body text on surfaces. */
+  --color-primary: light-dark(var(--color-paper), var(--color-dark-bg));
+  --color-secondary: light-dark(var(--color-paper-dark), var(--color-dark-bg-soft));
   --color-alt: light-dark(var(--color-ink-body), var(--color-bone));
   --color-muted: light-dark(var(--color-ink-soft), var(--color-dark-text-soft));
 
-  /* Per-utility overrides (Tailwind reads --background-color-* and
-     --border-color-* before --color-*): fills and rules use the deep green,
-     while text-green / text-alt keep the colours above. */
+  /* Roles the light "looks" below re-point (see LOOKS). By default they
+     resolve to the colours above, so the bone design is unchanged:
+     page = what the body sits on, surface = framed panels (border-alt),
+     strip = the plain '// label' strips, rule = border-alt lines,
+     band = bg-green fills. */
+  --color-page: var(--color-primary);
+  --color-surface: var(--color-primary);
+  --color-strip: var(--color-primary);
+  --color-rule: var(--color-alt);
+  --color-band: var(--color-green);
+  --color-on-page: var(--color-alt);
+  --color-dot: transparent;
+
+  /* Tailwind reads --background-color-* / --border-color-* before --color-*,
+     so fills and rules can differ from the same-named text colour. */
   --background-color-primary: var(--color-surface);
   --background-color-alt: var(--color-rule);
   --background-color-green: var(--color-band);
@@ -111,7 +107,10 @@ body {
   /* color-scheme is inherited from :root so the theme toggle controls it. */
   min-height: 100vh;
   color: var(--color-on-page);
-  background: var(--color-page);
+  background-color: var(--color-page);
+  /* Faint 6px pixel-dot texture; transparent unless a look sets --color-dot. */
+  background-image: radial-gradient(var(--color-dot) 1px, transparent 1.5px);
+  background-size: 6px 6px;
   transition:
     color 0.3s,
     background-color 0.3s;
@@ -234,5 +233,84 @@ body {
   .ascii-border {
     @apply border-2 border-dashed;
     border-color: var(--color-rule);
+  }
+}
+
+/* ==============================================
+   LOOKS (light mode only, picked with ?look=...)
+   Default is the bone design above. Each look re-points the role tokens on
+   :root; dark mode never matches these selectors, so it is unchanged.
+   ============================================== */
+
+/* --- LOOSE: green page, bone panels floating on it with soft rules; the
+   '// labels' and header bars read as light headings on the green. --- */
+:root[data-theme='light'][data-look='loose'] {
+  --color-page: #0f6b52;
+  --color-surface: var(--color-paper);
+  --color-on-page: var(--color-bone); /* 5.9:1 on the page */
+  --color-strip: var(--color-page);
+  --color-band: var(--color-page);
+  --color-primary: var(--color-bone);
+  --color-rule: rgb(11 61 48 / 0.16);
+  --color-dot: rgb(255 255 255 / 0.07);
+  --background-color-alt: var(--color-ink-body);
+}
+
+/* --- INTEGRATED: content sits on the green like a terminal; only things
+   you touch or read closely (buttons, cards, inputs, achievements, the QR)
+   get a bone surface. Rules are dashed and low contrast. --- */
+:root[data-theme='light'][data-look='integrated'] {
+  --color-page: #0f6b52;
+  --color-surface: transparent;
+  --color-strip: transparent;
+  --color-band: transparent;
+  --color-on-page: var(--color-bone);
+  --color-primary: var(--color-bone);
+  --color-alt: var(--color-bone); /* 5.9:1 */
+  --color-muted: #c8ded4; /* 4.6:1 */
+  --color-green: #b4f0d6; /* mint, 5.1:1 */
+  --color-rule: rgb(244 244 240 / 0.35);
+  --color-dot: rgb(255 255 255 / 0.07);
+  --background-color-primary: var(--color-paper);
+  --background-color-alt: var(--color-bone);
+}
+
+/* Unlayered on purpose: these must beat the py-1 / border utilities on the
+   same elements, and only ever apply inside the loose look. */
+:root[data-theme='light'][data-look='loose'] .bg-strip {
+  --color-alt: var(--color-bone);
+  --color-muted: #c8ded4; /* 4.6:1 on the page */
+  padding-top: 0.75rem;
+}
+
+/* Loose: home action rows lose their box; a quiet dashed rule between. */
+:root[data-theme='light'][data-look='loose'] .action-row {
+  border-width: 0 0 1px;
+  border-style: dashed;
+  border-color: rgb(43 43 43 / 0.3);
+  box-shadow: none;
+}
+
+@layer components {
+  /* Integrated: ASCII-ish rules. Tailwind's `border` reads this variable. */
+  :root[data-theme='light'][data-look='integrated'] .border-alt {
+    --tw-border-style: dashed;
+  }
+
+  /* Integrated: these keep a bone surface, with the bone palette inside. */
+  :root[data-theme='light'][data-look='integrated']
+    :is(.look-surface, .navi-btn, .card, input, select, textarea) {
+    --color-alt: var(--color-ink-body);
+    --color-muted: var(--color-ink-soft);
+    --color-green: var(--color-green-light);
+    --color-primary: var(--color-paper);
+    --color-surface: var(--color-paper);
+    --color-strip: var(--color-paper);
+    --border-color-alt: rgb(43 43 43 / 0.35);
+    --background-color-alt: var(--color-ink-body);
+    --background-color-green: var(--color-green-light);
+    --background-color-primary: var(--color-paper);
+    background-color: var(--color-paper);
+    color: var(--color-ink-body);
   }
 }

@@ -160,7 +160,7 @@ const stepStateText = { done: 'completed', active: 'current', pending: 'upcoming
       <!-- QR Code -->
       <div v-if="qrToken && order?.order_status === 'O'" class="border border-alt text-xs">
         <div class="px-3 py-1 border-b border-alt bg-strip font-secondary text-alt">// qr code</div>
-        <div class="px-3 py-4 flex justify-center">
+        <div class="look-surface px-3 py-4 flex justify-center">
           <Qrcode
             :value="qrToken"
             :size="200"

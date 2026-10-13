@@ -15,7 +15,7 @@ const { summary, badges, nextBadge, isGuest, isPending, isFixture } = useAchieve
 </script>
 
 <template>
-  <div v-if="summary" class="pb-1">
+  <div v-if="summary" class="look-surface pb-1">
     <template v-if="variant === 'a'">
       <HealthBar :next="nextBadge" />
       <AchievementsRow :badges="badges" />
