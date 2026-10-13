@@ -146,7 +146,7 @@ const stepStateText = { done: 'completed', active: 'current', pending: 'upcoming
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <!-- Order Details -->
       <div class="border border-alt text-xs">
-        <div class="px-3 py-1 border-b border-alt bg-green text-white">// order details</div>
+        <div class="px-3 py-1 border-b border-alt bg-green text-primary">// order details</div>
         <div class="px-3 py-2 flex justify-between">
           <span>order id</span>
           <span class="font-mono">{{ orderId }}</span>

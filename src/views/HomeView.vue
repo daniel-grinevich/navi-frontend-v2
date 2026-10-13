@@ -2,14 +2,9 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import gsap from 'gsap'
 import { useSessionStore } from '@/stores/session'
-import HealthBar from '@/components/home/HealthBar.vue'
-import AchievementsRow from '@/components/home/AchievementsRow.vue'
-import { useAchievementsSync } from '@/composables/useAchievements'
+import AchievementsSection from '@/components/home/AchievementsSection.vue'
 
 const session = useSessionStore()
-
-// Hydrate achievements from the backend (definitions + per-user progress).
-useAchievementsSync()
 
 const steps = [
   {
@@ -179,7 +174,7 @@ onUnmounted(() => {
           </div>
 
           <div ref="tagline" class="mt-6 text-center">
-            <div class="font-secondary tracking-[0.2em]">coffee, your way</div>
+            <div class="font-secondary">coffee, your way</div>
           </div>
 
           <div></div>
@@ -241,8 +236,7 @@ onUnmounted(() => {
 
         <div class="border-t border-alt">
           <div class="px-3 py-1 border-b border-alt font-secondary">// Achievements</div>
-          <HealthBar />
-          <AchievementsRow />
+          <AchievementsSection />
         </div>
       </div>
     </div>
@@ -253,7 +247,7 @@ onUnmounted(() => {
   <div class="w-full text-xs border border-alt mt-10">
     <div class="px-3 py-1 border-b border-alt text-primary bg-green flex items-center justify-between">
       <span>// how_it_works</span>
-      <span class="hidden sm:inline opacity-70">3 steps to caffeine</span>
+      <span class="hidden sm:inline">3 steps to caffeine</span>
     </div>
 
     <div class="grid md:grid-cols-3">
@@ -265,7 +259,7 @@ onUnmounted(() => {
       >
         <div class="flex items-baseline gap-3">
           <span class="text-green font-mono text-4xl leading-none">{{ step.n }}</span>
-          <span class="font-secondary tracking-[0.3em]">step</span>
+          <span class="font-secondary">step</span>
         </div>
         <p class="font-mono font-bold text-sm tracking-wide">{{ step.title }}</p>
         <p class="font-secondary leading-relaxed flex-1">{{ step.desc }}</p>
@@ -341,7 +335,7 @@ onUnmounted(() => {
     <div class="flex flex-col sm:flex-row items-center justify-between gap-4 px-8 py-8">
       <div class="flex flex-col gap-1 text-center sm:text-left">
         <p class="font-mono font-bold text-sm tracking-wide">READY WHEN YOU ARE</p>
-        <p class="opacity-80">your next drink is a few taps away.</p>
+        <p>your next drink is a few taps away.</p>
       </div>
       <router-link
         to="/menu"

@@ -2,7 +2,6 @@
 import { ref, computed, onBeforeMount } from 'vue'
 import { useRouter } from 'vue-router'
 import { useShoppingCart } from '@/stores/shoppingCart'
-import { useAchievementsStore } from '@/stores/achievements'
 import { useCreateOrder } from '@/composables/useOrder'
 import { useStripe } from '@/composables/useStripe'
 import { getApiErrorMessage } from '@/lib/errorParser'
@@ -11,7 +10,6 @@ import type { PaymentRequestPaymentMethodEvent, StripeCardNumberElement } from '
 
 const router = useRouter()
 const cart = useShoppingCart()
-const achievements = useAchievementsStore()
 
 const paymentStep = ref<'review' | 'payment'>('review')
 const cardNumberElement = ref<StripeCardNumberElement | null>(null)
@@ -153,7 +151,6 @@ const submitOrder = async () => {
           }
         }
 
-        achievements.recordOrderPlaced(cart.localCart)
         cart.clearCart()
         router.push({ name: 'orderConfirmation', params: { orderId: orderId.value } })
       })
@@ -180,7 +177,6 @@ const confirmPayment = async () => {
   if (error) {
     paymentError.value = error.message ?? 'Payment failed'
   } else {
-    achievements.recordOrderPlaced(cart.localCart)
     cart.clearCart()
     router.push({ name: 'orderConfirmation', params: { orderId: orderId.value } })
   }

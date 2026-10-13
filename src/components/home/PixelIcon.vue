@@ -91,7 +91,7 @@ const pixels = computed(() => {
     :height="size"
     viewBox="0 0 10 10"
     shape-rendering="crispEdges"
-    :style="{ opacity: locked ? 0.25 : 1 }"
+    :style="{ opacity: locked ? 0.5 : 1 }"
     aria-hidden="true"
   >
     <rect

@@ -81,7 +81,7 @@ const form = useForm({
     <div class="flex flex-col md:flex-row min-h-[75vh]">
       <!-- Left: Sign Up Form -->
       <div class="md:w-1/2 border-b md:border-b-0 md:border-r border-alt flex flex-col">
-        <div class="px-3 py-1 border-b border-alt bg-green text-white">// sign up</div>
+        <div class="px-3 py-1 border-b border-alt bg-green text-primary">// sign up</div>
 
         <div class="flex-1 flex flex-col justify-center p-6">
           <form
@@ -195,7 +195,7 @@ const form = useForm({
                 <button
                   type="submit"
                   :disabled="!canSubmit"
-                  class="w-full py-2 px-4 bg-green text-white border border-green cursor-pointer font-mono tracking-wide text-xs hover:bg-alt hover:text-primary hover:border-alt transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+                  class="w-full py-2 px-4 bg-green text-primary border border-green cursor-pointer font-mono tracking-wide text-xs hover:bg-alt hover:text-primary hover:border-alt transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-2"
                 >
                   {{ isSubmitting ? 'creating account...' : '▸ SIGN UP' }}
                 </button>

@@ -6,8 +6,12 @@
   --color-bone: #f4f4f0;
   --color-bone-dark: #efe8d8;
   --color-ink: #1a1a1a;
-  --color-ink-soft: #666666;
-  --color-green: #008060;
+  --color-ink-soft: #4d4d4d; /* 7.7:1 on bone */
+  /* Green is nudged per theme so text-green and text-on-green both clear
+     WCAG AA (light #007a5c 4.8:1 on bone, dark #009b74 4.9:1 on #1a1a1a). */
+  --color-green-light: #007a5c;
+  --color-green-dark: #009b74;
+  --color-green: light-dark(var(--color-green-light), var(--color-green-dark));
   --color-red: #e03c31;
   --color-blue: #2e5cff;
 
@@ -15,17 +19,28 @@
   --color-dark-bg: #1a1a1a;
   --color-dark-bg-soft: #282828;
   --color-dark-text: #f4f4f0;
-  --color-dark-text-soft: #999999;
+  --color-dark-text-soft: #b8b8b2; /* 8.7:1 on #1a1a1a */
 
   --color-primary: light-dark(var(--color-bone), var(--color-dark-bg));
   --color-secondary: light-dark(var(--color-bone-dark), var(--color-dark-bg-soft));
   --color-alt: light-dark(var(--color-dark-bg), var(--color-bone));
   --color-muted: light-dark(var(--color-ink-soft), var(--color-dark-text-soft));
 
-  --font-family-tech: 'Courier New', Courier, monospace;
+  /* JetBrains Mono: sturdier strokes than Courier New at small sizes, same
+     0.6em advance so columns and ascii art keep their widths. */
+  --font-family-tech: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --font-mono: var(--font-family-tech);
+
+  /* Readability floor: Tailwind's text-xs is 12px by default; meta text
+     stays at 14px or above. */
+  --text-xs: 0.875rem;
+  --text-xs--line-height: 1.5;
+  --text-sm: 0.9375rem;
+  --text-sm--line-height: 1.55;
+  --tracking-wide: 0.06em;
 
   /* Fluid Typography - scales with viewport */
-  --font-size-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+  --font-size-xs: clamp(0.875rem, 0.85rem + 0.125vw, 0.9375rem);
   --font-size-sm: clamp(0.875rem, 0.825rem + 0.25vw, 1rem);
   --font-size-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
   --font-size-lg: clamp(1.125rem, 1.05rem + 0.375vw, 1.25rem);
@@ -59,7 +74,7 @@
 *::before,
 *::after {
   box-sizing: border-box;
-  font-weight: normal;
+  font-weight: inherit;
 }
 
 body {
@@ -72,8 +87,16 @@ body {
     background-color 0.3s;
   line-height: 1.6;
   font-family: var(--font-family-tech);
-  font-size: var(--font-size-sm);
+  /* One weight everywhere, as before, but 500: JetBrains Mono at 400 still
+     reads light at 14px. */
+  font-weight: 500;
+  font-size: var(--font-size-base);
   text-rendering: optimizeLegibility;
+}
+
+/* Grayscale antialiasing thins dark-on-light text on macOS, so only use it
+   for light-on-dark, where it stops glyphs from looking bloated. */
+:root[data-theme='dark'] body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -118,6 +141,12 @@ body {
   @keyframes blinker {
     50% {
       opacity: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .blink {
+      animation: none;
     }
   }
 }

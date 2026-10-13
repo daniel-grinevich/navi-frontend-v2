@@ -94,7 +94,7 @@ const form = useForm({
 
       <!-- Right: Login Form -->
       <div class="md:w-1/2 flex flex-col">
-        <div class="px-3 py-1 border-b border-alt bg-green text-white">// sign in</div>
+        <div class="px-3 py-1 border-b border-alt bg-green text-primary">// sign in</div>
 
         <div
           v-if="route.query.reason === 'auth-required'"
@@ -179,7 +179,7 @@ const form = useForm({
                 <button
                   type="submit"
                   :disabled="!canSubmit"
-                  class="w-full py-2 px-4 bg-green text-white border border-green cursor-pointer font-mono tracking-wide text-xs hover:bg-alt hover:text-primary hover:border-alt transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+                  class="w-full py-2 px-4 bg-green text-primary border border-green cursor-pointer font-mono tracking-wide text-xs hover:bg-alt hover:text-primary hover:border-alt transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-2"
                 >
                   <span v-if="isSubmitting">creating session... SIGN IN</span>
                   <span v-else>▸ SIGN IN</span>
