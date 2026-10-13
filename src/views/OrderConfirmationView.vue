@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { useRouter, useRoute } from 'vue-router'
-import { computed, toValue } from 'vue'
+import { computed, ref } from 'vue'
 import Qrcode from '@/components/shared/Qrcode.vue'
-import { useOrder } from '@/composables/useOrder'
+import { useOrder, useDispatchOrder } from '@/composables/useOrder'
 import { useOrderWebSocket } from '@/composables/useOrderWebSocket'
 import { useSessionStore } from '../stores/session'
-import { apiClient } from '@/lib/apiClient'
+import { getApiErrorMessage } from '@/lib/errorParser'
+import { ORDER_STATUS_LABELS as stepLabels } from '@/lib/orderStatus'
+import type { OrderStatus } from '@/types/order'
 
 const router = useRouter()
 const route = useRoute()
@@ -16,23 +18,38 @@ const { machineError } = useOrderWebSocket(orderId.value)
 
 const sessionStore = useSessionStore()
 
-const onDispatchClick = () => {
-  const naviPort = { id: '65065f88-e474-4c8d-a22b-e50254fd49c5' }
-  const response = apiClient(`api/orders/${toValue(orderId)}/dispatch/`, {
-    method: 'POST',
-    body: JSON.stringify({ orderId: toValue(orderId), naviportId: naviPort.id }),
-  })
+// The QR payload is the signed qr_token from the latest GET. The backend
+// re-mints it on every fetch and it expires, so always bind the current cached
+// value (never a copy) and let useOrder's refetches keep it fresh.
+const qrToken = computed(() => order.value?.qr_token ?? null)
+// No centre logo: the scanner needs every module, and the default is a
+// third-party image.
+const qrImageSettings = { src: '', width: 0, height: 0, excavate: false }
 
-  console.log(response)
+// Admin shortcut: dispatch to the order's own pickup NaviPort.
+const { mutateAsync: dispatch, isPending: isDispatching } = useDispatchOrder()
+const dispatchError = ref<string | null>(null)
+const onDispatchClick = async () => {
+  const naviportId = order.value?.navi_port
+  if (!naviportId || isDispatching.value) return
+  dispatchError.value = null
+  try {
+    await dispatch({ orderId: orderId.value, naviportId })
+  } catch (error) {
+    dispatchError.value = getApiErrorMessage(error)
+  }
 }
 
-const steps = ['O', 'S', 'D', 'C']
-const stepLabels: Record<string, string> = {
-  O: 'OPEN',
-  S: 'SHIPPED',
-  D: 'DISPATCH',
-  C: 'DONE',
+// Happy-path progression. C (cancelled) is terminal and shown on its own.
+const steps: OrderStatus[] = ['O', 'S', 'D']
+const stepDescriptions: Record<OrderStatus, string> = {
+  O: 'waiting for you to scan at the machine',
+  S: 'the machine is making your order',
+  D: 'your order is ready',
+  C: 'this order was cancelled',
 }
+
+const isCancelled = computed(() => order.value?.order_status === 'C')
 
 const stepIndex = computed(() => {
   if (!order.value) return 0
@@ -40,10 +57,13 @@ const stepIndex = computed(() => {
 })
 
 const stepState = (i: number) => {
-  if (i < stepIndex.value) return 'done'
+  // Done is the last step, so it reads as completed rather than in progress.
+  if (i < stepIndex.value || order.value?.order_status === 'D') return 'done'
   if (i === stepIndex.value) return 'active'
   return 'pending'
 }
+
+const stepStateText = { done: 'completed', active: 'current', pending: 'upcoming' }
 </script>
 
 <template>
@@ -69,17 +89,27 @@ const stepState = (i: number) => {
     <div v-if="machineError" class="border border-alt text-xs">
       <div class="px-3 py-1 border-b border-alt font-secondary text-alt">// machine error</div>
       <div class="px-3 py-3 font-mono">{{ machineError }}</div>
-      <div class="px-3 py-2 border-t border-alt text-alt">your qr code is still valid — please try again or visit another machine</div>
+      <!-- A machine error cancels the order (C) and auto-refunds it server-side. -->
+      <div class="px-3 py-2 border-t border-alt text-alt">cancelled — you've been refunded</div>
     </div>
     <!-- ASCII Status Tracker -->
     <div class="border border-alt text-xs">
       <div class="px-3 py-1 border-b border-alt font-secondary text-alt">// order status</div>
       <div class="px-4 py-6">
+        <!-- Announced to screen readers whenever the status changes -->
+        <p role="status" aria-live="polite" class="sr-only">
+          order status: {{ stepLabels[order?.order_status ?? 'O'] }} —
+          {{ stepDescriptions[order?.order_status ?? 'O'] }}
+        </p>
+        <p v-if="isCancelled" class="text-center font-mono text-red">
+          {{ stepLabels.C }} — {{ stepDescriptions.C }}
+        </p>
         <!-- Progress Line -->
-        <div class="flex items-center justify-between font-mono">
+        <div v-else class="flex items-center justify-between font-mono">
           <template v-for="(step, i) in steps" :key="step">
             <div class="flex flex-col items-center gap-2">
               <span
+                aria-hidden="true"
                 :class="[
                   'text-lg',
                   stepState(i) === 'done' ? 'text-green' : '',
@@ -98,6 +128,7 @@ const stepState = (i: number) => {
                 ]"
               >
                 {{ stepLabels[step] }}
+                <span class="sr-only">({{ stepStateText[stepState(i)] }})</span>
               </span>
             </div>
             <div
@@ -127,10 +158,17 @@ const stepState = (i: number) => {
       </div>
 
       <!-- QR Code -->
-      <div v-if="order?.id && order.order_status === 'O'" class="border border-alt text-xs">
+      <div v-if="qrToken && order?.order_status === 'O'" class="border border-alt text-xs">
         <div class="px-3 py-1 border-b border-alt font-secondary text-alt">// qr code</div>
         <div class="px-3 py-4 flex justify-center">
-          <Qrcode :value="'{{order.id}}'" :size="200" />
+          <Qrcode
+            :value="qrToken"
+            :size="200"
+            :margin="2"
+            :image-settings="qrImageSettings"
+            role="img"
+            aria-label="pickup qr code — scan this at the naviport machine"
+          />
         </div>
       </div>
     </div>
@@ -152,13 +190,15 @@ const stepState = (i: number) => {
     </div>
 
     <!-- Admin Dispatch -->
-    <div v-if="sessionStore.isAdmin" class="text-xs">
+    <div v-if="sessionStore.isAdmin && order?.navi_port" class="text-xs space-y-2">
       <button
+        :disabled="isDispatching"
         @click="onDispatchClick"
         class="group w-full px-3 py-2 border border-red text-red cursor-pointer font-mono tracking-wide hover:bg-red hover:text-primary transition-colors"
       >
         ▸ DISPATCH ORDER (admin)
       </button>
+      <p v-if="dispatchError" class="text-red px-2 py-2 border border-red">{{ dispatchError }}</p>
     </div>
   </div>
 </template>

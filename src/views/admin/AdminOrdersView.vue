@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAdminOrders } from '@/composables/useOrder'
 import type { OrderStatus } from '@/types/order'
+import { ORDER_STATUS_LABELS } from '@/lib/orderStatus'
 import Pagination from '@/components/shared/Pagination.vue'
 import LoadingSpinnerTwo from '@/components/shared/LoadingSpinnerTwo.vue'
 
@@ -19,11 +20,7 @@ const count = computed(() => data.value?.count ?? 0)
 
 const statusLabels: Record<OrderStatus | 'ALL', string> = {
   ALL: 'ALL',
-  O: 'OPEN',
-  S: 'SHIPPED',
-  D: 'DISPATCH',
-  C: 'DONE',
-  R: 'REFUNDED',
+  ...ORDER_STATUS_LABELS,
 }
 
 const setStatus = (key: OrderStatus | 'ALL') => {
@@ -42,13 +39,8 @@ const orderDate = (iso: Date) => {
     <!-- Header -->
     <div class="border border-alt flex items-center justify-between">
       <div class="px-3 py-1 bg-green text-primary">// admin · all orders</div>
-      <button
-        type="button"
-        class="px-3 py-1 cursor-pointer text-green hover:underline font-mono"
-        @click="router.push({ name: 'adminCreateOrder' })"
-      >
-        ▸ NEW ORDER
-      </button>
+      <!-- NEW ORDER hidden: the backend has no admin order-create endpoint yet
+           (/api/admin/orders/ is read-only). See AdminCreateOrderView. -->
     </div>
 
     <!-- Filter Bar -->

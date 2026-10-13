@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useOrders } from '@/composables/useOrder'
 import type { OrderStatus } from '@/types/order'
+import { ORDER_STATUS_LABELS } from '@/lib/orderStatus'
 import AsyncList from '@/components/shared/AsyncList.vue'
 import Pagination from '@/components/shared/Pagination.vue'
 
@@ -19,11 +20,7 @@ const count = computed(() => data.value?.count ?? 0)
 
 const statusLabels: Record<OrderStatus | 'ALL', string> = {
   ALL: 'ALL',
-  O: 'OPEN',
-  S: 'SHIPPED',
-  D: 'DISPATCH',
-  C: 'DONE',
-  R: 'REFUNDED',
+  ...ORDER_STATUS_LABELS,
 }
 
 // Filtering is server-side now; changing it resets to the first page.

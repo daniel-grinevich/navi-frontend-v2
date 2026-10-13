@@ -1,7 +1,9 @@
 import { type CartItem } from './cart'
 import { type UserResponse } from './user'
 
-export type OrderStatus = 'O' | 'S' | 'D' | 'C' | 'R'
+// Mirrors the backend Order.Status choices: Ordered (waiting for a scan), Sent
+// (claimed by a machine, being made), Done, Cancelled.
+export type OrderStatus = 'O' | 'S' | 'D' | 'C'
 
 // Standard DRF PageNumberPagination envelope.
 export type PaginatedResponse<T> = {
@@ -13,7 +15,7 @@ export type PaginatedResponse<T> = {
 
 export type Order = {
   id?: string
-  naviPortId: string | number
+  navi_port: string | null
   items: CartItem[]
   subtotal: number
   tax: number
@@ -24,10 +26,13 @@ export type Order = {
   created_at: Date
   estimatedReadyTime?: Date
   user: UserResponse
+  // Signed pickup token the machine scans. Re-minted on every GET and expires,
+  // so it must always come from the latest fetch. null once the order leaves O.
+  qr_token?: string | null
 }
 
 export type ServerOrder = {
-  navi_port: string | number
+  navi_port: string
   items: {
     menu_item: string
     quantity: number

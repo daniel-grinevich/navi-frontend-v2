@@ -6,7 +6,8 @@ import { toServerItems, calculateItemTotal, cartSubtotal } from '@/lib/orderItem
 
 export const useShoppingCart = defineStore('shopping-cart', () => {
   const localCart = useStorage<CartItem[]>('shopping-cart', [], localStorage)
-  const selectedNaviPort = ref<number | null>(null)
+  // NaviPort ids are UUID strings; null means no pickup location chosen yet.
+  const selectedNaviPort = ref<string | null>(null)
 
   const serverCart = computed(() => toServerItems(localCart.value))
 
