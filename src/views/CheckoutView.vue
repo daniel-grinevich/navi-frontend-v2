@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onBeforeMount } from 'vue'
 import { useRouter } from 'vue-router'
-import { vPixelFill } from '@/directives/pixelFill'
 import { useShoppingCart } from '@/stores/shoppingCart'
 import { useCreateOrder } from '@/composables/useOrder'
 import { useStripe } from '@/composables/useStripe'
@@ -214,10 +213,9 @@ const confirmPayment = async () => {
             <p class="mb-3">no location selected</p>
             <button
               @click="selectNaviPort"
-              v-pixel-fill
-              class="navi-btn group px-3 py-2 border border-alt cursor-pointer font-mono tracking-wide transition-all duration-200"
+              class="navi-btn group px-3 py-2 border border-alt cursor-pointer font-mono tracking-wide hover:bg-green hover:text-primary transition-all duration-200"
             >
-              <span class="text-green">▸</span> SELECT NAVIPORT
+              <span class="text-green group-hover:text-primary">▸</span> SELECT NAVIPORT
             </button>
           </div>
         </div>
@@ -278,18 +276,16 @@ const confirmPayment = async () => {
             <button
               @click="submitOrder"
               :disabled="!hasNaviPort || isPending || cart.itemCount === 0"
-              v-pixel-fill="{ color: 'var(--color-alt)' }"
-              class="navi-btn group w-full px-3 py-2 bg-green text-primary border border-green cursor-pointer font-mono tracking-wide disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+              class="navi-btn group w-full px-3 py-2 bg-green text-primary border border-green cursor-pointer font-mono tracking-wide hover:bg-alt hover:text-primary hover:border-alt disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
             >
               <span v-if="isPending" class="blink">PLACING ORDER...</span>
               <span v-else><span>▸</span> PLACE ORDER</span>
             </button>
             <button
               @click="router.push({ name: 'cart' })"
-              v-pixel-fill
-              class="navi-btn group w-full px-3 py-2 border border-alt cursor-pointer font-mono tracking-wide transition-all duration-200"
+              class="navi-btn group w-full px-3 py-2 border border-alt cursor-pointer font-mono tracking-wide hover:bg-green hover:text-primary transition-all duration-200"
             >
-              <span class="text-green">▸</span> BACK TO CART
+              <span class="text-green group-hover:text-primary">▸</span> BACK TO CART
             </button>
           </div>
 
@@ -324,8 +320,7 @@ const confirmPayment = async () => {
               </p>
               <button
                 @click="confirmPayment"
-                v-pixel-fill="{ color: 'var(--color-alt)' }"
-                class="navi-btn group w-full px-3 py-2 bg-green text-primary border border-green cursor-pointer font-mono tracking-wide transition-all duration-200"
+                class="navi-btn group w-full px-3 py-2 bg-green text-primary border border-green cursor-pointer font-mono tracking-wide hover:bg-alt hover:text-primary hover:border-alt transition-all duration-200"
               >
                 <span>▸</span> CONFIRM PAYMENT
               </button>

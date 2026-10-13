@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { useForm } from '@tanstack/vue-form'
 import { useRouter } from 'vue-router'
-import { vPixelFill } from '@/directives/pixelFill'
 import { useSessionStore } from '@/stores/session'
 import { validateEmail } from '@/schemas/form/CartOptions'
 
@@ -80,8 +79,7 @@ defineExpose({ submit: () => form.handleSubmit() })
     <div class="px-3 pb-3 flex gap-3">
       <button
         type="submit"
-        v-pixel-fill
-        class="group px-3 py-2 border border-alt cursor-pointer font-mono tracking-wide transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+        class="group px-3 py-2 border border-alt cursor-pointer font-mono tracking-wide hover:bg-green hover:text-primary transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
       >
         <span class="text-green group-hover:text-primary">▸</span>
         {{ prefillEmail ? 'UPDATE EMAIL' : 'CONTINUE AS GUEST' }}

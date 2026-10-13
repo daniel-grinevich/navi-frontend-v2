@@ -3,9 +3,7 @@
 
 export type Screen = string[]
 
-const NOISE = '░▒▓█<>/\\|#*+=:'
-
-/** Deterministic PRNG so dissolve/decode orders are stable per seed. */
+/** Deterministic PRNG so dissolve orders are stable per seed. */
 export function rng(seed: number) {
   let a = seed >>> 0
   return () => {
@@ -64,47 +62,4 @@ export function dissolve(from: Screen, to: Screen, p: number, rank: number[]): S
   const w = size(to).w
   const src = pad(from, w, to.length)
   return mapChars(to, (ch, i) => ((rank[i] ?? 0) < p ? ch : [...src[Math.floor(i / w)]!][i % w]!), w)
-}
-
-/** Terminal decode: cells flicker through noise, then lock to the target.
- *  p=0 → blank, p=1 → target. Spaces stay spaces. */
-export function decode(target: Screen, p: number, rank: number[], noise = rng(Math.floor(p * 997))) {
-  const w = size(target).w
-  return mapChars(
-    target,
-    (ch, i) => {
-      if (ch === ' ') return ch
-      const r = (rank[i] ?? 0) * 0.75
-      if (p >= r + 0.25) return ch
-      if (p >= r) return NOISE[Math.floor(noise() * NOISE.length)]!
-      return ' '
-    },
-    w,
-  )
-}
-
-/** Typewriter: the first `n` non-space cells in reading order, plus a cursor. */
-export function typewriter(target: Screen, n: number, cursor = '█'): Screen {
-  let left = Math.floor(n)
-  let placed = false
-  return target.map((line) =>
-    [...line]
-      .map((ch) => {
-        if (ch === ' ') return ' '
-        if (left > 0) {
-          left--
-          return ch
-        }
-        if (!placed) {
-          placed = true
-          return cursor
-        }
-        return ' '
-      })
-      .join(''),
-  )
-}
-
-export function countChars(s: Screen) {
-  return s.join('').replace(/ /g, '').length
 }

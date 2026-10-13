@@ -3,7 +3,6 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { useSessionStore } from '@/stores/session'
 import AchievementsSection from '@/components/home/AchievementsSection.vue'
 import HeroAnimation from '@/components/home/HeroAnimation.vue'
-import { vPixelFill } from '@/directives/pixelFill'
 
 const session = useSessionStore()
 
@@ -85,11 +84,10 @@ onUnmounted(() => {
           <div class="flex flex-col justify-center p-4 gap-2">
             <router-link
               to="/menu"
-              v-pixel-fill
-              class="navi-btn action-row group px-3 py-3 border border-alt text-alt transition-all duration-200 cursor-pointer"
+              class="navi-btn action-row group px-3 py-3 border border-alt text-alt hover:bg-green hover:text-primary hover:border-green transition-all duration-200 cursor-pointer"
             >
               <div class="flex items-center gap-3">
-                <span class="text-green">▸</span>
+                <span class="text-green group-hover:text-primary">▸</span>
                 <span class="tracking-wide font-mono font-bold">START ORDER</span>
                 <span class="ml-auto">browse menu &amp; build your drink</span>
               </div>
@@ -97,11 +95,10 @@ onUnmounted(() => {
 
             <router-link
               to="/find-navi"
-              v-pixel-fill
-              class="navi-btn action-row group px-3 py-3 border border-alt text-alt transition-all duration-200 cursor-pointer"
+              class="navi-btn action-row group px-3 py-3 border border-alt text-alt hover:bg-green hover:text-primary hover:border-green transition-all duration-200 cursor-pointer"
             >
               <div class="flex items-center gap-3">
-                <span class="text-green">▸</span>
+                <span class="text-green group-hover:text-primary">▸</span>
                 <span class="tracking-wide font-mono font-bold">FIND NAVIPORT</span>
                 <span class="ml-auto">pickup spots near you</span>
               </div>
@@ -110,11 +107,10 @@ onUnmounted(() => {
             <router-link
               v-if="!session.isAuthenticated"
               to="/signup"
-              v-pixel-fill
-              class="navi-btn action-row group px-3 py-3 border border-alt text-alt transition-all duration-200 cursor-pointer"
+              class="navi-btn action-row group px-3 py-3 border border-alt text-alt hover:bg-green hover:text-primary hover:border-green transition-all duration-200 cursor-pointer"
             >
               <div class="flex items-center gap-3">
-                <span class="text-green">▸</span>
+                <span class="text-green group-hover:text-primary">▸</span>
                 <span class="tracking-wide font-mono font-bold">SIGN UP</span>
                 <span class="ml-auto">save favorites &amp; track orders</span>
               </div>
@@ -123,11 +119,10 @@ onUnmounted(() => {
             <router-link
               v-if="session.isAuthenticated"
               to="/orders"
-              v-pixel-fill
-              class="navi-btn action-row group px-3 py-3 border border-alt text-alt transition-all duration-200 cursor-pointer"
+              class="navi-btn action-row group px-3 py-3 border border-alt text-alt hover:bg-green hover:text-primary hover:border-green transition-all duration-200 cursor-pointer"
             >
               <div class="flex items-center gap-3">
-                <span class="text-green">▸</span>
+                <span class="text-green group-hover:text-primary">▸</span>
                 <span class="tracking-wide font-mono font-bold">MY ORDERS</span>
                 <span class="ml-auto">view full order history</span>
               </div>
@@ -167,10 +162,9 @@ onUnmounted(() => {
         <router-link
           v-if="step.to"
           :to="step.to"
-          v-pixel-fill
-          class="navi-btn inline-block px-3 py-2 border border-alt font-mono tracking-wide transition-all duration-200 cursor-pointer w-fit"
+          class="navi-btn inline-block px-3 py-2 border border-alt font-mono tracking-wide hover:bg-green hover:text-primary hover:border-green transition-all duration-200 cursor-pointer w-fit"
         >
-          <span class="text-green">▸</span> {{ step.cta }}
+          <span class="text-green group-hover:text-primary">▸</span> {{ step.cta }}
         </router-link>
       </div>
     </div>
@@ -241,8 +235,7 @@ onUnmounted(() => {
       </div>
       <router-link
         to="/menu"
-        v-pixel-fill="{ color: 'var(--color-alt)' }"
-        class="navi-btn inline-block px-5 py-3 border border-primary bg-primary text-alt font-mono font-bold tracking-wide transition-all duration-200 cursor-pointer whitespace-nowrap"
+        class="navi-btn inline-block px-5 py-3 border border-primary bg-primary text-alt font-mono font-bold tracking-wide hover:bg-transparent hover:text-primary hover:border-primary transition-all duration-200 cursor-pointer whitespace-nowrap"
       >
         ▸ START ORDER
       </router-link>
