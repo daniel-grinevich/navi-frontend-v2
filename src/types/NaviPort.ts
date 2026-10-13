@@ -1,5 +1,5 @@
 export type NaviPort = {
-  id: number
+  id: string
   name: string
   slug: string
   created_at?: Date
@@ -26,4 +26,27 @@ export type NormalizedNaviPort = NaviPort & {
     postcode: string
   }
   distance: string
+}
+
+// Public availability snapshot from `GET /api/navi_ports/by-slug/{slug}/`,
+// used by the QR walk-up landing page.
+export type NaviPortStatus = {
+  id: string
+  slug: string
+  name: string
+  address: {
+    line1: string
+    city: string
+    state: string
+    postal_code: string
+  }
+  is_online: boolean
+  // Admin flag AND is_online.
+  accepting_orders: boolean
+  // Admin-set text shown when not accepting orders.
+  status_message: string | null
+  queue_length: number
+  est_wait_seconds: number
+  // Drinks this machine can make; null means no restriction.
+  menu_item_ids: string[] | null
 }
