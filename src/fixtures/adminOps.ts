@@ -4,8 +4,8 @@
  * VITE_ADMIN_NOTIFICATIONS_API / VITE_ADMIN_DEVICES_API is set to "fixtures"
  * so the screens can be built and demoed without the J3/J4 backends.
  *
- * Errors are thrown as ApiError with a JSON-stringified body, matching what
- * apiClient throws for a non-2xx response.
+ * Errors are thrown as ApiError with the JSON-stringified error envelope,
+ * matching what apiClient throws for a non-2xx response.
  */
 import ApiError from '@/lib/apiError'
 import type {
@@ -30,10 +30,15 @@ const LATENCY_MS = 250
 const delay = <T>(value: T): Promise<T> =>
   new Promise((resolve) => setTimeout(() => resolve(structuredClone(value)), LATENCY_MS))
 
-const fail = (status: number, body: unknown): Promise<never> =>
-  new Promise((_, reject) =>
-    setTimeout(() => reject(new ApiError(status, JSON.stringify(body))), LATENCY_MS),
+// Mirrors the backend envelope: { error: { code, message: detail | field errors } }.
+const fail = (status: number, body: unknown): Promise<never> => {
+  const message =
+    body && typeof body === 'object' && 'detail' in body ? (body as { detail: unknown }).detail : body
+  const envelope = { error: { code: status, message } }
+  return new Promise((_, reject) =>
+    setTimeout(() => reject(new ApiError(status, JSON.stringify(envelope))), LATENCY_MS),
   )
+}
 
 const uuid = () => crypto.randomUUID()
 

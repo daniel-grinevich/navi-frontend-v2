@@ -280,7 +280,7 @@ const confirmRotate = () => {
                 <div class="font-secondary pl-4">{{ d.mac_address }} · {{ d.location || '—' }}</div>
               </td>
               <td class="px-3 py-2" :title="d.last_seen ?? ''">{{ timeAgo(d.last_seen, now.getTime()) }}</td>
-              <td class="px-3 py-2">{{ d.firmware_version ?? '—' }}</td>
+              <td class="px-3 py-2">{{ d.firmware_version || '—' }}</td>
               <td class="px-3 py-2">{{ d.navi_port?.name ?? '—' }}</td>
               <td class="px-3 py-2">
                 <template v-if="d.espresso_machine">
@@ -334,7 +334,7 @@ const confirmRotate = () => {
             <dt class="font-secondary">last seen</dt>
             <dd>{{ timeAgo(d.last_seen, now.getTime()) }}</dd>
             <dt class="font-secondary">firmware</dt>
-            <dd>{{ d.firmware_version ?? '—' }}</dd>
+            <dd>{{ d.firmware_version || '—' }}</dd>
             <dt class="font-secondary">naviport</dt>
             <dd>{{ d.navi_port?.name ?? '—' }}</dd>
             <dt class="font-secondary">machine</dt>

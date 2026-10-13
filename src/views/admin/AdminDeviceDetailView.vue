@@ -191,7 +191,7 @@ const noQrImage = { src: '', width: 0, height: 0, excavate: false }
           </div>
           <div>
             <dt class="font-secondary">firmware</dt>
-            <dd>{{ device.firmware_version ?? '—' }}</dd>
+            <dd>{{ device.firmware_version || '—' }}</dd>
           </div>
           <div>
             <dt class="font-secondary">naviport</dt>

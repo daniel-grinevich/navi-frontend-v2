@@ -171,7 +171,11 @@ const updatedLine = computed(() => {
       @cancel="confirmChannel = null"
     >
       This stops <strong>every</strong> {{ confirmChannelLabel.toLowerCase() }} message platform-wide —
-      including login codes and order updates — until it's turned back on.
+      including order updates and login codes — until it's turned back on.
+      <p v-if="confirmChannel === 'email'" class="mt-2 text-red">
+        ⚠ Magic-link sign-in stops working: users who log in by email link (including staff)
+        won't receive one. Make sure you can still sign in another way before disabling.
+      </p>
     </ConfirmDialog>
   </section>
 </template>
