@@ -56,7 +56,7 @@ const groupedMenuItems = computed(() => {
       :key="category"
       :class="{ 'border-t border-alt': index !== 0 }"
     >
-      <div class="px-3 py-1 border-b border-alt text-xl font-secondary">
+      <div class="px-3 py-1 border-b border-alt bg-strip text-xl font-secondary">
         {{ category }}
       </div>
       <div class="overflow-x-auto px-3 py-6">

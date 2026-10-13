@@ -62,7 +62,7 @@ const orderDate = (iso: Date) => {
     <AsyncList :items="orders" :loading="isLoading" flex-gap="gap-4" no-data-msg="No orders yet.">
       <template #item="order">
         <div class="navi-btn border border-alt border-l-[0.5rem] border-l-green text-xs transition-all duration-200 cursor-pointer">
-          <div class="px-3 py-1 border-b border-alt font-secondary text-alt">// order</div>
+          <div class="px-3 py-1 border-b border-alt bg-strip font-secondary text-alt">// order</div>
           <div class="px-3 py-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
             <div class="flex-1">
               <p class="text-alt font-mono">order #{{ order.id }}</p>

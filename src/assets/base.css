@@ -6,15 +6,19 @@
   --color-bone: #f4f4f0;
   --color-bone-dark: #efe8d8;
   --color-ink: #1a1a1a;
-  --color-ink-soft: #5e5e5e; /* 5.5:1 on paper */
 
-  /* Light-mode surfaces and body text: a little softer than bone/ink to cut
-     glare (body text 12:1 on paper). Bone stays the dark-mode text colour. */
-  --color-paper: #eeece6;
-  --color-paper-dark: #e6e2d8;
-  --color-ink-body: #2b2b2b;
-  /* Green is nudged per theme so text-green and text-on-green both clear
-     WCAG AA (light #007a5c 4.5:1 on paper, dark #009b74 4.9:1 on #1a1a1a). */
+  /* Light mode is a "green page": a pine background with off-white panels
+     framed by deep-green rules. Contrast: body text 14.2:1 and muted 6.6:1 on
+     the surface, bone on the page 5.9:1, bone on deep-green bands 11:1. */
+  --color-pine: #0f6b52;
+  --color-pine-deep: #0b3d30;
+  --color-surface-light: #fbfaf6;
+  --color-strip-light: #e4ece8;
+  --color-ink-body: #1f2a26;
+  --color-ink-soft: #4f5d57;
+
+  /* Accent green for text, icons and bars inside panels: light #007a5c
+     (5.1:1 on the surface), dark #009b74 (4.9:1 on #1a1a1a). */
   --color-green-light: #007a5c;
   --color-green-dark: #009b74;
   --color-green: light-dark(var(--color-green-light), var(--color-green-dark));
@@ -27,10 +31,30 @@
   --color-dark-text: #f4f4f0;
   --color-dark-text-soft: #b8b8b2; /* 8.7:1 on #1a1a1a */
 
-  --color-primary: light-dark(var(--color-paper), var(--color-dark-bg));
-  --color-secondary: light-dark(var(--color-paper-dark), var(--color-dark-bg-soft));
+  /* Semantic roles. In dark mode page, surface and strip are all the same
+     #1a1a1a, so dark mode renders exactly as before. */
+  --color-page: light-dark(var(--color-pine), var(--color-dark-bg));
+  --color-surface: light-dark(var(--color-surface-light), var(--color-dark-bg));
+  --color-strip: light-dark(var(--color-strip-light), var(--color-dark-bg));
+  --color-rule: light-dark(var(--color-pine-deep), var(--color-bone));
+  --color-band: light-dark(var(--color-pine-deep), var(--color-green-dark));
+  /* Text sitting directly on the page (outside any panel). */
+  --color-on-page: var(--color-bone);
+
+  /* text-primary: text on fills and bands (and directly on the page). */
+  --color-primary: light-dark(var(--color-bone), var(--color-dark-bg));
+  --color-secondary: light-dark(var(--color-strip-light), var(--color-dark-bg-soft));
+  /* text-alt: body text on surfaces. */
   --color-alt: light-dark(var(--color-ink-body), var(--color-bone));
   --color-muted: light-dark(var(--color-ink-soft), var(--color-dark-text-soft));
+
+  /* Per-utility overrides (Tailwind reads --background-color-* and
+     --border-color-* before --color-*): fills and rules use the deep green,
+     while text-green / text-alt keep the colours above. */
+  --background-color-primary: var(--color-surface);
+  --background-color-alt: var(--color-rule);
+  --background-color-green: var(--color-band);
+  --border-color-alt: var(--color-rule);
 
   /* JetBrains Mono: sturdier strokes than Courier New at small sizes, same
      0.6em advance so columns and ascii art keep their widths. */
@@ -86,8 +110,8 @@
 body {
   /* color-scheme is inherited from :root so the theme toggle controls it. */
   min-height: 100vh;
-  color: var(--color-alt);
-  background: var(--color-primary);
+  color: var(--color-on-page);
+  background: var(--color-page);
   transition:
     color 0.3s,
     background-color 0.3s;
@@ -113,11 +137,11 @@ body {
 
   /* --- BORDERS --- */
   .border-dash {
-    border: 2px dashed var(--color-alt);
+    border: 2px dashed var(--color-rule);
   }
 
   .border-solid {
-    border: 1px solid var(--color-alt);
+    border: 1px solid var(--color-rule);
   }
 
   .shadow-stamp {
@@ -154,8 +178,17 @@ body {
    ============================================== */
 
 @layer components {
+  /* Every framed block (anything ruled with border-alt: sections, the nav
+     bar, buttons, cards, inputs) is a panel: it sits on the surface colour
+     with body text, rather than directly on the page. Component layer, so a
+     bg-* / text-* utility on the same element still wins. */
+  .border-alt {
+    background-color: var(--color-surface);
+    color: var(--color-alt);
+  }
+
   .card {
-    border: 1px var(--color-alt);
+    border: 1px var(--color-rule);
     @apply p-4 cursor-pointer;
     @apply transition-transform duration-200;
     @apply w-full max-w-sm;
@@ -164,7 +197,7 @@ body {
   .card:hover,
   .navi-btn:hover:not(:disabled) {
     @apply -translate-x-0.5 -translate-y-0.5;
-    box-shadow: 0.3rem 0.3rem 0px var(--color-alt);
+    box-shadow: 0.3rem 0.3rem 0px var(--color-rule);
   }
 
   .nav-bar {
@@ -200,6 +233,6 @@ body {
 
   .ascii-border {
     @apply border-2 border-dashed;
-    border-color: var(--color-alt);
+    border-color: var(--color-rule);
   }
 }

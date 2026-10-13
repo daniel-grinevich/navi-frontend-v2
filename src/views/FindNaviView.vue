@@ -131,7 +131,7 @@ onMounted(() => {
       <div class="space-y-4 md:sticky md:top-4 md:self-start">
         <!-- Status -->
         <div class="border border-alt">
-          <div class="px-3 py-1 border-b border-alt font-secondary text-alt">// status</div>
+          <div class="px-3 py-1 border-b border-alt bg-strip font-secondary text-alt">// status</div>
           <div class="px-3 py-2">
             <p v-if="!shoppingCartStore.selectedNaviPort" class="font-mono">no naviport selected</p>
             <p v-else class="font-mono">
@@ -142,7 +142,7 @@ onMounted(() => {
 
         <!-- Location source -->
         <div class="border border-alt">
-          <div class="px-3 py-1 border-b border-alt font-secondary text-alt">// location source</div>
+          <div class="px-3 py-1 border-b border-alt bg-strip font-secondary text-alt">// location source</div>
           <div class="px-3 py-2 space-y-2">
             <!-- Mode toggle -->
             <div class="flex gap-2">
@@ -252,7 +252,7 @@ onMounted(() => {
 
         <!-- Legend -->
         <div class="border border-alt">
-          <div class="px-3 py-1 border-b border-alt font-secondary text-alt">// legend</div>
+          <div class="px-3 py-1 border-b border-alt bg-strip font-secondary text-alt">// legend</div>
           <div class="px-3 py-2 grid grid-cols-2 gap-y-1 font-mono">
             <span><span class="text-green">▪</span> online</span>
             <span><span class="text-alt">▫</span> offline</span>
@@ -281,7 +281,7 @@ onMounted(() => {
           v-else-if="locationStore.mode === 'device' && !locationStore.locatedAt"
           class="border border-alt text-xs"
         >
-          <div class="px-3 py-1 border-b border-alt font-secondary text-alt">// locating</div>
+          <div class="px-3 py-1 border-b border-alt bg-strip font-secondary text-alt">// locating</div>
           <div class="px-3 py-4 text-center">
             <p class="font-mono blink">locating you...</p>
             <p class="font-secondary mt-2">can we have your location?</p>
@@ -293,7 +293,7 @@ onMounted(() => {
           v-else-if="locationStore.mode === 'homebase' && !locationStore.homebase"
           class="border border-alt text-xs"
         >
-          <div class="px-3 py-1 border-b border-alt font-secondary text-alt">// homebase</div>
+          <div class="px-3 py-1 border-b border-alt bg-strip font-secondary text-alt">// homebase</div>
           <div class="px-3 py-4 text-center">
             <p class="font-mono">no homebase set.</p>
             <p class="font-secondary mt-2">add an address on the left to find naviports near it.</p>
@@ -326,7 +326,7 @@ onMounted(() => {
                     : 'border-l-[0.5rem] border-l-green'
                 "
               >
-                <div class="px-3 py-1 border-b border-alt font-secondary text-alt flex justify-between">
+                <div class="px-3 py-1 border-b border-alt bg-strip font-secondary text-alt flex justify-between">
                   <span>// naviport #{{ naviPort.id }}</span>
                   <span class="font-mono"><span class="text-green">▪</span> online</span>
                 </div>

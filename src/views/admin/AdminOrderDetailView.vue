@@ -59,7 +59,7 @@ const orderDate = (iso?: Date) => {
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <!-- Order Details -->
         <div class="border border-alt">
-          <div class="px-3 py-1 border-b border-alt font-secondary text-alt">// details</div>
+          <div class="px-3 py-1 border-b border-alt bg-strip font-secondary text-alt">// details</div>
           <div class="px-3 py-2 flex justify-between">
             <span>customer</span>
             <span class="font-mono">{{ order.user?.email ?? 'guest' }}</span>
@@ -83,7 +83,7 @@ const orderDate = (iso?: Date) => {
 
         <!-- Totals -->
         <div class="border border-alt">
-          <div class="px-3 py-1 border-b border-alt font-secondary text-alt">// summary</div>
+          <div class="px-3 py-1 border-b border-alt bg-strip font-secondary text-alt">// summary</div>
           <div class="px-3 py-2 flex justify-between">
             <span>subtotal</span>
             <span class="font-mono">${{ order.subtotal?.toFixed?.(2) ?? order.subtotal }}</span>

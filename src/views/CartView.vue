@@ -81,7 +81,7 @@ const continueShopping = () => {
         <!-- Right Column: Summary -->
         <div class="lg:col-span-1">
           <div class="border border-alt lg:sticky lg:top-4">
-            <div class="px-3 py-1 border-b border-alt font-secondary text-alt">
+            <div class="px-3 py-1 border-b border-alt bg-strip font-secondary text-alt">
               // order summary
             </div>
             <div class="px-3 py-2 flex justify-between">

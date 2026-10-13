@@ -70,7 +70,7 @@ const stepStateText = { done: 'completed', active: 'current', pending: 'upcoming
   <!-- Loading -->
   <div v-if="isLoading" class="w-full text-xs">
     <div class="border border-alt text-xs">
-      <div class="px-3 py-1 border-b border-alt font-secondary text-alt">// order</div>
+      <div class="px-3 py-1 border-b border-alt bg-strip font-secondary text-alt">// order</div>
       <div class="px-3 py-6 text-center font-mono blink">loading...</div>
     </div>
   </div>
@@ -87,14 +87,14 @@ const stepStateText = { done: 'completed', active: 'current', pending: 'upcoming
   <div v-else class="w-full text-xs space-y-4">
     <!-- Machine Error -->
     <div v-if="machineError" class="border border-alt text-xs">
-      <div class="px-3 py-1 border-b border-alt font-secondary text-alt">// machine error</div>
+      <div class="px-3 py-1 border-b border-alt bg-strip font-secondary text-alt">// machine error</div>
       <div class="px-3 py-3 font-mono">{{ machineError }}</div>
       <!-- A machine error cancels the order (C) and auto-refunds it server-side. -->
       <div class="px-3 py-2 border-t border-alt text-alt">cancelled — you've been refunded</div>
     </div>
     <!-- ASCII Status Tracker -->
     <div class="border border-alt text-xs">
-      <div class="px-3 py-1 border-b border-alt font-secondary text-alt">// order status</div>
+      <div class="px-3 py-1 border-b border-alt bg-strip font-secondary text-alt">// order status</div>
       <div class="px-4 py-6">
         <!-- Announced to screen readers whenever the status changes -->
         <p role="status" aria-live="polite" class="sr-only">
@@ -159,7 +159,7 @@ const stepStateText = { done: 'completed', active: 'current', pending: 'upcoming
 
       <!-- QR Code -->
       <div v-if="qrToken && order?.order_status === 'O'" class="border border-alt text-xs">
-        <div class="px-3 py-1 border-b border-alt font-secondary text-alt">// qr code</div>
+        <div class="px-3 py-1 border-b border-alt bg-strip font-secondary text-alt">// qr code</div>
         <div class="px-3 py-4 flex justify-center">
           <Qrcode
             :value="qrToken"

@@ -183,7 +183,7 @@ onUnmounted(() => {
 
       <div class="md:w-1/2 flex flex-col">
         <div class="flex-1 flex flex-col">
-          <div class="px-3 py-1 border-b border-alt text-alt">// Actions</div>
+          <div class="px-3 py-1 border-b border-alt bg-strip text-alt">// Actions</div>
 
           <div class="flex flex-col justify-center p-4 gap-2">
             <router-link
@@ -235,7 +235,7 @@ onUnmounted(() => {
         </div>
 
         <div class="border-t border-alt">
-          <div class="px-3 py-1 border-b border-alt font-secondary">// Achievements</div>
+          <div class="px-3 py-1 border-b border-alt bg-strip font-secondary">// Achievements</div>
           <AchievementsSection />
         </div>
       </div>

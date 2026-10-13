@@ -190,7 +190,7 @@ const confirmPayment = async () => {
       <div class="space-y-4">
         <!-- NaviPort Selection -->
         <div class="border border-alt text-xs">
-          <div class="px-3 py-1 border-b border-alt font-secondary text-alt">
+          <div class="px-3 py-1 border-b border-alt bg-strip font-secondary text-alt">
             // pickup location
           </div>
           <div v-if="hasNaviPort" class="px-3 py-3">
@@ -253,7 +253,7 @@ const confirmPayment = async () => {
       <!-- Right Column: Order Summary -->
       <div>
         <div class="border border-alt text-xs sticky top-6">
-          <div class="px-3 py-1 border-b border-alt font-secondary text-alt">// order summary</div>
+          <div class="px-3 py-1 border-b border-alt bg-strip font-secondary text-alt">// order summary</div>
           <div class="px-3 py-2 flex justify-between">
             <span>subtotal</span>
             <span class="font-mono">${{ cart.subtotal.toFixed(2) }}</span>

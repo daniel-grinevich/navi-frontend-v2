@@ -214,7 +214,7 @@ const form = useForm({
 
       <!-- Right: ASCII Art -->
       <div class="md:w-1/2 flex flex-col">
-        <div class="px-3 py-1 border-b border-alt font-secondary text-alt">//</div>
+        <div class="px-3 py-1 border-b border-alt bg-strip font-secondary text-alt">//</div>
 
         <div class="flex-1 flex flex-col items-center justify-center p-6 overflow-hidden">
           <div class="text-green whitespace-pre leading-none select-none">
