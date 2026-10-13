@@ -89,7 +89,8 @@ const stepStateText = { done: 'completed', active: 'current', pending: 'upcoming
     <div v-if="machineError" class="border border-alt text-xs">
       <div class="px-3 py-1 border-b border-alt font-secondary text-alt">// machine error</div>
       <div class="px-3 py-3 font-mono">{{ machineError }}</div>
-      <div class="px-3 py-2 border-t border-alt text-alt">your qr code is still valid — please try again or visit another machine</div>
+      <!-- A machine error cancels the order (C) and auto-refunds it server-side. -->
+      <div class="px-3 py-2 border-t border-alt text-alt">cancelled — you've been refunded</div>
     </div>
     <!-- ASCII Status Tracker -->
     <div class="border border-alt text-xs">
