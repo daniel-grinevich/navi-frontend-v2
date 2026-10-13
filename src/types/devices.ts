@@ -6,7 +6,7 @@ export type DeviceNaviPort = {
 export type DeviceEspressoMachine = {
   id: string
   serial_number: string
-  machine_type: string
+  machine_type: string | null
   is_online: boolean
 }
 

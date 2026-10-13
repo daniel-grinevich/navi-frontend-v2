@@ -93,9 +93,17 @@ const testOrderEvents = computed(() => {
   return (events.value ?? []).filter((e) => eventOrderId(e) === id)
 })
 
-const reachedSteps = computed(() => new Set(testOrderEvents.value.map((e) => e.type)))
-const testFailed = computed(() => reachedSteps.value.has('brew_failed'))
-const testComplete = computed(() => reachedSteps.value.has('brew_completed'))
+const seenTypes = computed(() => new Set(testOrderEvents.value.map((e) => e.type)))
+
+// A later step implies the earlier ones: devices may not report every step
+// (e.g. brew_started isn't always emitted), so light everything up to the
+// furthest step seen.
+const reachedSteps = computed(() => {
+  const furthest = steps.reduce((acc, s, i) => (seenTypes.value.has(s.type) ? i : acc), -1)
+  return new Set(steps.slice(0, furthest + 1).map((s) => s.type))
+})
+const testFailed = computed(() => seenTypes.value.has('brew_failed'))
+const testComplete = computed(() => seenTypes.value.has('brew_completed'))
 
 // --- Device actions ---
 const actionError = ref<string | null>(null)
@@ -192,7 +200,7 @@ const noQrImage = { src: '', width: 0, height: 0, excavate: false }
           <div class="col-span-2">
             <dt class="font-secondary">espresso machine</dt>
             <dd v-if="device.espresso_machine">
-              {{ device.espresso_machine.machine_type }} · {{ device.espresso_machine.serial_number }}
+              {{ device.espresso_machine.machine_type ?? 'unknown model' }} · {{ device.espresso_machine.serial_number }}
               <span :class="device.espresso_machine.is_online ? 'text-green' : 'text-red'">
                 ● {{ device.espresso_machine.is_online ? 'online' : 'offline' }}
               </span>

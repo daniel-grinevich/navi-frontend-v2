@@ -284,7 +284,7 @@ const confirmRotate = () => {
               <td class="px-3 py-2">{{ d.navi_port?.name ?? '—' }}</td>
               <td class="px-3 py-2">
                 <template v-if="d.espresso_machine">
-                  {{ d.espresso_machine.machine_type }}
+                  {{ d.espresso_machine.machine_type ?? d.espresso_machine.serial_number }}
                   <span :class="d.espresso_machine.is_online ? 'text-green' : 'text-red'">●</span>
                 </template>
                 <template v-else>—</template>
@@ -338,7 +338,7 @@ const confirmRotate = () => {
             <dt class="font-secondary">naviport</dt>
             <dd>{{ d.navi_port?.name ?? '—' }}</dd>
             <dt class="font-secondary">machine</dt>
-            <dd>{{ d.espresso_machine?.machine_type ?? '—' }}</dd>
+            <dd>{{ d.espresso_machine ? (d.espresso_machine.machine_type ?? d.espresso_machine.serial_number) : '—' }}</dd>
           </dl>
           <div class="px-3 py-2 border-t border-alt flex items-center justify-between">
             <ToggleSwitch
