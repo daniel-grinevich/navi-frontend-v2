@@ -247,7 +247,7 @@ const noQrImage = { src: '', width: 0, height: 0, excavate: false }
       <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,20rem)_1fr] gap-4 items-start">
         <!-- Test order -->
         <div class="border border-alt">
-          <div class="px-3 py-1 border-b border-alt">// end-to-end test</div>
+          <div class="px-3 py-1 border-b border-alt bg-strip">// end-to-end test</div>
           <div class="p-3 flex flex-col gap-3">
             <p class="font-secondary">
               Queues a $0 staff order for this device's NaviPort. Scan the QR with the sim or a real
@@ -301,7 +301,7 @@ const noQrImage = { src: '', width: 0, height: 0, excavate: false }
 
         <!-- Event log -->
         <div class="border border-alt min-w-0">
-          <div class="px-3 py-1 border-b border-alt flex flex-wrap items-center gap-3">
+          <div class="px-3 py-1 border-b border-alt bg-strip flex flex-wrap items-center gap-3">
             <span>// event log</span>
             <span
               class="flex items-center gap-1"

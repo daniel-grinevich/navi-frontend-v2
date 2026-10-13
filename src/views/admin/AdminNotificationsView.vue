@@ -94,7 +94,7 @@ const tabs: { id: Tab; label: string }[] = [
     <!-- Templates -->
     <section v-else-if="tab === 'templates'" class="flex flex-col gap-6">
       <div class="border border-alt">
-        <h2 class="px-3 py-2 border-b border-alt tracking-wide">
+        <h2 class="px-3 py-2 border-b border-alt bg-strip tracking-wide">
           // {{ editingId ? 'EDIT TEMPLATE' : 'NEW TEMPLATE' }}
         </h2>
         <div class="p-3 flex flex-col gap-3">
@@ -124,7 +124,7 @@ const tabs: { id: Tab; label: string }[] = [
       </div>
 
       <div class="border border-alt">
-        <h2 class="px-3 py-2 border-b border-alt tracking-wide">// TEMPLATES</h2>
+        <h2 class="px-3 py-2 border-b border-alt bg-strip tracking-wide">// TEMPLATES</h2>
         <p v-if="templatesLoading" class="p-3 font-secondary">loading...</p>
         <p v-else-if="!templates?.length" class="p-3 font-secondary">no templates yet.</p>
         <ul v-else class="divide-y divide-alt">
@@ -148,7 +148,7 @@ const tabs: { id: Tab; label: string }[] = [
 
     <!-- Email logs -->
     <section v-else-if="tab === 'email'" class="border border-alt overflow-x-auto">
-      <h2 class="px-3 py-2 border-b border-alt tracking-wide">// EMAIL LOGS</h2>
+      <h2 class="px-3 py-2 border-b border-alt bg-strip tracking-wide">// EMAIL LOGS</h2>
       <p v-if="emailLoading" class="p-3 font-secondary">loading...</p>
       <p v-else-if="!emailLogs?.length" class="p-3 font-secondary">no email logs.</p>
       <table v-else class="w-full text-sm">
@@ -173,7 +173,7 @@ const tabs: { id: Tab; label: string }[] = [
 
     <!-- SMS logs -->
     <section v-else class="border border-alt overflow-x-auto">
-      <h2 class="px-3 py-2 border-b border-alt tracking-wide">// SMS LOGS</h2>
+      <h2 class="px-3 py-2 border-b border-alt bg-strip tracking-wide">// SMS LOGS</h2>
       <p v-if="textLoading" class="p-3 font-secondary">loading...</p>
       <p v-else-if="!textLogs?.length" class="p-3 font-secondary">no sms logs.</p>
       <table v-else class="w-full text-sm">

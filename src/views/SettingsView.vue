@@ -50,7 +50,7 @@ const setToggle = (key: NotificationPrefKey, value: boolean) =>
     <div v-else-if="prefs" class="flex flex-col gap-6">
       <!-- General -->
       <section class="border border-alt">
-        <h2 class="px-3 py-2 border-b border-alt tracking-wide">// GENERAL</h2>
+        <h2 class="px-3 py-2 border-b border-alt bg-strip tracking-wide">// GENERAL</h2>
         <div class="p-3 flex flex-col gap-4">
           <label class="flex items-center justify-between gap-4">
             <span>theme</span>
@@ -76,7 +76,7 @@ const setToggle = (key: NotificationPrefKey, value: boolean) =>
 
       <!-- Email notifications -->
       <section class="border border-alt">
-        <h2 class="px-3 py-2 border-b border-alt tracking-wide">// EMAIL NOTIFICATIONS</h2>
+        <h2 class="px-3 py-2 border-b border-alt bg-strip tracking-wide">// EMAIL NOTIFICATIONS</h2>
         <div class="p-3 flex flex-col gap-3">
           <div
             v-for="row in emailRows"
@@ -95,7 +95,7 @@ const setToggle = (key: NotificationPrefKey, value: boolean) =>
 
       <!-- SMS notifications -->
       <section class="border border-alt">
-        <h2 class="px-3 py-2 border-b border-alt tracking-wide">// SMS NOTIFICATIONS</h2>
+        <h2 class="px-3 py-2 border-b border-alt bg-strip tracking-wide">// SMS NOTIFICATIONS</h2>
         <div v-if="smsAvailable" class="p-3 flex flex-col gap-3">
           <div
             v-for="row in smsRows"

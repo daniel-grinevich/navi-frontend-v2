@@ -80,13 +80,13 @@ onUnmounted(() => {
 
       <div class="md:w-1/2 flex flex-col">
         <div class="flex-1 flex flex-col">
-          <div class="px-3 py-1 border-b border-alt text-alt">// Actions</div>
+          <div class="px-3 py-1 border-b border-alt bg-strip text-alt">// Actions</div>
 
           <div class="flex flex-col justify-center p-4 gap-2">
             <router-link
               to="/menu"
               v-pixel-fill
-              class="navi-btn group px-3 py-3 border border-alt text-alt transition-all duration-200 cursor-pointer"
+              class="navi-btn action-row group px-3 py-3 border border-alt text-alt transition-all duration-200 cursor-pointer"
             >
               <div class="flex items-center gap-3">
                 <span class="text-green">▸</span>
@@ -98,7 +98,7 @@ onUnmounted(() => {
             <router-link
               to="/find-navi"
               v-pixel-fill
-              class="navi-btn group px-3 py-3 border border-alt text-alt transition-all duration-200 cursor-pointer"
+              class="navi-btn action-row group px-3 py-3 border border-alt text-alt transition-all duration-200 cursor-pointer"
             >
               <div class="flex items-center gap-3">
                 <span class="text-green">▸</span>
@@ -111,7 +111,7 @@ onUnmounted(() => {
               v-if="!session.isAuthenticated"
               to="/signup"
               v-pixel-fill
-              class="navi-btn group px-3 py-3 border border-alt text-alt transition-all duration-200 cursor-pointer"
+              class="navi-btn action-row group px-3 py-3 border border-alt text-alt transition-all duration-200 cursor-pointer"
             >
               <div class="flex items-center gap-3">
                 <span class="text-green">▸</span>
@@ -124,7 +124,7 @@ onUnmounted(() => {
               v-if="session.isAuthenticated"
               to="/orders"
               v-pixel-fill
-              class="navi-btn group px-3 py-3 border border-alt text-alt transition-all duration-200 cursor-pointer"
+              class="navi-btn action-row group px-3 py-3 border border-alt text-alt transition-all duration-200 cursor-pointer"
             >
               <div class="flex items-center gap-3">
                 <span class="text-green">▸</span>
@@ -136,7 +136,7 @@ onUnmounted(() => {
         </div>
 
         <div class="border-t border-alt">
-          <div class="px-3 py-1 border-b border-alt font-secondary">// Achievements</div>
+          <div class="px-3 py-1 border-b border-alt bg-strip font-secondary">// Achievements</div>
           <AchievementsSection />
         </div>
       </div>

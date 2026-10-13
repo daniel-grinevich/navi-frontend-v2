@@ -32,6 +32,26 @@
   --color-alt: light-dark(var(--color-ink-body), var(--color-bone));
   --color-muted: light-dark(var(--color-ink-soft), var(--color-dark-text-soft));
 
+  /* Roles the light "looks" below re-point (see LOOKS). By default they
+     resolve to the colours above, so the bone design is unchanged:
+     page = what the body sits on, surface = framed panels (border-alt),
+     strip = the plain '// label' strips, rule = border-alt lines,
+     band = bg-green fills. */
+  --color-page: var(--color-primary);
+  --color-surface: var(--color-primary);
+  --color-strip: var(--color-primary);
+  --color-rule: var(--color-alt);
+  --color-band: var(--color-green);
+  --color-on-page: var(--color-alt);
+  --color-dot: transparent;
+
+  /* Tailwind reads --background-color-* / --border-color-* before --color-*,
+     so fills and rules can differ from the same-named text colour. */
+  --background-color-primary: var(--color-surface);
+  --background-color-alt: var(--color-rule);
+  --background-color-green: var(--color-band);
+  --border-color-alt: var(--color-rule);
+
   /* JetBrains Mono: sturdier strokes than Courier New at small sizes, same
      0.6em advance so columns and ascii art keep their widths. */
   --font-family-tech: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -86,8 +106,11 @@
 body {
   /* color-scheme is inherited from :root so the theme toggle controls it. */
   min-height: 100vh;
-  color: var(--color-alt);
-  background: var(--color-primary);
+  color: var(--color-on-page);
+  background-color: var(--color-page);
+  /* Faint 6px pixel-dot texture; transparent unless a look sets --color-dot. */
+  background-image: radial-gradient(var(--color-dot) 1px, transparent 1.5px);
+  background-size: 6px 6px;
   transition:
     color 0.3s,
     background-color 0.3s;
@@ -113,11 +136,11 @@ body {
 
   /* --- BORDERS --- */
   .border-dash {
-    border: 2px dashed var(--color-alt);
+    border: 2px dashed var(--color-rule);
   }
 
   .border-solid {
-    border: 1px solid var(--color-alt);
+    border: 1px solid var(--color-rule);
   }
 
   .shadow-stamp {
@@ -154,8 +177,17 @@ body {
    ============================================== */
 
 @layer components {
+  /* Every framed block (anything ruled with border-alt: sections, the nav
+     bar, buttons, cards, inputs) is a panel: it sits on the surface colour
+     with body text, rather than directly on the page. Component layer, so a
+     bg-* / text-* utility on the same element still wins. */
+  .border-alt {
+    background-color: var(--color-surface);
+    color: var(--color-alt);
+  }
+
   .card {
-    border: 1px var(--color-alt);
+    border: 1px var(--color-rule);
     @apply p-4 cursor-pointer;
     @apply transition-transform duration-200;
     @apply w-full max-w-sm;
@@ -164,7 +196,7 @@ body {
   .card:hover,
   .navi-btn:hover:not(:disabled) {
     @apply -translate-x-0.5 -translate-y-0.5;
-    box-shadow: 0.3rem 0.3rem 0px var(--color-alt);
+    box-shadow: 0.3rem 0.3rem 0px var(--color-rule);
   }
 
   .nav-bar {
@@ -200,6 +232,85 @@ body {
 
   .ascii-border {
     @apply border-2 border-dashed;
-    border-color: var(--color-alt);
+    border-color: var(--color-rule);
+  }
+}
+
+/* ==============================================
+   LOOKS (light mode only, picked with ?look=...)
+   Default is the bone design above. Each look re-points the role tokens on
+   :root; dark mode never matches these selectors, so it is unchanged.
+   ============================================== */
+
+/* --- LOOSE: green page, bone panels floating on it with soft rules; the
+   '// labels' and header bars read as light headings on the green. --- */
+:root[data-theme='light'][data-look='loose'] {
+  --color-page: #0f6b52;
+  --color-surface: var(--color-paper);
+  --color-on-page: var(--color-bone); /* 5.9:1 on the page */
+  --color-strip: var(--color-page);
+  --color-band: var(--color-page);
+  --color-primary: var(--color-bone);
+  --color-rule: rgb(11 61 48 / 0.16);
+  --color-dot: rgb(255 255 255 / 0.07);
+  --background-color-alt: var(--color-ink-body);
+}
+
+/* --- INTEGRATED: content sits on the green like a terminal; only things
+   you touch or read closely (buttons, cards, inputs, achievements, the QR)
+   get a bone surface. Rules are dashed and low contrast. --- */
+:root[data-theme='light'][data-look='integrated'] {
+  --color-page: #0f6b52;
+  --color-surface: transparent;
+  --color-strip: transparent;
+  --color-band: transparent;
+  --color-on-page: var(--color-bone);
+  --color-primary: var(--color-bone);
+  --color-alt: var(--color-bone); /* 5.9:1 */
+  --color-muted: #c8ded4; /* 4.6:1 */
+  --color-green: #b4f0d6; /* mint, 5.1:1 */
+  --color-rule: rgb(244 244 240 / 0.35);
+  --color-dot: rgb(255 255 255 / 0.07);
+  --background-color-primary: var(--color-paper);
+  --background-color-alt: var(--color-bone);
+}
+
+/* Unlayered on purpose: these must beat the py-1 / border utilities on the
+   same elements, and only ever apply inside the loose look. */
+:root[data-theme='light'][data-look='loose'] .bg-strip {
+  --color-alt: var(--color-bone);
+  --color-muted: #c8ded4; /* 4.6:1 on the page */
+  padding-top: 0.75rem;
+}
+
+/* Loose: home action rows lose their box; a quiet dashed rule between. */
+:root[data-theme='light'][data-look='loose'] .action-row {
+  border-width: 0 0 1px;
+  border-style: dashed;
+  border-color: rgb(43 43 43 / 0.3);
+  box-shadow: none;
+}
+
+@layer components {
+  /* Integrated: ASCII-ish rules. Tailwind's `border` reads this variable. */
+  :root[data-theme='light'][data-look='integrated'] .border-alt {
+    --tw-border-style: dashed;
+  }
+
+  /* Integrated: these keep a bone surface, with the bone palette inside. */
+  :root[data-theme='light'][data-look='integrated']
+    :is(.look-surface, .navi-btn, .card, input, select, textarea) {
+    --color-alt: var(--color-ink-body);
+    --color-muted: var(--color-ink-soft);
+    --color-green: var(--color-green-light);
+    --color-primary: var(--color-paper);
+    --color-surface: var(--color-paper);
+    --color-strip: var(--color-paper);
+    --border-color-alt: rgb(43 43 43 / 0.35);
+    --background-color-alt: var(--color-ink-body);
+    --background-color-green: var(--color-green-light);
+    --background-color-primary: var(--color-paper);
+    background-color: var(--color-paper);
+    color: var(--color-ink-body);
   }
 }

@@ -144,7 +144,7 @@ const confirmPayment = async () => {
     <div v-if="step === 'build'" class="grid grid-cols-1 lg:grid-cols-2 gap-4">
       <!-- Menu -->
       <div class="border border-alt">
-        <div class="px-3 py-1 border-b border-alt font-secondary text-alt">// menu</div>
+        <div class="px-3 py-1 border-b border-alt bg-strip font-secondary text-alt">// menu</div>
         <div v-if="menuLoading" class="flex justify-center py-8"><LoadingSpinnerTwo /></div>
         <div v-else class="max-h-96 overflow-y-auto">
           <div
@@ -212,7 +212,7 @@ const confirmPayment = async () => {
 
         <!-- Customer + location -->
         <div class="border border-alt">
-          <div class="px-3 py-1 border-b border-alt font-secondary text-alt">// customer</div>
+          <div class="px-3 py-1 border-b border-alt bg-strip font-secondary text-alt">// customer</div>
           <div class="px-3 py-2 space-y-2">
             <div>
               <label class="block font-secondary mb-1">customer email (existing user)</label>
