@@ -1,7 +1,7 @@
 // Text progress bars in the btop/htop style: full blocks, one eighth-block
 // partial cell, then an empty fill character.
-//   blockBar(0.675, 20)       -> '█████████████▌░░░░░░'
-//   blockBar(0.675, 20, '·')  -> '█████████████▌······'
+//   blockBarParts(0.675, 20)      -> { filled: '█████████████▌', empty: '░░░░░░' }
+//   blockBarParts(0.675, 20, '·') -> { filled: '█████████████▌', empty: '······' }
 
 const PARTIALS = ['', '▏', '▎', '▍', '▌', '▋', '▊', '▉'] as const
 
@@ -21,9 +21,4 @@ export const blockBarParts = (fraction: number, cols: number, empty = '░'): Bl
     filled: '█'.repeat(full) + partial,
     empty: empty.repeat(width - full - (partial ? 1 : 0)),
   }
-}
-
-export const blockBar = (fraction: number, cols: number, empty = '░'): string => {
-  const parts = blockBarParts(fraction, cols, empty)
-  return parts.filled + parts.empty
 }

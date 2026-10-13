@@ -188,7 +188,7 @@ onUnmounted(() => {
           <div class="flex flex-col justify-center p-4 gap-2">
             <router-link
               to="/menu"
-              class="navi-btn action-row group px-3 py-3 border border-alt text-alt hover:bg-green hover:text-primary hover:border-green transition-all duration-200 cursor-pointer"
+              class="navi-btn group px-3 py-3 border border-alt text-alt hover:bg-green hover:text-primary hover:border-green transition-all duration-200 cursor-pointer"
             >
               <div class="flex items-center gap-3">
                 <span class="text-green group-hover:text-primary">▸</span>
@@ -199,7 +199,7 @@ onUnmounted(() => {
 
             <router-link
               to="/find-navi"
-              class="navi-btn action-row group px-3 py-3 border border-alt text-alt hover:bg-green hover:text-primary hover:border-green transition-all duration-200 cursor-pointer"
+              class="navi-btn group px-3 py-3 border border-alt text-alt hover:bg-green hover:text-primary hover:border-green transition-all duration-200 cursor-pointer"
             >
               <div class="flex items-center gap-3">
                 <span class="text-green group-hover:text-primary">▸</span>
@@ -211,7 +211,7 @@ onUnmounted(() => {
             <router-link
               v-if="!session.isAuthenticated"
               to="/signup"
-              class="navi-btn action-row group px-3 py-3 border border-alt text-alt hover:bg-green hover:text-primary hover:border-green transition-all duration-200 cursor-pointer"
+              class="navi-btn group px-3 py-3 border border-alt text-alt hover:bg-green hover:text-primary hover:border-green transition-all duration-200 cursor-pointer"
             >
               <div class="flex items-center gap-3">
                 <span class="text-green group-hover:text-primary">▸</span>
@@ -223,7 +223,7 @@ onUnmounted(() => {
             <router-link
               v-if="session.isAuthenticated"
               to="/orders"
-              class="navi-btn action-row group px-3 py-3 border border-alt text-alt hover:bg-green hover:text-primary hover:border-green transition-all duration-200 cursor-pointer"
+              class="navi-btn group px-3 py-3 border border-alt text-alt hover:bg-green hover:text-primary hover:border-green transition-all duration-200 cursor-pointer"
             >
               <div class="flex items-center gap-3">
                 <span class="text-green group-hover:text-primary">▸</span>
