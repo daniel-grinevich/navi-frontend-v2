@@ -6,9 +6,15 @@
   --color-bone: #f4f4f0;
   --color-bone-dark: #efe8d8;
   --color-ink: #1a1a1a;
-  --color-ink-soft: #4d4d4d; /* 7.7:1 on bone */
+  --color-ink-soft: #5e5e5e; /* 5.5:1 on paper */
+
+  /* Light-mode surfaces and body text: a little softer than bone/ink to cut
+     glare (body text 12:1 on paper). Bone stays the dark-mode text colour. */
+  --color-paper: #eeece6;
+  --color-paper-dark: #e6e2d8;
+  --color-ink-body: #2b2b2b;
   /* Green is nudged per theme so text-green and text-on-green both clear
-     WCAG AA (light #007a5c 4.8:1 on bone, dark #009b74 4.9:1 on #1a1a1a). */
+     WCAG AA (light #007a5c 4.5:1 on paper, dark #009b74 4.9:1 on #1a1a1a). */
   --color-green-light: #007a5c;
   --color-green-dark: #009b74;
   --color-green: light-dark(var(--color-green-light), var(--color-green-dark));
@@ -21,9 +27,9 @@
   --color-dark-text: #f4f4f0;
   --color-dark-text-soft: #b8b8b2; /* 8.7:1 on #1a1a1a */
 
-  --color-primary: light-dark(var(--color-bone), var(--color-dark-bg));
-  --color-secondary: light-dark(var(--color-bone-dark), var(--color-dark-bg-soft));
-  --color-alt: light-dark(var(--color-dark-bg), var(--color-bone));
+  --color-primary: light-dark(var(--color-paper), var(--color-dark-bg));
+  --color-secondary: light-dark(var(--color-paper-dark), var(--color-dark-bg-soft));
+  --color-alt: light-dark(var(--color-ink-body), var(--color-bone));
   --color-muted: light-dark(var(--color-ink-soft), var(--color-dark-text-soft));
 
   /* JetBrains Mono: sturdier strokes than Courier New at small sizes, same
@@ -74,7 +80,7 @@
 *::before,
 *::after {
   box-sizing: border-box;
-  font-weight: inherit;
+  font-weight: normal;
 }
 
 body {
@@ -87,16 +93,8 @@ body {
     background-color 0.3s;
   line-height: 1.6;
   font-family: var(--font-family-tech);
-  /* One weight everywhere, as before, but 500: JetBrains Mono at 400 still
-     reads light at 14px. */
-  font-weight: 500;
   font-size: var(--font-size-base);
   text-rendering: optimizeLegibility;
-}
-
-/* Grayscale antialiasing thins dark-on-light text on macOS, so only use it
-   for light-on-dark, where it stops glyphs from looking bloated. */
-:root[data-theme='dark'] body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
