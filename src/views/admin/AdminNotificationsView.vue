@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import NaviButton from '@/components/shared/NaviButton.vue'
+import NotificationControls from '@/components/admin/NotificationControls.vue'
 import {
   useEmailLogs,
   useTextLogs,
@@ -11,8 +12,8 @@ import {
 } from '@/composables/useNotificationsAdmin'
 import type { EmailTemplate } from '@/types/notifications'
 
-type Tab = 'templates' | 'email' | 'sms'
-const tab = ref<Tab>('templates')
+type Tab = 'controls' | 'templates' | 'email' | 'sms'
+const tab = ref<Tab>('controls')
 
 const { data: templates, isPending: templatesLoading } = useEmailTemplates()
 const { data: emailLogs, isPending: emailLoading } = useEmailLogs()
@@ -59,6 +60,7 @@ const sentClass = (isSent: boolean | null) =>
 const formatDate = (iso: string) => new Date(iso).toLocaleString()
 
 const tabs: { id: Tab; label: string }[] = [
+  { id: 'controls', label: 'CONTROLS' },
   { id: 'templates', label: 'TEMPLATES' },
   { id: 'email', label: 'EMAIL LOGS' },
   { id: 'sms', label: 'SMS LOGS' },
@@ -70,7 +72,7 @@ const tabs: { id: Tab; label: string }[] = [
     <h1 class="text-xl tracking-wide mb-1">
       <span class="text-green">▪</span> ADMIN · NOTIFICATIONS
     </h1>
-    <p class="font-secondary text-sm mb-6">manage templates and audit delivery logs</p>
+    <p class="font-secondary text-sm mb-6">global controls, templates and delivery logs</p>
 
     <!-- Tabs -->
     <div class="flex border border-alt mb-6 w-fit">
@@ -86,8 +88,11 @@ const tabs: { id: Tab; label: string }[] = [
       </button>
     </div>
 
+    <!-- Controls -->
+    <NotificationControls v-if="tab === 'controls'" />
+
     <!-- Templates -->
-    <section v-if="tab === 'templates'" class="flex flex-col gap-6">
+    <section v-else-if="tab === 'templates'" class="flex flex-col gap-6">
       <div class="border border-alt">
         <h2 class="px-3 py-2 border-b border-alt tracking-wide">
           // {{ editingId ? 'EDIT TEMPLATE' : 'NEW TEMPLATE' }}

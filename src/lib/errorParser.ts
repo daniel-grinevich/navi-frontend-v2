@@ -36,6 +36,14 @@ function extractFromBody(body: unknown): string | null {
   if (body && typeof body === 'object') {
     const record = body as Record<string, unknown>
 
+    // Project envelope (core/exceptions.py): { error: { code, message } }, where
+    // message is DRF's `detail` string or the full field-error object.
+    const envelope = record.error
+    if (envelope && typeof envelope === 'object' && 'message' in envelope) {
+      const inner = extractFromBody((envelope as Record<string, unknown>).message)
+      if (inner) return inner
+    }
+
     // DRF's standard non-field error shapes.
     const detail = firstMessage(record.detail)
     if (detail) return detail
