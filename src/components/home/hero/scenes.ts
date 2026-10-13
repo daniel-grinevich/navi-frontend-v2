@@ -9,8 +9,8 @@ import { grid, type Screen } from './ascii'
  * HeroAnimation.vue owns the timeline and turns these into tweens.
  * ------------------------------------------------------------------ */
 
-export type EnterKind = 'slide' | 'rise' | 'fade'
-export type ExitKind = 'slide-right' | 'dissolve'
+export type EnterKind = 'pop' | 'fade'
+export type ExitKind = 'fade' | 'dissolve'
 
 export interface SceneCtx {
   tl: gsap.core.Timeline
@@ -108,31 +108,24 @@ function progress(p: number): Screen {
 /* ---------- the sequence ---------- */
 
 export const scenes: Scene[] = [
-  { id: 'logo', art: logoArt, caption: '', enter: 'slide', exit: 'slide-right', hold: 3 },
-  {
-    id: 'coffee',
-    art: coffeeArt,
-    caption: 'coffee, your way',
-    enter: 'rise',
-    exit: 'slide-right',
-    hold: 3,
-  },
   {
     id: 'progress',
     art: progress(0),
     caption: '',
     enter: 'fade',
     exit: 'dissolve',
-    hold: 2,
+    hold: 1.2,
     play: (ctx) => ctx.text(6, (p) => progress(Math.round(p * 26) / 26), 'sine.inOut'),
   },
+  { id: 'logo', art: logoArt, caption: '', enter: 'pop', exit: 'fade', hold: 1.6 },
+  { id: 'coffee', art: coffeeArt, caption: 'coffee, your way', enter: 'pop', exit: 'fade', hold: 1.8 },
   {
     id: 'steam',
     art: steamCup(0),
     caption: 'coffee, your way',
     enter: 'fade',
     hold: 0,
-    // slow drift: a quarter of the original sway speed, stepped at 4fps
+    // slow drift, stepped at 4fps
     play: (ctx) => ctx.loop(4, (t) => steamCup(t * 0.45)),
   },
 ]

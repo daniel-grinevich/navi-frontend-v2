@@ -85,17 +85,10 @@ async function play(index: number) {
   }
 
   const enter: Record<EnterKind, () => void> = {
-    // NAVI: lines slide in from the left, staggered
-    slide: () => {
-      const els = lineEls()
-      gsap.set(els, { opacity: 0, x: -40 })
-      els.forEach((el, i) => t.to(el, { opacity: 1, x: 0, duration: 0.8 }, i * 0.22))
-    },
-    // COFFEE: lines rise into place one after another
-    rise: () => {
-      const els = lineEls()
-      gsap.set(els, { opacity: 0, y: 24 })
-      els.forEach((el) => t.to(el, { opacity: 1, y: 0, duration: 0.6 }, '>-0.3'))
+    // snappy: the whole block snaps on with a small overshoot
+    pop: () => {
+      t.fromTo(artNode, { opacity: 0 }, { opacity: 1, duration: 0.06, ease: 'none' })
+      t.fromTo(artNode, { scale: 0.75 }, { scale: 1, duration: 0.22, ease: 'back.out(2.5)' }, '<')
     },
     fade: () => {
       t.fromTo(artNode, { opacity: 0 }, { opacity: 1, duration: 1.4, ease: EASE })
@@ -103,8 +96,8 @@ async function play(index: number) {
   }
 
   const exit: Record<ExitKind, () => void> = {
-    'slide-right': () =>
-      t.to([artNode, capNode], { x: '120%', opacity: 0, duration: 1.4, ease: 'power2.inOut' }),
+    // quick, so NAVI → COFFEE reads as one snappy beat
+    fade: () => t.to([artNode, capNode], { opacity: 0, duration: 0.3, ease: 'power1.in' }),
     dissolve: () => {
       const rank = ranks(w, h, index + 1)
       const empty = blank(w, h)
@@ -125,7 +118,10 @@ async function play(index: number) {
 
   enter[scene.enter]()
   t.addLabel('shown')
-  if (scene.caption) t.to(capNode, { opacity: 1, duration: 1.4, ease: EASE }, 'shown-=0.2')
+  if (scene.caption) {
+    const snappy = scene.enter === 'pop'
+    t.to(capNode, { opacity: 1, duration: snappy ? 0.5 : 1.4, ease: EASE }, snappy ? 'shown' : 'shown-=0.2')
+  }
   scene.play?.(ctx)
 
   if (scene.exit) {
