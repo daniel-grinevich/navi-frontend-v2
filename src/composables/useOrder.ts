@@ -36,8 +36,9 @@ export type AdminServerOrder = ServerOrder & {
   guest_contact?: string
 }
 
-// Admin-only: create an order on a customer's behalf. Backed by
-// /api/admin/orders/, which requires staff and 403s otherwise.
+// Admin-only: create an order on a customer's behalf. NOT SUPPORTED by the
+// backend yet: /api/admin/orders/ is a read-only viewset, so this POST 405s.
+// AdminCreateOrderView blocks submit until a write endpoint exists.
 export const useAdminCreateOrder = () => {
   return useApiWrite<OrderSubmissionResponse, Error, AdminServerOrder>(async (orderData) => {
     return await apiClient('api/admin/orders/', {
@@ -100,38 +101,19 @@ export const useAdminOrder = (orderId: string) => {
   )
 }
 
-// Admin-only: move an order to a new status. Refreshes both the all-orders list
-// and the single-order cache so the table and detail view reflect the change.
-export const useUpdateOrderStatus = () => {
-  const queryClient = useQueryClient()
-
-  return useApiWrite<Order, Error, { orderId: string; order_status: OrderStatus }>(
-    ({ orderId, order_status }) =>
-      apiClient(`api/admin/orders/${orderId}/`, {
-        method: 'PATCH',
-        body: JSON.stringify({ order_status }),
-      }),
-    {
-      onSuccess: (_data: Order, variables: { orderId: string; order_status: OrderStatus }) => {
-        queryClient.invalidateQueries({ queryKey: ['admin-orders'] })
-        queryClient.invalidateQueries({ queryKey: ['admin-order', variables.orderId] })
-      },
-    },
-  )
-}
-
 // Admin-only: dispatch an order to a NaviPort machine.
 export const useDispatchOrder = () => {
   const queryClient = useQueryClient()
 
-  return useApiWrite<Order, Error, { orderId: string; naviportId: string | number }>(
+  return useApiWrite<Order, Error, { orderId: string; naviportId: string }>(
     ({ orderId, naviportId }) =>
       apiClient(`api/orders/${orderId}/dispatch/`, {
         method: 'POST',
         body: JSON.stringify({ orderId, naviportId }),
       }),
     {
-      onSuccess: (_data: Order, variables: { orderId: string; naviportId: string | number }) => {
+      onSuccess: (_data: Order, variables: { orderId: string; naviportId: string }) => {
+        queryClient.invalidateQueries({ queryKey: ['order', variables.orderId] })
         queryClient.invalidateQueries({ queryKey: ['admin-orders'] })
         queryClient.invalidateQueries({ queryKey: ['admin-order', variables.orderId] })
       },

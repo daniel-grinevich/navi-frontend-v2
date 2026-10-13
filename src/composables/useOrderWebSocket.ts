@@ -26,6 +26,9 @@ export function useOrderWebSocket(orderId: string) {
         if (!old) return old
         return { ...old, order_status: data.status as Order['order_status'] }
       })
+      // Refetch so derived fields stay right, notably qr_token: it's re-minted
+      // per GET and is null outside O (e.g. back to O after a machine failure).
+      queryClient.invalidateQueries({ queryKey: ['order', orderId] })
     }
 
     ws.onclose = () => {

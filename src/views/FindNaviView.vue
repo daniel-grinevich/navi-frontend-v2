@@ -64,7 +64,7 @@ const showHomebaseForm = computed(
   () => locationStore.mode === 'homebase' && (!locationStore.homebase || editingHomebase.value),
 )
 
-const handleNaviPortClick = (id: number) => {
+const handleNaviPortClick = (id: string) => {
   shoppingCartStore.selectedNaviPort = id
   const from = router.options.history.state.back?.toString()
 
@@ -133,7 +133,7 @@ onMounted(() => {
         <div class="border border-alt">
           <div class="px-3 py-1 border-b border-alt font-secondary text-alt">// status</div>
           <div class="px-3 py-2">
-            <p v-if="shoppingCartStore.selectedNaviPort == 0" class="font-mono">no naviport selected</p>
+            <p v-if="shoppingCartStore.selectedNaviPort === null" class="font-mono">no naviport selected</p>
             <p v-else class="font-mono">
               <span class="text-green">◆</span> naviport #{{ shoppingCartStore.selectedNaviPort }} selected
             </p>

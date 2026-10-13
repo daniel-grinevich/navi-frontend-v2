@@ -17,10 +17,15 @@ const { mountCardFields, confirmCard } = useCardPayment()
 
 const step = ref<'build' | 'payment'>('build')
 
+// The backend has no admin order-create endpoint yet (/api/admin/orders/ is a
+// read-only viewset, so POST 405s). Keep the builder visible but block submit
+// until that endpoint exists rather than sending a request that can't succeed.
+const ADMIN_CREATE_SUPPORTED = false
+
 // Isolated order state — deliberately NOT the shopping-cart store, so building
 // an admin order never touches the admin's own cart.
 const orderItems = ref<CartItem[]>([])
-const naviPortId = ref<number | null>(null)
+const naviPortId = ref('')
 const customerEmail = ref('')
 const guestName = ref('')
 const guestContact = ref('')
@@ -74,17 +79,18 @@ const removeItem = (cartItemId: string) => {
 
 const placeOrder = async () => {
   formError.value = null
+  if (!ADMIN_CREATE_SUPPORTED) return
   if (orderItems.value.length === 0) {
     formError.value = 'Add at least one item to the order.'
     return
   }
-  if (naviPortId.value == null) {
+  if (!naviPortId.value.trim()) {
     formError.value = 'Enter a NaviPort id.'
     return
   }
 
   const payload: AdminServerOrder = {
-    navi_port: naviPortId.value,
+    navi_port: naviPortId.value.trim(),
     items: toServerItems(orderItems.value),
     ...(customerEmail.value ? { customer_email: customerEmail.value } : {}),
     ...(guestName.value ? { guest_name: guestName.value } : {}),
@@ -240,9 +246,9 @@ const confirmPayment = async () => {
             <div>
               <label class="block font-secondary mb-1">naviport id</label>
               <input
-                v-model.number="naviPortId"
-                type="number"
-                placeholder="e.g. 12"
+                v-model="naviPortId"
+                type="text"
+                placeholder="naviport uuid"
                 class="w-full px-3 py-2 border border-alt bg-transparent focus:border-green outline-none transition-colors"
               />
             </div>
@@ -268,10 +274,13 @@ const confirmPayment = async () => {
             <span class="font-mono">${{ (orderTotal ?? subtotal).toFixed(2) }}</span>
           </div>
           <div class="px-3 py-3 border-t border-alt space-y-3">
+            <p v-if="!ADMIN_CREATE_SUPPORTED" class="text-alt px-2 py-2 border border-alt">
+              admin order creation is not available yet — the backend has no endpoint for it.
+            </p>
             <p v-if="formError" class="text-red px-2 py-2 border border-red">{{ formError }}</p>
             <button
               type="button"
-              :disabled="isPending || orderItems.length === 0"
+              :disabled="!ADMIN_CREATE_SUPPORTED || isPending || orderItems.length === 0"
               @click="placeOrder"
               class="w-full px-3 py-2 bg-green text-primary border border-green cursor-pointer font-mono tracking-wide hover:bg-alt hover:text-primary hover:border-alt disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
