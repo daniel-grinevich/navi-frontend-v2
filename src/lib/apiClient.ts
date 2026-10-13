@@ -12,6 +12,8 @@ const UNSAFE_METHODS = ['POST', 'PUT', 'PATCH', 'DELETE']
 
 type Request = RequestInit & {
   queryParams?: Record<string, boolean | Date | string | number | null>
+  // Overrides API_BASE_URL for this request (e.g. a feature served by a separate backend).
+  baseUrl?: string
 }
 
 export async function apiClient<T>(
@@ -37,14 +39,15 @@ export async function apiClient<T>(
 
   if (!options.credentials) options.credentials = 'include'
 
+  const { baseUrl, ...fetchOptions } = options
   let response: Response | null = null
 
   try {
-    response = await fetch(`${API_BASE_URL}/api/${cleanedEndpoint}`, {
-      ...options,
+    response = await fetch(`${baseUrl ?? API_BASE_URL}/api/${cleanedEndpoint}`, {
+      ...fetchOptions,
       headers: {
         'Content-Type': 'application/json',
-        ...options.headers,
+        ...fetchOptions.headers,
       },
     })
 

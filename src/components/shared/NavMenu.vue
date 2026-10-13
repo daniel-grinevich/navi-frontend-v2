@@ -79,6 +79,14 @@ onClickOutside(userMenuRef, () => {
       </router-link>
 
       <router-link
+        v-if="session.isAdmin"
+        to="/admin/devices"
+        class="no-underline px-3 py-1 border-r border-alt hidden md:flex items-center hover:bg-green hover:text-primary transition-colors"
+      >
+        DEVICES
+      </router-link>
+
+      <router-link
         to="/cart"
         class="group no-underline px-3 py-1 border-r border-alt hidden md:flex items-center gap-2 hover:bg-green hover:text-primary transition-colors"
       >
@@ -192,6 +200,24 @@ onClickOutside(userMenuRef, () => {
         @click="mobileMenuOpen = false"
       >
         ADMIN
+      </router-link>
+
+      <router-link
+        v-if="session.isAdmin"
+        to="/admin/orders"
+        class="no-underline px-3 py-2 border-b border-primary flex items-center hover:bg-alt transition-colors"
+        @click="mobileMenuOpen = false"
+      >
+        ALL ORDERS
+      </router-link>
+
+      <router-link
+        v-if="session.isAdmin"
+        to="/admin/devices"
+        class="no-underline px-3 py-2 border-b border-primary flex items-center hover:bg-alt transition-colors"
+        @click="mobileMenuOpen = false"
+      >
+        DEVICES
       </router-link>
 
       <template v-if="session.isAuthenticated">
