@@ -39,6 +39,13 @@ const router = createRouter({
       props: true,
     },
     {
+      // QR sticker on a machine: {FRONTEND_URL}/p/{slug}
+      path: '/p/:slug',
+      name: 'portLanding',
+      component: () => import('../views/PortLandingView.vue'),
+      props: true,
+    },
+    {
       path: '/cart',
       name: 'cart',
       component: () => import('../views/CartView.vue'),
@@ -103,6 +110,13 @@ const router = createRouter({
       path: '/admin/devices/:deviceId',
       name: 'adminDeviceDetail',
       component: () => import('../views/admin/AdminDeviceDetailView.vue'),
+      props: true,
+      meta: { requiresAuth: true, requiresAdmin: true },
+    },
+    {
+      path: '/admin/ports/:slug/sticker',
+      name: 'adminPortSticker',
+      component: () => import('../views/admin/AdminPortStickerView.vue'),
       props: true,
       meta: { requiresAuth: true, requiresAdmin: true },
     },

@@ -200,7 +200,9 @@ const confirmPayment = async () => {
           <div v-if="hasNaviPort" class="px-3 py-3">
             <div class="flex items-center justify-between">
               <div>
-                <p class="font-mono">NaviPort #{{ cart.selectedNaviPort }}</p>
+                <p class="font-mono">
+                  {{ cart.activeNaviPortInfo?.name ?? `NaviPort #${cart.selectedNaviPort}` }}
+                </p>
                 <p class="text-alt mt-1">selected pickup location</p>
               </div>
               <button

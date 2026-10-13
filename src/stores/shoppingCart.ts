@@ -1,13 +1,40 @@
-import { ref, computed } from 'vue'
+import { computed } from 'vue'
 import { defineStore } from 'pinia'
-import { useStorage } from '@vueuse/core'
+import { useStorage, StorageSerializers } from '@vueuse/core'
 import { type CartItem } from '@/types/cart'
 import { toServerItems, calculateItemTotal, cartSubtotal } from '@/lib/orderItems'
 
+// What the menu/checkout need to know about a port picked via its QR sticker.
+export type SelectedNaviPortInfo = {
+  id: string
+  slug: string
+  name: string
+  menu_item_ids: string[] | null
+}
+
 export const useShoppingCart = defineStore('shopping-cart', () => {
   const localCart = useStorage<CartItem[]>('shopping-cart', [], localStorage)
-  // NaviPort ids are UUID strings; null means no pickup location chosen yet.
-  const selectedNaviPort = ref<string | null>(null)
+  // Session-scoped so the pick survives a reload or auth redirect mid-order,
+  // but a stale machine isn't remembered across visits.
+  const selectedNaviPort = useStorage<string | null>('navi:selected-port-id', null, sessionStorage, {
+    serializer: StorageSerializers.object,
+  })
+  const selectedNaviPortInfo = useStorage<SelectedNaviPortInfo | null>(
+    'navi:selected-port-info',
+    null,
+    sessionStorage,
+    { serializer: StorageSerializers.object },
+  )
+
+  const selectNaviPort = (id: string, info: SelectedNaviPortInfo | null = null) => {
+    selectedNaviPort.value = id
+    selectedNaviPortInfo.value = info
+  }
+
+  // Info only counts while it describes the currently selected port.
+  const activeNaviPortInfo = computed(() =>
+    selectedNaviPortInfo.value?.id === selectedNaviPort.value ? selectedNaviPortInfo.value : null,
+  )
 
   const serverCart = computed(() => toServerItems(localCart.value))
 
@@ -72,6 +99,8 @@ export const useShoppingCart = defineStore('shopping-cart', () => {
     localCart,
     serverCart,
     selectedNaviPort,
+    activeNaviPortInfo,
+    selectNaviPort,
     itemCount,
     subtotal,
     addCartItem,

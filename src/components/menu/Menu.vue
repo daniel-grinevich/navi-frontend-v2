@@ -5,16 +5,25 @@ import { computed } from 'vue'
 import AsyncList from '@/components/shared/AsyncList.vue'
 import MenuItemCard from './MenuItemCard.vue'
 /*** stores ***/
+import { useShoppingCart } from '@/stores/shoppingCart'
 /*** composables ****/
 import { useMenu, type MenuItem } from '@/composables/useMenu'
 /*** types ****/
 
+const cart = useShoppingCart()
 const { isLoading, data: menuItems, isError } = useMenu()
 
-const groupedMenuItems = computed(() => {
-  if (!menuItems.value) return {}
+// Only show drinks the selected machine can make (null = no restriction).
+const availableMenuItems = computed(() => {
+  if (!menuItems.value) return []
+  const allowed = cart.activeNaviPortInfo?.menu_item_ids
+  if (!allowed) return menuItems.value
+  const allowedIds = new Set(allowed)
+  return menuItems.value.filter((item) => allowedIds.has(item.id))
+})
 
-  return menuItems.value.reduce(
+const groupedMenuItems = computed(() => {
+  return availableMenuItems.value.reduce(
     (acc, item) => {
       const category = item.category_name
       if (!acc[category]) {
@@ -39,6 +48,9 @@ const groupedMenuItems = computed(() => {
   </div>
   <div v-else class="w-full text-xs border border-alt">
     <div class="px-3 py-1 border-b border-alt text-primary bg-green">// menu</div>
+    <div v-if="availableMenuItems.length === 0" class="px-3 py-2 font-secondary">
+      nothing on the menu at this machine right now.
+    </div>
     <div
       v-for="(items, category, index) in groupedMenuItems"
       :key="category"
