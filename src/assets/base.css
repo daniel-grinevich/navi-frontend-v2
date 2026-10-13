@@ -109,7 +109,7 @@ body {
   color: var(--color-on-page);
   background-color: var(--color-page);
   /* Faint 6px pixel-dot texture; transparent unless a look sets --color-dot. */
-  background-image: radial-gradient(var(--color-dot) 1px, transparent 1.5px);
+  background-image: radial-gradient(var(--color-dot) 1px, transparent 1.2px);
   background-size: 6px 6px;
   transition:
     color 0.3s,
@@ -273,6 +273,22 @@ body {
   --color-dot: rgb(255 255 255 / 0.07);
   --background-color-primary: var(--color-paper);
   --background-color-alt: var(--color-bone);
+}
+
+/* --- WINDOWS: the bone design on a faint green dot grid; panels are
+   slightly lighter "windows" with ink frames, and every '// label' strip is
+   a green title bar. --- */
+:root[data-theme='light'][data-look='windows'] {
+  --color-surface: #f6f5f1;
+  --color-rule: var(--color-ink);
+  --color-strip: var(--color-green-light);
+  --color-dot: rgb(15 107 82 / 0.18);
+}
+
+:root[data-theme='light'][data-look='windows'] .bg-strip {
+  /* Title-bar text: bone on the accent green, 4.8:1. */
+  --color-alt: var(--color-bone);
+  --color-muted: var(--color-bone);
 }
 
 /* Unlayered on purpose: these must beat the py-1 / border utilities on the

@@ -38,12 +38,12 @@ export function useTheme() {
   return { theme, setTheme, toggleTheme }
 }
 
-// Light-mode "look" being trialled (see LOOKS in base.css). ?look=loose or
-// ?look=integrated picks one; it sticks for the tab so it survives in-app
+// Light-mode "look" being trialled (see LOOKS in base.css). ?look=loose,
+// ?look=integrated or ?look=windows picks one; it sticks for the tab so it survives in-app
 // navigation, and ?look=bone (or any other value) goes back to the default.
-type Look = 'loose' | 'integrated'
+type Look = 'loose' | 'integrated' | 'windows'
 const LOOK_KEY = 'navi-look'
-const LOOKS: readonly Look[] = ['loose', 'integrated']
+const LOOKS: readonly Look[] = ['loose', 'integrated', 'windows']
 
 export function initLook() {
   let look: string | null = null
