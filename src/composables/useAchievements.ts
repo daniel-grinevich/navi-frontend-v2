@@ -78,7 +78,6 @@ export const useAchievementProgress = () => {
 
   return {
     ...query,
-    isGuest,
     isFixture,
     summary,
     badges,

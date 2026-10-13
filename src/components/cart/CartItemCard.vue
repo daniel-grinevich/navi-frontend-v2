@@ -43,7 +43,7 @@ const customizationSummary = computed(() => {
     <!-- Card Content -->
     <div class="flex-1">
       <!-- Header -->
-      <div class="px-3 py-1 border-b border-alt bg-strip flex justify-between items-center font-mono">
+      <div class="px-3 py-1 border-b border-alt flex justify-between items-center font-mono">
         <span class="text-alt">{{ item.menuItemName }}</span>
         <div class="flex flex-row gap-3">
           <button
